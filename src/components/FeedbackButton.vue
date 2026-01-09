@@ -9,7 +9,7 @@ const isModalOpen = ref(false)
   <!-- Floating Feedback Button -->
   <button
     @click="isModalOpen = true"
-    class="fixed bottom-6 right-6 z-40 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all hover:scale-110 flex items-center gap-2"
+    class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-3 sm:p-4 shadow-lg transition-all hover:scale-110 flex items-center gap-2"
     title="Report a bug or give feedback"
     aria-label="Report feedback"
   >

@@ -14,7 +14,7 @@
     </div>
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 animate-slide-up">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-12 animate-slide-up">
       <!-- Active Grants -->
       <div class="stat-card">
         <div class="flex items-center justify-between mb-4">

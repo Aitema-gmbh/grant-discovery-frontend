@@ -77,7 +77,7 @@
               <!-- Dropdown Menu -->
               <div
                 v-if="showUserMenu"
-                class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-soft-lg border border-navy-100 py-2 z-50 animate-scale-in"
+                class="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-56 sm:w-56 bg-white rounded-xl shadow-soft-lg border border-navy-100 py-2 z-50 animate-scale-in"
               >
                 <div class="px-4 py-3 border-b border-navy-100">
                   <p class="text-sm font-semibold text-navy-900">{{ userName }}</p>

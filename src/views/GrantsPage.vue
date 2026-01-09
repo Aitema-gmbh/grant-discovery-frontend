@@ -21,14 +21,14 @@
           @input="debouncedSearch"
           type="text"
           :placeholder="$t('grants.searchPlaceholder')"
-          class="input w-full pl-12 pr-48"
+          class="input w-full pl-12 pr-4 sm:pr-48"
         />
         <svg class="absolute left-4 top-3.5 w-5 h-5 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
 
-        <!-- Search Mode Toggle -->
-        <div class="absolute right-3 top-2.5 flex items-center gap-2">
+        <!-- Search Mode Toggle - Hidden on mobile, shown below search on small screens -->
+        <div class="absolute right-3 top-2.5 hidden sm:flex items-center gap-2">
           <button
             @click="searchMode = 'text'"
             :class="searchMode === 'text' ? 'btn-primary py-1 px-3 text-sm' : 'bg-navy-100 text-navy-700 py-1 px-3 rounded-lg text-sm font-medium hover:bg-navy-200 transition-colors'"
@@ -64,7 +64,7 @@
       </button>
 
       <!-- Filters Panel -->
-      <div v-show="showFilters" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-navy-100 animate-slide-down">
+      <div v-show="showFilters" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-navy-100 animate-slide-down">
         <!-- Amount Range -->
         <div>
           <label class="block text-sm font-medium text-navy-700 mb-2">
@@ -417,7 +417,18 @@ async function searchGrants() {
 
     if (filters.value.status) params.append('status', filters.value.status)
     if (filters.value.country) params.append('country', filters.value.country)
-    // Amount and deadline filters would need backend support
+
+    // Deadline filter - calculates max deadline date from days selection
+    if (filters.value.deadline) {
+      const days = parseInt(filters.value.deadline)
+      const maxDate = new Date()
+      maxDate.setDate(maxDate.getDate() + days)
+      params.append('deadline_before', maxDate.toISOString().split('T')[0])
+    }
+
+    // Amount filters
+    if (filters.value.amountMin) params.append('amount_min', filters.value.amountMin.toString())
+    if (filters.value.amountMax) params.append('amount_max', filters.value.amountMax.toString())
 
     const response = await api.get(`/api/grants?${params.toString()}`)
     grants.value = response.data.grants || []
