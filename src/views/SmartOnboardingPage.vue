@@ -40,11 +40,13 @@
             </label>
             <input
               v-model="website"
-              type="url"
-              placeholder="https://your-organization.org"
+              type="text"
+              placeholder="www.your-organization.org"
               class="input-premium w-full"
               :disabled="loading"
+              @blur="normalizeWebsite"
             />
+            <p class="text-xs text-navy-400 mt-1">Enter with or without https://</p>
           </div>
 
           <!-- Country -->
@@ -281,6 +283,19 @@ function formatBudget(range: string): string {
     'over_1m': '> €1M'
   }
   return map[range] || range
+}
+
+function normalizeWebsite() {
+  if (!website.value.trim()) return
+
+  let url = website.value.trim()
+
+  // If no protocol, add https://
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    url = 'https://' + url
+  }
+
+  website.value = url
 }
 
 async function generateProfile() {

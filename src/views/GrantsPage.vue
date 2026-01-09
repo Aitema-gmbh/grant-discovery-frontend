@@ -420,10 +420,10 @@ async function searchGrants() {
 
     // Deadline filter - calculates max deadline date from days selection
     if (filters.value.deadline) {
-      const days = parseInt(filters.value.deadline)
+      const days = parseInt(filters.value.deadline as string)
       const maxDate = new Date()
       maxDate.setDate(maxDate.getDate() + days)
-      params.append('deadline_before', maxDate.toISOString().split('T')[0])
+      params.append('deadline_before', maxDate.toISOString().split('T')[0] as string)
     }
 
     // Amount filters
