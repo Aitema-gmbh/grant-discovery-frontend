@@ -126,10 +126,11 @@
           </label>
           <select v-model="filters.status" class="input text-sm">
             <option value="">All statuses</option>
-            <option value="open">Open</option>
-            <option value="upcoming">Upcoming</option>
-            <option value="closed">Closed</option>
+            <option value="open">🟢 Open - Accepting applications</option>
+            <option value="upcoming">🟡 Upcoming - Opens soon</option>
+            <option value="closed">🔴 Closed - Deadline passed</option>
           </select>
+          <p class="text-xs text-navy-400 mt-1">Filter by application status</p>
         </div>
       </div>
 

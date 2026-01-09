@@ -47,6 +47,20 @@
             <CheckIcon v-if="locale === 'uk'" class="ml-auto w-4 h-4 text-amber-600" />
           </button>
         </MenuItem>
+        <MenuItem v-slot="{ active }">
+          <button
+            @click="switchLocale('de')"
+            :class="[
+              active ? 'bg-stone-100' : '',
+              locale === 'de' ? 'bg-amber-50 text-amber-700' : 'text-navy-700',
+              'group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium'
+            ]"
+          >
+            <span class="text-lg">🇩🇪</span>
+            <span>Deutsch</span>
+            <CheckIcon v-if="locale === 'de'" class="ml-auto w-4 h-4 text-amber-600" />
+          </button>
+        </MenuItem>
       </MenuItems>
     </transition>
   </Menu>
@@ -61,10 +75,19 @@ import { setLocale } from '@/i18n'
 
 const { locale } = useI18n()
 
-const currentFlag = computed(() => locale.value === 'uk' ? '🇺🇦' : '🇬🇧')
-const currentLabel = computed(() => locale.value === 'uk' ? 'UK' : 'EN')
+const currentFlag = computed(() => {
+  if (locale.value === 'uk') return '🇺🇦'
+  if (locale.value === 'de') return '🇩🇪'
+  return '🇬🇧'
+})
 
-function switchLocale(newLocale: 'en' | 'uk') {
+const currentLabel = computed(() => {
+  if (locale.value === 'uk') return 'UK'
+  if (locale.value === 'de') return 'DE'
+  return 'EN'
+})
+
+function switchLocale(newLocale: 'en' | 'uk' | 'de') {
   setLocale(newLocale)
 }
 </script>

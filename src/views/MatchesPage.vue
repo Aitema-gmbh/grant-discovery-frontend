@@ -147,9 +147,11 @@ import { useRouter, useRoute } from 'vue-router'
 import AppLayout from '@/components/AppLayout.vue'
 import api from '@/services/api'
 import { useFeedback } from '@/lib/useFeedback'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
 const { trackPageView, trackGrantAction } = useFeedback()
 
 const loading = ref(false)
@@ -159,9 +161,18 @@ const matches = ref<any[]>([])
 
 async function loadCsoProfiles() {
   try {
-    const response = await api.get('/api/cso')
-    csoProfiles.value = response.data.profiles || []
-    
+    const response = await api.get('/api/cso', {
+      params: { user_id: authStore.userId }
+    })
+    let profiles = response.data.profiles || []
+
+    // Client-side fallback: filter by owner_id if backend returns all profiles
+    if (authStore.userId && profiles.length > 0 && profiles[0].owner_id) {
+      profiles = profiles.filter((p: any) => p.owner_id === authStore.userId)
+    }
+
+    csoProfiles.value = profiles
+
     // Check for URL parameter
     const csoParam = route.query.cso as string
     if (csoParam && csoProfiles.value.find(c => c.id === csoParam)) {

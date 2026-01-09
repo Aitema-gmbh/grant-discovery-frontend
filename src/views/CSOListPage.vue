@@ -96,16 +96,28 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppLayout from '@/components/AppLayout.vue'
 import api from '@/services/api'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const loading = ref(true)
 const csoProfiles = ref<any[]>([])
 
 async function loadProfiles() {
   loading.value = true
   try {
-    const response = await api.get('/api/cso')
-    csoProfiles.value = response.data.profiles || []
+    // Request user's organizations (backend should filter by authenticated user)
+    const response = await api.get('/api/cso', {
+      params: { user_id: authStore.userId }
+    })
+    let profiles = response.data.profiles || []
+
+    // Client-side fallback: filter by owner_id if backend returns all profiles
+    if (authStore.userId && profiles.length > 0 && profiles[0].owner_id) {
+      profiles = profiles.filter((p: any) => p.owner_id === authStore.userId)
+    }
+
+    csoProfiles.value = profiles
   } catch (error) {
     console.error('Error loading CSO profiles:', error)
     csoProfiles.value = []
