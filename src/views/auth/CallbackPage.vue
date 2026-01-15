@@ -28,17 +28,40 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const error = ref<string | null>(null)
 
 onMounted(async () => {
   try {
-    // Handle OAuth callback
+    // Check for OAuth code in URL (PKCE flow)
+    const code = route.query.code as string | undefined
+
+    if (code) {
+      // Exchange authorization code for session
+      const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+
+      if (exchangeError) {
+        throw exchangeError
+      }
+
+      if (data.session) {
+        authStore.session = data.session
+        authStore.user = data.session.user
+        router.push('/dashboard')
+        return
+      }
+    }
+
+    // Fallback: Check for hash fragment tokens (implicit flow) or existing session
+    // Wait a moment for Supabase to process URL tokens
+    await new Promise(resolve => setTimeout(resolve, 500))
+
     const {
       data: { session },
       error: sessionError,
