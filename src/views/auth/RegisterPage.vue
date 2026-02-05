@@ -7,10 +7,10 @@
           <span class="text-3xl">🇺🇦</span>
         </div>
         <h1 class="text-display-md font-display text-navy-900 mb-2 gradient-text">
-          Join Grants Bridge Ukraine
+          {{ $t('auth.registerTitle') }}
         </h1>
         <p class="text-lg text-navy-600 font-sans">
-          Connect your Ukrainian organization with funding opportunities
+          {{ $t('auth.registerSubtitle') }}
         </p>
       </div>
 
@@ -30,7 +30,7 @@
           class="mb-6 p-4 bg-sage-50 border-l-4 border-sage-500 rounded-r-lg animate-scale-in"
         >
           <p class="text-sm font-medium text-sage-800">
-            ✓ Account created! Please check your email to verify your account.
+            ✓ {{ $t('auth.accountCreated') }}
           </p>
         </div>
 
@@ -38,7 +38,7 @@
         <form v-if="!registrationSuccess" @submit.prevent="handleRegister" class="space-y-6">
           <div class="space-y-2">
             <label for="fullName" class="block text-sm font-medium text-navy-700">
-              Full name
+              {{ $t('auth.fullName') }}
             </label>
             <input
               id="fullName"
@@ -47,13 +47,18 @@
               required
               autocomplete="name"
               class="input"
-              placeholder="Jane Smith"
+              :class="{ 'border-red-400 focus:border-red-500 focus:ring-red-200': nameError }"
+              :placeholder="$t('auth.fullNamePlaceholder')"
+              @blur="nameTouched = true"
             />
+            <p v-if="nameError" class="text-xs text-red-600 mt-1 animate-fade-in">
+              {{ nameError }}
+            </p>
           </div>
 
           <div class="space-y-2">
             <label for="email" class="block text-sm font-medium text-navy-700">
-              Email address
+              {{ $t('auth.email') }}
             </label>
             <input
               id="email"
@@ -62,13 +67,18 @@
               required
               autocomplete="email"
               class="input"
-              placeholder="jane@organization.org"
+              :class="{ 'border-red-400 focus:border-red-500 focus:ring-red-200': emailError }"
+              :placeholder="$t('auth.emailPlaceholder')"
+              @blur="emailTouched = true"
             />
+            <p v-if="emailError" class="text-xs text-red-600 mt-1 animate-fade-in">
+              {{ emailError }}
+            </p>
           </div>
 
           <div class="space-y-2">
             <label for="password" class="block text-sm font-medium text-navy-700">
-              Password
+              {{ $t('auth.password') }}
             </label>
             <input
               id="password"
@@ -77,17 +87,36 @@
               required
               autocomplete="new-password"
               class="input"
+              :class="{ 'border-red-400 focus:border-red-500 focus:ring-red-200': passwordError }"
               placeholder="••••••••"
               minlength="8"
+              @blur="passwordTouched = true"
             />
-            <p class="text-xs text-navy-500">
-              Must be at least 8 characters with a mix of letters and numbers
+            <!-- Password Strength Indicator -->
+            <div v-if="password" class="mt-2">
+              <div class="flex gap-1 mb-1">
+                <div
+                  v-for="i in 4"
+                  :key="i"
+                  class="h-1 flex-1 rounded-full transition-colors duration-300"
+                  :class="i <= passwordStrength.level ? passwordStrength.color : 'bg-navy-200'"
+                ></div>
+              </div>
+              <p class="text-xs" :class="passwordStrength.textColor">
+                {{ passwordStrength.label }}
+              </p>
+            </div>
+            <p v-else class="text-xs text-navy-500">
+              {{ $t('auth.passwordHint') }}
+            </p>
+            <p v-if="passwordError" class="text-xs text-red-600 mt-1 animate-fade-in">
+              {{ passwordError }}
             </p>
           </div>
 
           <div class="space-y-2">
             <label for="confirmPassword" class="block text-sm font-medium text-navy-700">
-              Confirm password
+              {{ $t('auth.confirmPassword') }}
             </label>
             <input
               id="confirmPassword"
@@ -96,13 +125,14 @@
               required
               autocomplete="new-password"
               class="input"
+              :class="{ 'border-red-400 focus:border-red-500 focus:ring-red-200': passwordMismatch }"
               placeholder="••••••••"
+              @blur="confirmTouched = true"
             />
+            <p v-if="passwordMismatch" class="text-xs text-red-600 mt-1 animate-fade-in">
+              {{ $t('auth.passwordsDontMatch') }}
+            </p>
           </div>
-
-          <p v-if="passwordMismatch" class="text-sm text-red-600">
-            Passwords don't match
-          </p>
 
           <div class="flex items-start">
             <div class="flex items-center h-5">
@@ -116,13 +146,13 @@
             </div>
             <div class="ml-2 text-sm">
               <label for="terms" class="text-navy-600">
-                I agree to the
+                {{ $t('auth.termsPrefix') }}
                 <a href="/terms" target="_blank" class="text-amber-600 hover:text-amber-700 font-medium">
-                  Terms of Service
+                  {{ $t('auth.termsOfService') }}
                 </a>
-                and
+                {{ $t('common.and') }}
                 <a href="/privacy" target="_blank" class="text-amber-600 hover:text-amber-700 font-medium">
-                  Privacy Policy
+                  {{ $t('auth.privacyPolicy') }}
                 </a>
               </label>
             </div>
@@ -133,13 +163,13 @@
             :disabled="authStore.loading || passwordMismatch || !acceptedTerms"
             class="btn btn-primary w-full"
           >
-            <span v-if="!authStore.loading">Create your account</span>
+            <span v-if="!authStore.loading">{{ $t('auth.createAccount') }}</span>
             <span v-else class="flex items-center justify-center gap-2">
               <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Creating account...
+              {{ $t('auth.creatingAccount') }}
             </span>
           </button>
         </form>
@@ -147,7 +177,7 @@
         <!-- After successful signup -->
         <div v-else class="text-center py-4">
           <router-link to="/auth/login" class="btn btn-primary w-full">
-            Go to Login
+            {{ $t('auth.goToLogin') }}
           </router-link>
         </div>
 
@@ -157,7 +187,7 @@
             <div class="w-full border-t border-navy-200"></div>
           </div>
           <div class="relative flex justify-center text-sm">
-            <span class="px-3 bg-white text-navy-500 font-medium">Or sign up with</span>
+            <span class="px-3 bg-white text-navy-500 font-medium">{{ $t('auth.orSignUpWith') }}</span>
           </div>
         </div>
 
@@ -185,18 +215,18 @@
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          Sign up with Google
+          {{ $t('auth.googleSignUp') }}
         </button>
 
         <!-- Sign in link -->
         <div class="mt-8 pt-6 border-t border-navy-100">
           <p class="text-center text-sm text-navy-600">
-            Already have an account?
+            {{ $t('auth.hasAccount') }}
             <router-link
               to="/auth/login"
               class="font-medium text-amber-600 hover:text-amber-700 transition-colors duration-200"
             >
-              Sign in
+              {{ $t('auth.signIn') }}
             </router-link>
           </p>
         </div>
@@ -205,10 +235,10 @@
       <!-- Trust Indicators -->
       <div class="mt-8 text-center">
         <p class="text-xs text-navy-500">
-          🔒 Your data is encrypted and secure
+          🔒 {{ $t('auth.dataSecure') }}
         </p>
         <p class="text-xs text-navy-400 mt-1">
-          Join 500+ organizations finding funding opportunities
+          {{ $t('auth.joinOrgs') }}
         </p>
       </div>
     </div>
@@ -218,10 +248,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const fullName = ref('')
 const email = ref('')
@@ -230,8 +262,51 @@ const confirmPassword = ref('')
 const acceptedTerms = ref(false)
 const registrationSuccess = ref(false)
 
+// Touched state for validation
+const nameTouched = ref(false)
+const emailTouched = ref(false)
+const passwordTouched = ref(false)
+const confirmTouched = ref(false)
+
+// Validation
+const nameError = computed(() => {
+  if (!nameTouched.value || !fullName.value) return ''
+  if (fullName.value.trim().length < 2) return t('validation.nameTooShort')
+  return ''
+})
+
+const emailError = computed(() => {
+  if (!emailTouched.value || !email.value) return ''
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email.value)) return t('validation.emailInvalid')
+  return ''
+})
+
+const passwordError = computed(() => {
+  if (!passwordTouched.value || !password.value) return ''
+  if (password.value.length < 8) return t('validation.passwordMin8')
+  return ''
+})
+
 const passwordMismatch = computed(() => {
-  return password.value && confirmPassword.value && password.value !== confirmPassword.value
+  return confirmTouched.value && password.value && confirmPassword.value && password.value !== confirmPassword.value
+})
+
+// Password strength
+const passwordStrength = computed(() => {
+  const pw = password.value
+  if (!pw) return { level: 0, label: '', color: '', textColor: '' }
+
+  let score = 0
+  if (pw.length >= 8) score++
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++
+  if (/\d/.test(pw)) score++
+  if (/[^A-Za-z0-9]/.test(pw)) score++
+
+  if (score <= 1) return { level: 1, label: t('validation.strengthWeak'), color: 'bg-red-500', textColor: 'text-red-600' }
+  if (score === 2) return { level: 2, label: t('validation.strengthFair'), color: 'bg-amber-500', textColor: 'text-amber-600' }
+  if (score === 3) return { level: 3, label: t('validation.strengthGood'), color: 'bg-sage-500', textColor: 'text-sage-600' }
+  return { level: 4, label: t('validation.strengthStrong'), color: 'bg-green-500', textColor: 'text-green-600' }
 })
 
 async function handleRegister() {

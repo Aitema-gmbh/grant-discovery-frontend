@@ -4,10 +4,10 @@
       <!-- Header -->
       <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-gray-900 mb-2">
-          Welcome to Grant Discovery! 🎉
+          {{ $t('setup.welcomeTitle') }} 🎉
         </h1>
         <p class="text-lg text-gray-600">
-          Let's get you set up in just a few minutes
+          {{ $t('setup.welcomeSubtitle') }}
         </p>
       </div>
 
@@ -44,17 +44,17 @@
         <div v-if="currentStep === 0" class="space-y-6">
           <div>
             <h2 class="text-2xl font-bold text-gray-900 mb-2">
-              Tell us about yourself
+              {{ $t('setup.step1.title') }}
             </h2>
             <p class="text-gray-600">
-              We'll use this to personalize your experience
+              {{ $t('setup.step1.subtitle') }}
             </p>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Your Name *
+                {{ $t('setup.step1.yourName') }} *
               </label>
               <input
                 v-model="formData.fullName"
@@ -67,7 +67,7 @@
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Email *
+                {{ $t('setup.step1.email') }} *
               </label>
               <input
                 v-model="formData.email"
@@ -80,29 +80,29 @@
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Role in Organization
+                {{ $t('setup.step1.roleInOrg') }}
               </label>
               <select v-model="formData.role" class="input w-full">
-                <option value="">Select your role</option>
-                <option value="director">Executive Director</option>
-                <option value="program">Program Manager</option>
-                <option value="fundraising">Fundraising Manager</option>
-                <option value="grants">Grants Officer</option>
-                <option value="other">Other</option>
+                <option value="">{{ $t('setup.step1.selectRole') }}</option>
+                <option value="director">{{ $t('setup.step1.executiveDirector') }}</option>
+                <option value="program">{{ $t('setup.step1.programManager') }}</option>
+                <option value="fundraising">{{ $t('setup.step1.fundraisingManager') }}</option>
+                <option value="grants">{{ $t('setup.step1.grantsOfficer') }}</option>
+                <option value="other">{{ $t('setup.step1.other') }}</option>
               </select>
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                How did you hear about us?
+                {{ $t('setup.step1.hearAboutUs') }}
               </label>
               <select v-model="formData.referralSource" class="input w-full">
-                <option value="">Select source</option>
-                <option value="search">Google Search</option>
-                <option value="social">Social Media</option>
-                <option value="colleague">Colleague Recommendation</option>
-                <option value="conference">Conference/Event</option>
-                <option value="other">Other</option>
+                <option value="">{{ $t('setup.step1.selectSource') }}</option>
+                <option value="search">{{ $t('setup.step1.googleSearch') }}</option>
+                <option value="social">{{ $t('setup.step1.socialMedia') }}</option>
+                <option value="colleague">{{ $t('setup.step1.colleagueRec') }}</option>
+                <option value="conference">{{ $t('setup.step1.conferenceEvent') }}</option>
+                <option value="other">{{ $t('setup.step1.other') }}</option>
               </select>
             </div>
           </div>
@@ -112,22 +112,22 @@
         <div v-if="currentStep === 1" class="space-y-6">
           <div>
             <h2 class="text-2xl font-bold text-gray-900 mb-2">
-              About your organization
+              {{ $t('setup.step2.title') }}
             </h2>
             <p class="text-gray-600">
-              This helps us find the most relevant grants for you
+              {{ $t('setup.step2.subtitle') }}
             </p>
           </div>
 
           <div class="space-y-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Organization Name *
+                {{ $t('setup.step2.orgName') }} *
               </label>
               <input
                 v-model="formData.orgName"
                 type="text"
-                placeholder="e.g., Ukrainian Democracy Foundation"
+                :placeholder="$t('setup.step2.orgNamePlaceholder')"
                 class="input w-full"
                 required
               />
@@ -136,41 +136,41 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Organization Type *
+                  {{ $t('setup.step2.orgType') }} *
                 </label>
                 <select v-model="formData.orgType" class="input w-full" required>
-                  <option value="">Select type</option>
-                  <option value="ngo">Non-Governmental Organization (NGO)</option>
-                  <option value="foundation">Foundation</option>
-                  <option value="association">Association</option>
-                  <option value="cooperative">Cooperative</option>
-                  <option value="social-enterprise">Social Enterprise</option>
-                  <option value="research">Research Institution</option>
-                  <option value="university">University</option>
-                  <option value="other">Other</option>
+                  <option value="">{{ $t('setup.step2.selectType') }}</option>
+                  <option value="ngo">{{ $t('setup.step2.ngo') }}</option>
+                  <option value="foundation">{{ $t('setup.step2.foundation') }}</option>
+                  <option value="association">{{ $t('setup.step2.association') }}</option>
+                  <option value="cooperative">{{ $t('setup.step2.cooperative') }}</option>
+                  <option value="social-enterprise">{{ $t('setup.step2.socialEnterprise') }}</option>
+                  <option value="research">{{ $t('setup.step2.research') }}</option>
+                  <option value="university">{{ $t('setup.step2.university') }}</option>
+                  <option value="other">{{ $t('setup.step1.other') }}</option>
                 </select>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Registration Country *
+                  {{ $t('setup.step2.regCountry') }} *
                 </label>
                 <select v-model="formData.country" class="input w-full" required>
-                  <option value="">Select country</option>
+                  <option value="">{{ $t('setup.step2.selectCountry') }}</option>
                   <option value="UA">Ukraine</option>
                   <option value="PL">Poland</option>
                   <option value="DE">Germany</option>
                   <option value="FR">France</option>
                   <option value="UK">United Kingdom</option>
                   <option value="US">United States</option>
-                  <option value="other">Other</option>
+                  <option value="other">{{ $t('setup.step1.other') }}</option>
                 </select>
               </div>
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Website (optional)
+                {{ $t('setup.step2.website') }}
               </label>
               <input
                 v-model="formData.website"
@@ -186,10 +186,10 @@
         <div v-if="currentStep === 2" class="space-y-6">
           <div>
             <h2 class="text-2xl font-bold text-gray-900 mb-2">
-              What areas do you work in?
+              {{ $t('setup.step3.title') }}
             </h2>
             <p class="text-gray-600">
-              Select all that apply - this helps us match you with relevant grants
+              {{ $t('setup.step3.subtitle') }}
             </p>
           </div>
 
@@ -217,45 +217,45 @@
         <div v-if="currentStep === 3" class="space-y-6">
           <div>
             <h2 class="text-2xl font-bold text-gray-900 mb-2">
-              Organization size & budget
+              {{ $t('setup.step4.title') }}
             </h2>
             <p class="text-gray-600">
-              This helps us recommend grants that fit your capacity
+              {{ $t('setup.step4.subtitle') }}
             </p>
           </div>
 
           <div class="space-y-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Annual Budget (EUR)
+                {{ $t('setup.step4.annualBudget') }}
               </label>
               <select v-model="formData.annualBudget" class="input w-full">
-                <option value="">Select budget range</option>
-                <option value="0-50000">Under €50,000</option>
-                <option value="50000-200000">€50,000 - €200,000</option>
-                <option value="200000-500000">€200,000 - €500,000</option>
-                <option value="500000-1000000">€500,000 - €1,000,000</option>
-                <option value="1000000+">Over €1,000,000</option>
+                <option value="">{{ $t('setup.step4.selectBudget') }}</option>
+                <option value="0-50000">{{ $t('setup.step4.under50k') }}</option>
+                <option value="50000-200000">{{ $t('setup.step4.range50k200k') }}</option>
+                <option value="200000-500000">{{ $t('setup.step4.range200k500k') }}</option>
+                <option value="500000-1000000">{{ $t('setup.step4.range500k1m') }}</option>
+                <option value="1000000+">{{ $t('setup.step4.over1m') }}</option>
               </select>
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Number of Staff Members
+                {{ $t('setup.step4.staffMembers') }}
               </label>
               <select v-model="formData.staffCount" class="input w-full">
-                <option value="">Select staff size</option>
-                <option value="1-5">1-5 people</option>
-                <option value="6-20">6-20 people</option>
-                <option value="21-50">21-50 people</option>
-                <option value="51-100">51-100 people</option>
-                <option value="100+">Over 100 people</option>
+                <option value="">{{ $t('setup.step4.selectStaff') }}</option>
+                <option value="1-5">{{ $t('setup.step4.staff1to5') }}</option>
+                <option value="6-20">{{ $t('setup.step4.staff6to20') }}</option>
+                <option value="21-50">{{ $t('setup.step4.staff21to50') }}</option>
+                <option value="51-100">{{ $t('setup.step4.staff51to100') }}</option>
+                <option value="100+">{{ $t('setup.step4.staff100plus') }}</option>
               </select>
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Grant Experience Level
+                {{ $t('setup.step4.grantExperience') }}
               </label>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <label
@@ -280,7 +280,7 @@
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Preferred Grant Size Range (EUR)
+                {{ $t('setup.step4.preferredGrantSize') }}
               </label>
               <div class="grid grid-cols-2 gap-4">
                 <input
@@ -304,34 +304,34 @@
         <div v-if="currentStep === 4" class="space-y-6">
           <div>
             <h2 class="text-2xl font-bold text-gray-900 mb-2">
-              Almost done! 🎊
+              {{ $t('setup.step5.title') }} 🎊
             </h2>
             <p class="text-gray-600">
-              Just a few more preferences to personalize your experience
+              {{ $t('setup.step5.subtitle') }}
             </p>
           </div>
 
           <div class="space-y-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-4">
-                What would you like help with? (Select all that apply)
+                {{ $t('setup.step5.whatHelp') }}
               </label>
               <div class="space-y-3">
                 <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
                   <input type="checkbox" v-model="formData.helpNeeded" value="finding" class="w-5 h-5 text-primary-600 rounded" />
-                  <span class="text-gray-900">Finding relevant grants</span>
+                  <span class="text-gray-900">{{ $t('setup.step5.findingGrants') }}</span>
                 </label>
                 <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
                   <input type="checkbox" v-model="formData.helpNeeded" value="writing" class="w-5 h-5 text-primary-600 rounded" />
-                  <span class="text-gray-900">Writing proposals</span>
+                  <span class="text-gray-900">{{ $t('setup.step5.writingProposals') }}</span>
                 </label>
                 <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
                   <input type="checkbox" v-model="formData.helpNeeded" value="budget" class="w-5 h-5 text-primary-600 rounded" />
-                  <span class="text-gray-900">Creating budgets</span>
+                  <span class="text-gray-900">{{ $t('setup.step5.creatingBudgets') }}</span>
                 </label>
                 <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
                   <input type="checkbox" v-model="formData.helpNeeded" value="deadlines" class="w-5 h-5 text-primary-600 rounded" />
-                  <span class="text-gray-900">Tracking deadlines</span>
+                  <span class="text-gray-900">{{ $t('setup.step5.trackingDeadlines') }}</span>
                 </label>
               </div>
             </div>
@@ -340,7 +340,7 @@
               <label class="flex items-center gap-3">
                 <input type="checkbox" v-model="formData.createSampleData" class="w-5 h-5 text-primary-600 rounded" />
                 <span class="text-gray-900">
-                  Add sample data to explore features (recommended for first-time users)
+                  {{ $t('setup.step5.addSampleData') }}
                 </span>
               </label>
             </div>
@@ -349,7 +349,7 @@
               <label class="flex items-center gap-3">
                 <input type="checkbox" v-model="formData.emailNotifications" class="w-5 h-5 text-primary-600 rounded" />
                 <span class="text-gray-900">
-                  Send me email notifications about new matching grants
+                  {{ $t('setup.step5.emailNotifications') }}
                 </span>
               </label>
             </div>
@@ -357,15 +357,15 @@
 
           <div class="bg-primary-50 border border-primary-200 rounded-lg p-6">
             <h3 class="font-semibold text-primary-900 mb-2">
-              🎁 What you'll get after setup:
+              🎁 {{ $t('setup.step5.whatYouGet') }}
             </h3>
             <ul class="space-y-2 text-sm text-primary-800">
-              <li>✓ Personalized grant recommendations based on your profile</li>
-              <li>✓ Access to 12+ international grant sources</li>
-              <li>✓ AI-powered matching with detailed scores</li>
-              <li>✓ Proposal writing tools and templates</li>
-              <li>✓ Deadline tracking and notifications</li>
-              <li v-if="formData.createSampleData">✓ Sample grants and proposals to explore</li>
+              <li>✓ {{ $t('setup.step5.benefit1') }}</li>
+              <li>✓ {{ $t('setup.step5.benefit2') }}</li>
+              <li>✓ {{ $t('setup.step5.benefit3') }}</li>
+              <li>✓ {{ $t('setup.step5.benefit4') }}</li>
+              <li>✓ {{ $t('setup.step5.benefit5') }}</li>
+              <li v-if="formData.createSampleData">✓ {{ $t('setup.step5.benefitSample') }}</li>
             </ul>
           </div>
         </div>
@@ -377,7 +377,7 @@
             @click="previousStep"
             class="btn btn-outline"
           >
-            ← Back
+            {{ $t('setup.back') }}
           </button>
           <div v-else></div>
 
@@ -388,7 +388,7 @@
               class="btn btn-primary"
               :disabled="!canProceed"
             >
-              Continue →
+              {{ $t('setup.continue') }}
             </button>
             <button
               v-else
@@ -396,8 +396,8 @@
               class="btn btn-primary px-8"
               :disabled="loading"
             >
-              <span v-if="loading">Creating your profile...</span>
-              <span v-else>Complete Setup 🚀</span>
+              <span v-if="loading">{{ $t('setup.creatingProfile') }}</span>
+              <span v-else>{{ $t('setup.completeSetup') }} 🚀</span>
             </button>
           </div>
         </div>
@@ -405,7 +405,7 @@
 
       <!-- Help Text -->
       <div class="text-center mt-6 text-sm text-gray-600">
-        Need help? <a href="#" class="text-primary-600 hover:underline">Contact Support</a>
+        {{ $t('setup.needHelp') }} <a href="#" class="text-primary-600 hover:underline">{{ $t('setup.contactSupport') }}</a>
       </div>
     </div>
   </div>
@@ -414,20 +414,24 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
+import { useToast } from '@/lib/useToast'
 
 const router = useRouter()
+const { t } = useI18n()
+const toast = useToast()
 
 const currentStep = ref(0)
 const loading = ref(false)
 
-const wizardSteps = [
-  { name: 'About You' },
-  { name: 'Organization' },
-  { name: 'Focus Areas' },
-  { name: 'Budget & Size' },
-  { name: 'Preferences' }
-]
+const wizardSteps = computed(() => [
+  { name: t('setup.steps.aboutYou') },
+  { name: t('setup.steps.organization') },
+  { name: t('setup.steps.focusAreas') },
+  { name: t('setup.steps.budgetSize') },
+  { name: t('setup.steps.preferences') }
+])
 
 const formData = ref({
   // Step 1
@@ -458,26 +462,26 @@ const formData = ref({
   emailNotifications: true
 })
 
-const focusAreas = [
-  { value: 'democracy', label: 'Democracy', icon: '🗳️' },
-  { value: 'human-rights', label: 'Human Rights', icon: '⚖️' },
-  { value: 'civil-society', label: 'Civil Society', icon: '🤝' },
-  { value: 'education', label: 'Education', icon: '📚' },
-  { value: 'health', label: 'Health', icon: '🏥' },
-  { value: 'environment', label: 'Environment', icon: '🌱' },
-  { value: 'gender', label: 'Gender Equality', icon: '♀️' },
-  { value: 'youth', label: 'Youth', icon: '👦' },
-  { value: 'media', label: 'Media Freedom', icon: '📰' },
-  { value: 'arts', label: 'Arts & Culture', icon: '🎨' },
-  { value: 'peace', label: 'Peace Building', icon: '🕊️' },
-  { value: 'development', label: 'Development', icon: '📈' }
-]
+const focusAreas = computed(() => [
+  { value: 'democracy', label: t('setup.step3.democracy'), icon: '🗳️' },
+  { value: 'human-rights', label: t('setup.step3.humanRights'), icon: '⚖️' },
+  { value: 'civil-society', label: t('setup.step3.civilSociety'), icon: '🤝' },
+  { value: 'education', label: t('setup.step3.education'), icon: '📚' },
+  { value: 'health', label: t('setup.step3.health'), icon: '🏥' },
+  { value: 'environment', label: t('setup.step3.environment'), icon: '🌱' },
+  { value: 'gender', label: t('setup.step3.genderEquality'), icon: '♀️' },
+  { value: 'youth', label: t('setup.step3.youth'), icon: '👦' },
+  { value: 'media', label: t('setup.step3.mediaFreedom'), icon: '📰' },
+  { value: 'arts', label: t('setup.step3.artsCulture'), icon: '🎨' },
+  { value: 'peace', label: t('setup.step3.peaceBuilding'), icon: '🕊️' },
+  { value: 'development', label: t('setup.step3.development'), icon: '📈' }
+])
 
-const experienceLevels = [
-  { value: 'beginner', label: 'Beginner', description: 'First grants' },
-  { value: 'intermediate', label: 'Intermediate', description: '1-5 grants' },
-  { value: 'experienced', label: 'Experienced', description: '5+ grants' }
-]
+const experienceLevels = computed(() => [
+  { value: 'beginner', label: t('setup.step4.beginner'), description: t('setup.step4.beginnerDesc') },
+  { value: 'intermediate', label: t('setup.step4.intermediate'), description: t('setup.step4.intermediateDesc') },
+  { value: 'experienced', label: t('setup.step4.experienced'), description: t('setup.step4.experiencedDesc') }
+])
 
 const canProceed = computed(() => {
   switch (currentStep.value) {
@@ -507,7 +511,7 @@ function getStepClass(index: number) {
 }
 
 function nextStep() {
-  if (canProceed.value && currentStep.value < wizardSteps.length - 1) {
+  if (canProceed.value && currentStep.value < wizardSteps.value.length - 1) {
     currentStep.value++
   }
 }
@@ -557,7 +561,7 @@ async function completeSetup() {
     router.push('/dashboard?welcome=true')
   } catch (error) {
     console.error('Setup failed:', error)
-    alert('Failed to complete setup. Please try again.')
+    toast.error('Failed to complete setup. Please try again.')
   } finally {
     loading.value = false
   }

@@ -26,6 +26,7 @@ export default {
         and: 'und',
         of: 'von',
         days: 'Tage',
+        scrollToTop: 'Nach oben scrollen',
         day: 'Tag',
         thisMonth: 'diesen Monat',
         noResults: 'Keine Ergebnisse gefunden',
@@ -43,7 +44,12 @@ export default {
         settings: 'Einstellungen',
         logout: 'Abmelden',
         login: 'Anmelden',
-        register: 'Registrieren'
+        register: 'Registrieren',
+        notifications: 'Benachrichtigungen',
+        noNotifications: 'Noch keine Benachrichtigungen',
+        markAllRead: 'Alle als gelesen markieren',
+        userMenu: 'Benutzermenü',
+        mainNavigation: 'Hauptnavigation'
     },
 
     // Dashboard
@@ -62,6 +68,15 @@ export default {
         recentActivity: 'Letzte Aktivitäten',
         noRecentActivity: 'Noch keine Aktivitäten',
         startBrowsing: 'Stöbern Sie in Förderprogrammen, um Aktivitäten hier zu sehen',
+        emptyActivity: {
+            description: 'Ihre Aktivitäten beim Durchsuchen von Förderungen, Speicherungen und Matching werden hier angezeigt. Beginnen Sie mit der Erkundung!',
+            setupProfile: 'Profil einrichten'
+        },
+        emptyDeadlines: {
+            title: 'Alles klar — keine anstehenden Fristen',
+            description: 'Wenn Sie Förderungen mit Fristen speichern, werden sie hier verfolgt, damit Sie kein Einreichungsfenster verpassen.',
+            browseGrants: 'Förderungen mit Fristen finden'
+        },
         quickActions: 'Schnellaktionen',
         browseGrants: 'Förderungen durchsuchen',
         discoverOpportunities: 'Neue Möglichkeiten entdecken',
@@ -93,6 +108,7 @@ export default {
         newest: 'Neueste',
         category: 'Kategorie',
         allCategories: 'Alle Kategorien',
+        recentSearches: 'Letzte Suchen',
         minAmount: 'Mindestbetrag',
         maxAmount: 'Höchstbetrag',
         deadlineAfter: 'Frist nach',
@@ -108,13 +124,84 @@ export default {
         eligibleCountries: 'Berechtigte Länder',
         organizationTypes: 'Organisationstypen',
         noGrantsFound: 'Keine Förderungen gefunden',
-        adjustFilters: 'Versuchen Sie, Ihre Filter oder Suchbegriffe anzupassen',
+        adjustFilters: 'Wir konnten keine Förderungen finden, die Ihren Kriterien entsprechen. Versuchen Sie, Ihre Filter oder Suchbegriffe anzupassen.',
+        emptySearch: {
+            title: 'Keine Ergebnisse für Ihre Suche',
+            description: 'Wir konnten keine Förderungen für "{query}" finden. Hier sind einige Tipps:',
+            tip1: 'Versuchen Sie breitere oder andere Suchbegriffe',
+            tip2: 'Überprüfen Sie Tippfehler in Ihrer Suche',
+            tip3: 'Probieren Sie die AI-Suche für bessere Ergebnisse',
+            tryAI: 'AI-Suche testen'
+        },
+        emptyFilters: {
+            title: 'Keine Förderungen entsprechen Ihren Filtern',
+            description: 'Ihre aktuelle Filterkombination ist zu eng. Entfernen Sie einige Filter oder erweitern Sie Ihre Kriterien, um mehr Ergebnisse zu sehen.'
+        },
+        emptyDefault: {
+            title: 'Derzeit keine Förderungen verfügbar',
+            description: 'Neue Fördermöglichkeiten werden regelmäßig hinzugefügt. Schauen Sie bald wieder vorbei oder richten Sie Ihr Profil ein, um Benachrichtigungen zu erhalten.',
+            goToDashboard: 'Zum Dashboard'
+        },
         loadMore: 'Mehr laden',
         openDeadline: 'Offen',
         closingSoon: 'Bald endend',
+        from: 'Ab',
         upTo: 'Bis zu',
         programName: 'Programm',
-        description: 'Beschreibung'
+        description: 'Beschreibung',
+        aiSearchActive: 'KI-semantische Suche aktiv',
+        deadlineToday: 'Heute!',
+        deadlineDaysLeft: '{days} T.',
+        showingResults: 'Zeige {from} - {to} von {total}',
+        filters: {
+            amount: 'Förderbetrag (EUR)',
+            amountHint: 'Filtern nach Mindest- und Höchstbetrag',
+            min: 'Min',
+            max: 'Max',
+            anyDeadline: 'Beliebige Frist',
+            next7Days: 'Nächste 7 Tage',
+            next14Days: 'Nächste 14 Tage',
+            next30Days: 'Nächste 30 Tage',
+            next90Days: 'Nächste 90 Tage',
+            next6Months: 'Nächste 6 Monate',
+            country: 'Berechtigtes Land',
+            allCountries: 'Alle Länder',
+            ukraine: 'Ukraine',
+            poland: 'Polen',
+            germany: 'Deutschland',
+            france: 'Frankreich',
+            usa: 'Vereinigte Staaten',
+            uk: 'Vereinigtes Königreich',
+            eu: 'Europäische Union',
+            statusLabel: 'Status',
+            allStatuses: 'Alle Status',
+            statusOpen: 'Offen - Bewerbungen möglich',
+            statusUpcoming: 'Demnächst - Öffnet bald',
+            statusClosed: 'Geschlossen - Frist abgelaufen',
+            active: 'Aktive Filter'
+        },
+        sort: {
+            relevance: 'Relevanteste',
+            deadline: 'Frist (nächste)',
+            amount: 'Betrag (höchster)',
+            recent: 'Kürzlich hinzugefügt'
+        },
+        sectors: {
+            humanitarian: 'Humanitäre Hilfe',
+            education: 'Bildung',
+            democracy: 'Demokratie',
+            environment: 'Umwelt',
+            culture: 'Kultur',
+            health: 'Gesundheit',
+            infrastructure: 'Infrastruktur',
+            economic: 'Wirtschaftsentwicklung'
+        },
+        searchMode: 'Suchmodus',
+        sortLabel: 'Ergebnisse sortieren',
+        viewMode: 'Ansichtsmodus',
+        gridView: 'Rasteransicht',
+        listView: 'Listenansicht',
+        unsaveGrant: 'Aus Gespeicherten entfernen'
     },
 
     // Grant Detail
@@ -142,7 +229,57 @@ export default {
         officialWebsite: 'Offizielle Website',
         visitWebsite: 'Website besuchen',
         startProposal: 'Antrag beginnen',
-        generateWithAI: 'Mit KI generieren'
+        generateWithAI: 'Mit KI generieren',
+        grantsLabel: 'Förderungen',
+        grantProgram: 'Förderprogramm',
+        save: 'Speichern',
+        saved: 'Gespeichert',
+        share: 'Teilen',
+        deadlineLabel: 'Frist:',
+        description: 'Beschreibung',
+        aiSummary: 'KI-Zusammenfassung',
+        eligibilityCheck: 'Förderfähigkeitsprüfung',
+        checkYourEligibility: 'Überprüfen Sie Ihre Förderfähigkeit',
+        basedOnCSOProfile: 'Basierend auf Ihrem CSO-Profil',
+        runCheck: 'Prüfung starten',
+        signInForEligibility: 'Melden Sie sich an, um Ihre Förderfähigkeit zu prüfen',
+        signIn: 'Anmelden',
+        similarGrants: 'Ähnliche Förderungen',
+        quickFacts: 'Auf einen Blick',
+        grantAmount: 'Fördersumme',
+        fundingRateLabel: 'Förderquote: {rate}%',
+        daysRemaining: '{count} Tage verbleibend',
+        timezoneNote: 'Fristen enden in der Regel um 23:59 UTC, sofern nicht anders angegeben',
+        moreCountries: '+{count} weitere',
+        topics: 'Themen',
+        actions: 'Aktionen',
+        viewOfficialPage: 'Offizielle Seite aufrufen',
+        startApplication: 'Bewerbung starten',
+        exportDetails: 'Details exportieren',
+        sourceInfo: 'Quellinformationen',
+        source: 'Quelle:',
+        referenceId: 'Referenz-ID:',
+        dataQuality: 'Datenqualität:',
+        needHelp: 'Brauchen Sie Hilfe?',
+        aiHelpDescription: 'Unsere KI kann Ihnen helfen, Anforderungen zu verstehen und Ihre Bewerbung vorzubereiten',
+        askAIAssistant: 'KI-Assistent fragen',
+        grantNotFound: 'Förderung nicht gefunden',
+        grantNotFoundDesc: 'Die gesuchte Förderung existiert nicht oder wurde entfernt',
+        amountNotSpecified: 'Betrag nicht angegeben',
+        open: 'Offen',
+        upcoming: 'Demnächst',
+        closed: 'Geschlossen',
+        today: 'Heute',
+        tomorrow: 'Morgen',
+        daysLeft: '{count} Tage übrig',
+        weeksLeft: '{count} Wochen übrig',
+        eligibleCountries: 'Förderfähige Länder',
+        organizationTypes: 'Organisationstypen',
+        removedFromSaved: 'Aus gespeicherten Förderungen entfernt',
+        help: {
+            aiSummary: 'Diese Zusammenfassung wurde von KI basierend auf der Förderbeschreibung erstellt. Sie hebt wichtige Punkte hervor.',
+            eligibility: 'Die Eignungsprüfung vergleicht Ihr Organisationsprofil (Land, Typ, Budget) mit den Förderanforderungen.'
+        }
     },
 
     // Matches
@@ -158,7 +295,36 @@ export default {
         noMatches: 'Keine Matches gefunden',
         createProfile: 'Erstellen Sie ein Organisationsprofil, um Matches zu sehen',
         matchScore: 'Match-Score',
-        basedOn: 'Basierend auf Ihrem Profil'
+        basedOn: 'Basierend auf Ihrem Profil',
+        chooseOrg: 'Organisation wählen...',
+        semantic: 'Semantisch',
+        eligibilityScore: 'Förderfähigkeit',
+        thematic: 'Thematisch',
+        budgetFit: 'Budget-Passung',
+        eligible: 'Förderfähig',
+        checkEligibility: 'Förderfähigkeit prüfen',
+        selectAnOrg: 'Organisation auswählen',
+        selectAnOrgDesc: 'Wählen Sie eine Ihrer Organisationen, um passende Förderungen basierend auf Ihrem Profil zu finden.',
+        createOrgFirst: 'Erstellen Sie zuerst eine Organisation',
+        createOrgFirstDesc: 'Um passende Förderungen zu sehen, müssen Sie ein CSO-Profil erstellen.',
+        createOrganization: 'Organisation erstellen',
+        noMatchesDesc: 'Wir konnten derzeit keine passenden Förderungen für diese Organisation finden. Hier ist, was Sie tun können:',
+        emptyTips: {
+            tip1: 'Fügen Sie mehr Schwerpunktbereiche zu Ihrem Organisationsprofil hinzu',
+            tip2: 'Aktualisieren Sie Ihren Budgetrahmen und Teamgröße für besseres Matching',
+            tip3: 'Neue Förderungen werden regelmäßig hinzugefügt — schauen Sie in ein paar Tagen wieder vorbei',
+            updateProfile: 'Profil aktualisieren',
+            browseManually: 'Alle Förderungen durchsuchen'
+        },
+        unknownProgram: 'Unbekanntes Programm',
+        noDescription: 'Keine Beschreibung verfügbar',
+        overallScore: 'Gesamtübereinstimmung',
+        help: {
+            semantic: 'Wie gut Ihre Mission und Aktivitäten mit der Förderbeschreibung übereinstimmen, analysiert durch KI.',
+            eligibility: 'Ob Ihre Organisation die formalen Anforderungen wie Land, Organisationstyp und Budgetrahmen erfüllt.',
+            thematic: 'Wie gut Ihre Schwerpunktbereiche und Sektoren mit den Förderthemen übereinstimmen.',
+            budgetFit: 'Ob Ihr Jahresbudget und die Fördersumme gut zueinander passen.'
+        }
     },
 
     // Organizations / CSO
@@ -179,7 +345,45 @@ export default {
         website: 'Website',
         email: 'Kontakt-E-Mail',
         noOrganizations: 'Noch keine Organisationen',
-        addFirst: 'Fügen Sie Ihre erste Organisation hinzu, um zu beginnen'
+        addFirst: 'Fügen Sie Ihre erste Organisation hinzu, um zu beginnen',
+        aiQuickSetup: 'KI-Schnelleinrichtung',
+        manualSetup: 'Manuelle Einrichtung',
+        active: 'Aktiv',
+        noDescription: 'Keine Beschreibung',
+        experience: 'Erfahrung:',
+        notSpecified: 'Nicht angegeben',
+        findMatches: 'Matches finden',
+        createFirst: 'Erstellen Sie Ihr erstes CSO-Profil, um passende Förderungen und Finanzierungsmöglichkeiten zu entdecken.',
+        createFirstOrg: 'Erste Organisation erstellen'
+    },
+
+    // CSO Detail
+    csoDetail: {
+        about: 'Über diese Organisation',
+        quickFacts: 'Kurzübersicht',
+        matchedGrants: 'Beste Förderungen',
+        noMatchesYet: 'Noch keine Übereinstimmungen berechnet',
+        runMatching: 'AI-Matching starten →',
+        registered: 'Registriert in',
+        operatingIn: 'Tätig in',
+        grantExperience: 'Fördererfahrung',
+        languages: 'Sprachen',
+        targetGroups: 'Zielgruppen',
+        memberSince: 'Mitglied seit',
+        notFound: 'Organisation nicht gefunden',
+        notFoundDesc: 'Dieses Organisationsprofil existiert nicht oder wurde entfernt.',
+        backToOrgs: 'Zurück zu Organisationen'
+    },
+
+    // CSO Create
+    csoCreate: {
+        title: 'Organisationsprofil erstellen',
+        subtitle: 'Wählen Sie, wie Sie Ihr Organisationsprofil einrichten möchten',
+        smartTitle: 'Smart-Einrichtung',
+        smartDesc: 'Fügen Sie Ihre Website-URL ein und lassen Sie KI Ihre Organisationsdetails automatisch extrahieren.',
+        manualTitle: 'Manuelle Einrichtung',
+        manualDesc: 'Füllen Sie Ihre Organisationsdetails Schritt für Schritt mit unserem Assistenten aus.',
+        recommended: 'Empfohlen'
     },
 
     // Proposals
@@ -196,7 +400,12 @@ export default {
         lastEdited: 'Zuletzt bearbeitet',
         targetGrant: 'Zielförderung',
         noProposals: 'Noch keine Anträge',
-        startFirst: 'Beginnen Sie Ihren ersten Antrag'
+        startFirst: 'Beginnen Sie Ihren ersten Antrag',
+        created: 'Erstellt',
+        aiGenerate: 'KI-Generierung',
+        view: 'Ansehen',
+        noProposalsDesc: 'Starten Sie einen Antrag, indem Sie eine passende Förderung finden und auf "Antrag erstellen" klicken.',
+        browseGrants: 'Förderungen durchsuchen'
     },
 
     // Onboarding
@@ -215,14 +424,40 @@ export default {
         teamSizeRange: 'Wie groß ist Ihr Team?',
         congratulations: 'Herzlichen Glückwunsch!',
         profileComplete: 'Ihr Profil ist vollständig. Entdecken Sie jetzt Förderungen!',
-        goToDashboard: 'Zum Dashboard'
+        goToDashboard: 'Zum Dashboard',
+        stepOf: 'Schritt {current} von {total}',
+        skipTour: 'Tour überspringen',
+        getStarted: 'Los geht\'s!',
+        goToStep: 'Zu Schritt {step}',
+        steps: {
+            welcome: {
+                title: 'Willkommen bei Grants Bridge Ukraine!',
+                desc: 'Ihre KI-gestützte Plattform zur Entdeckung und Beantragung von Fördermöglichkeiten. Lassen Sie uns Ihnen alles zeigen.'
+            },
+            profile: {
+                title: 'Erstellen Sie Ihr Organisationsprofil',
+                desc: 'Richten Sie Ihr CSO-Profil ein, damit wir die relevantesten Förderungen basierend auf Ihrer Mission, Ihrem Standort und Ihrer Expertise finden können.'
+            },
+            grants: {
+                title: 'Förderungen entdecken',
+                desc: 'Durchsuchen Sie Fördermöglichkeiten aus verschiedenen Quellen. Nutzen Sie Text- oder KI-gestützte semantische Suche.'
+            },
+            matches: {
+                title: 'KI-gestütztes Matching',
+                desc: 'Unsere KI bewertet Förderungen nach semantischer Ähnlichkeit, Eignung, thematischer Passung und Budget. Erhalten Sie personalisierte Empfehlungen!'
+            },
+            ready: {
+                title: 'Bereit loszulegen?',
+                desc: 'Erstellen Sie Ihr Organisationsprofil, um KI-Matching freizuschalten und die perfekten Förderungen für Ihre Mission zu finden.'
+            }
+        }
     },
 
     // Auth
     auth: {
         login: 'Anmelden',
         register: 'Registrieren',
-        email: 'E-Mail',
+        email: 'E-Mail-Adresse',
         password: 'Passwort',
         confirmPassword: 'Passwort bestätigen',
         forgotPassword: 'Passwort vergessen?',
@@ -231,7 +466,68 @@ export default {
         signUp: 'Registrieren',
         signIn: 'Anmelden',
         orContinueWith: 'Oder fortfahren mit',
-        termsAgree: 'Ich stimme den Nutzungsbedingungen und der Datenschutzerklärung zu'
+        termsAgree: 'Ich stimme den Nutzungsbedingungen und der Datenschutzerklärung zu',
+        signInSubtitle: 'Melden Sie sich an, um Fördermöglichkeiten zu entdecken',
+        emailPlaceholder: 'sie@organisation.org',
+        rememberMe: '30 Tage angemeldet bleiben',
+        signInButton: 'Zum Dashboard anmelden',
+        signingIn: 'Anmeldung...',
+        googleSignIn: 'Mit Google anmelden',
+        createAccount: 'Kostenloses Konto erstellen',
+        securityNote: 'Gesichert mit Industriestandard-Verschlüsselung',
+        trustedBy: 'Vertraut von über 500 Zivilgesellschaftsorganisationen weltweit',
+        serviceUnavailable: 'Authentifizierungsdienst vorübergehend nicht verfügbar',
+        serviceUnavailableDesc: 'Sie können weiterhin Förderungen durchsuchen, ohne sich anzumelden. Die Anmeldung wird in Kürze wieder verfügbar sein.',
+        browseGrantsInstead: 'Förderungen durchsuchen',
+        registerTitle: 'Werden Sie Teil von Grants Bridge Ukraine',
+        registerSubtitle: 'Verbinden Sie Ihre ukrainische Organisation mit Fördermöglichkeiten',
+        fullName: 'Vollständiger Name',
+        fullNamePlaceholder: 'Max Mustermann',
+        passwordHint: 'Mindestens 8 Zeichen mit einer Mischung aus Buchstaben und Zahlen',
+        passwordsDontMatch: 'Passwörter stimmen nicht überein',
+        accountCreated: 'Konto erstellt! Bitte überprüfen Sie Ihre E-Mail zur Bestätigung.',
+        goToLogin: 'Zum Login',
+        orSignUpWith: 'Oder registrieren mit',
+        googleSignUp: 'Mit Google registrieren',
+        creatingAccount: 'Konto wird erstellt...',
+        dataSecure: 'Ihre Daten sind verschlüsselt und sicher',
+        joinOrgs: 'Schließen Sie sich 500+ Organisationen an, die Fördermittel finden',
+        termsPrefix: 'Ich stimme den',
+        termsOfService: 'Nutzungsbedingungen',
+        privacyPolicy: 'Datenschutzerklärung'
+    },
+
+    // Settings
+    settings: {
+        title: 'Einstellungen',
+        description: 'Verwalten Sie Ihre Kontoeinstellungen',
+        language: 'Sprache',
+        languageDescription: 'Wählen Sie Ihre bevorzugte Sprache',
+        notifications: 'Benachrichtigungen',
+        comingSoon: 'Demnächst verfügbar',
+        account: 'Konto',
+        changePassword: 'Passwort ändern',
+        deleteAccount: 'Konto löschen',
+        notificationsRoadmap: 'Wir arbeiten an E-Mail-Benachrichtigungen, um Sie über neue Förderungen und Fristen zu informieren.',
+        accountRoadmap: 'Kontoverwaltungsfunktionen wie Passwortänderung und Datenexport werden entwickelt.',
+        notifGrantMatches: 'E-Mail-Benachrichtigungen bei neuen Förderübereinstimmungen',
+        notifWeeklyDigest: 'Wöchentliche Zusammenfassung gespeicherter Förderungen',
+        notifDeadlineReminders: 'Fristerinnerungen'
+    },
+
+    // Profile
+    profile: {
+        title: 'Profil',
+        description: 'Ihre Kontoinformationen',
+        noName: 'Kein Name angegeben',
+        email: 'E-Mail',
+        memberId: 'Mitglieds-ID',
+        memberSince: 'Mitglied seit',
+        lastLogin: 'Letzter Login',
+        editSettings: 'Einstellungen bearbeiten',
+        logout: 'Abmelden',
+        notLoggedIn: 'Nicht angemeldet',
+        pleaseLogin: 'Bitte melden Sie sich an, um Ihr Profil zu sehen'
     },
 
     // Feedback
@@ -264,6 +560,11 @@ export default {
         deadline: 'Letzter Tag für die Einreichung Ihres Antrags'
     },
 
+    // Offline
+    offline: {
+        banner: 'Sie sind offline. Einige Funktionen sind möglicherweise nicht verfügbar.'
+    },
+
     // Errors
     errors: {
         generic: 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.',
@@ -271,5 +572,248 @@ export default {
         notFound: 'Seite nicht gefunden',
         unauthorized: 'Bitte melden Sie sich an, um fortzufahren',
         forbidden: 'Sie haben keine Berechtigung, darauf zuzugreifen'
+    },
+
+    // Setup Wizard
+    setup: {
+        welcomeTitle: 'Willkommen bei Grant Discovery!',
+        welcomeSubtitle: 'Lassen Sie uns alles in wenigen Minuten einrichten',
+        steps: {
+            aboutYou: 'Über Sie',
+            organization: 'Organisation',
+            focusAreas: 'Schwerpunkte',
+            budgetSize: 'Budget & Größe',
+            preferences: 'Einstellungen'
+        },
+        step1: {
+            title: 'Erzählen Sie uns über sich',
+            subtitle: 'Wir nutzen dies zur Personalisierung Ihrer Erfahrung',
+            yourName: 'Ihr Name',
+            email: 'E-Mail',
+            roleInOrg: 'Rolle in der Organisation',
+            selectRole: 'Rolle auswählen',
+            executiveDirector: 'Geschäftsführer/in',
+            programManager: 'Programmmanager/in',
+            fundraisingManager: 'Fundraising-Manager/in',
+            grantsOfficer: 'Förderreferent/in',
+            other: 'Andere',
+            hearAboutUs: 'Wie haben Sie von uns erfahren?',
+            selectSource: 'Quelle auswählen',
+            googleSearch: 'Google-Suche',
+            socialMedia: 'Soziale Medien',
+            colleagueRec: 'Empfehlung eines Kollegen',
+            conferenceEvent: 'Konferenz/Veranstaltung'
+        },
+        step2: {
+            title: 'Über Ihre Organisation',
+            subtitle: 'Dies hilft uns, die relevantesten Förderungen zu finden',
+            orgName: 'Organisationsname',
+            orgNamePlaceholder: 'z.B. Ukrainische Demokratie-Stiftung',
+            orgType: 'Organisationstyp',
+            selectType: 'Typ auswählen',
+            ngo: 'Nichtregierungsorganisation (NGO)',
+            foundation: 'Stiftung',
+            association: 'Verein',
+            cooperative: 'Genossenschaft',
+            socialEnterprise: 'Sozialunternehmen',
+            research: 'Forschungseinrichtung',
+            university: 'Universität',
+            regCountry: 'Registrierungsland',
+            selectCountry: 'Land auswählen',
+            website: 'Website (optional)'
+        },
+        step3: {
+            title: 'In welchen Bereichen arbeiten Sie?',
+            subtitle: 'Wählen Sie alle zutreffenden - dies hilft bei der Förderungssuche',
+            democracy: 'Demokratie',
+            humanRights: 'Menschenrechte',
+            civilSociety: 'Zivilgesellschaft',
+            education: 'Bildung',
+            health: 'Gesundheit',
+            environment: 'Umwelt',
+            genderEquality: 'Geschlechtergleichheit',
+            youth: 'Jugend',
+            mediaFreedom: 'Pressefreiheit',
+            artsCulture: 'Kunst & Kultur',
+            peaceBuilding: 'Friedensarbeit',
+            development: 'Entwicklung'
+        },
+        step4: {
+            title: 'Organisationsgröße & Budget',
+            subtitle: 'Dies hilft uns, passende Förderungen zu empfehlen',
+            annualBudget: 'Jahresbudget (EUR)',
+            selectBudget: 'Budgetbereich auswählen',
+            under50k: 'Unter €50.000',
+            range50k200k: '€50.000 - €200.000',
+            range200k500k: '€200.000 - €500.000',
+            range500k1m: '€500.000 - €1.000.000',
+            over1m: 'Über €1.000.000',
+            staffMembers: 'Anzahl der Mitarbeiter',
+            selectStaff: 'Teamgröße auswählen',
+            staff1to5: '1-5 Personen',
+            staff6to20: '6-20 Personen',
+            staff21to50: '21-50 Personen',
+            staff51to100: '51-100 Personen',
+            staff100plus: 'Über 100 Personen',
+            grantExperience: 'Erfahrung mit Förderungen',
+            beginner: 'Anfänger',
+            beginnerDesc: 'Erste Förderungen',
+            intermediate: 'Fortgeschritten',
+            intermediateDesc: '1-5 Förderungen',
+            experienced: 'Erfahren',
+            experiencedDesc: '5+ Förderungen',
+            preferredGrantSize: 'Bevorzugte Fördersumme (EUR)'
+        },
+        step5: {
+            title: 'Fast geschafft!',
+            subtitle: 'Noch ein paar Einstellungen zur Personalisierung',
+            whatHelp: 'Wobei brauchen Sie Hilfe? (Wählen Sie alle zutreffenden)',
+            findingGrants: 'Relevante Förderungen finden',
+            writingProposals: 'Anträge schreiben',
+            creatingBudgets: 'Budgets erstellen',
+            trackingDeadlines: 'Fristen verfolgen',
+            addSampleData: 'Beispieldaten hinzufügen (empfohlen für Erstbenutzer)',
+            emailNotifications: 'E-Mail-Benachrichtigungen über neue passende Förderungen',
+            whatYouGet: 'Was Sie nach der Einrichtung erhalten:',
+            benefit1: 'Personalisierte Förderempfehlungen basierend auf Ihrem Profil',
+            benefit2: 'Zugang zu 12+ internationalen Förderquellen',
+            benefit3: 'KI-gestütztes Matching mit detaillierten Bewertungen',
+            benefit4: 'Tools zum Antragschreiben und Vorlagen',
+            benefit5: 'Fristenverfolgung und Benachrichtigungen',
+            benefitSample: 'Beispiel-Förderungen und -Anträge zum Erkunden'
+        },
+        back: '← Zurück',
+        continue: 'Weiter →',
+        creatingProfile: 'Ihr Profil wird erstellt...',
+        completeSetup: 'Einrichtung abschließen',
+        needHelp: 'Brauchen Sie Hilfe?',
+        contactSupport: 'Support kontaktieren'
+    },
+
+    // Smart Onboarding
+    smartOnboarding: {
+        title: 'KI-Smart-Einrichtung',
+        subtitle: 'Nennen Sie uns nur den Organisationsnamen - unsere KI erledigt den Rest',
+        orgName: 'Organisationsname',
+        orgNamePlaceholder: 'z.B. Wiederaufbau Ukraine Stiftung',
+        website: 'Website',
+        websiteOptional: '(optional - für bessere Genauigkeit)',
+        websitePlaceholder: 'www.ihre-organisation.org',
+        websiteHint: 'Mit oder ohne https:// eingeben',
+        country: 'Land',
+        generateButton: 'Profil mit KI erstellen',
+        aiAnalyzing: 'KI analysiert...',
+        howItWorks: 'So funktioniert es',
+        howItWorksDesc: 'Unsere KI analysiert Ihre Organisation und füllt automatisch Schwerpunktbereiche, Zielgruppen, Erfahrungsniveau und mehr aus. Sie können vor dem Speichern überprüfen und bearbeiten.',
+        aiConfidence: '{percent}% KI-Konfidenz',
+        readyToSave: 'Bereit zum Speichern',
+        description: 'Beschreibung',
+        mission: 'Mission',
+        focusAreas: 'Schwerpunktbereiche',
+        targetGroups: 'Zielgruppen',
+        experience: 'Erfahrung',
+        budgetRange: 'Budgetbereich',
+        languages: 'Sprachen',
+        operatingIn: 'Tätig in',
+        goBack: '← Zurück',
+        saveAndContinue: 'Speichern & Fortfahren',
+        saving: 'Wird gespeichert...'
+    },
+
+    // Proposal Wizard
+    proposalWizard: {
+        title: 'Bewerbung starten',
+        steps: {
+            selectOrg: 'Organisation wählen',
+            chooseSections: 'Abschnitte wählen',
+            generate: 'Generieren'
+        },
+        step1: {
+            title: 'Organisation auswählen',
+            subtitle: 'Wählen Sie das CSO-Profil für diese Bewerbung',
+            noCSOProfiles: 'Sie haben noch keine CSO-Profile erstellt',
+            createCSOProfile: 'CSO-Profil erstellen',
+            continue: 'Weiter'
+        },
+        step2: {
+            title: 'Abschnitte zum Generieren auswählen',
+            subtitle: 'Wählen Sie, welche Antragsabschnitte die KI generieren soll',
+            objectives: 'Projektziele',
+            objectivesDesc: 'Ziele und erwartete Ergebnisse des Projekts',
+            methodology: 'Methodik',
+            methodologyDesc: 'Ansatz und Umsetzungsstrategie',
+            impact: 'Erwartete Wirkung',
+            impactDesc: 'Langfristige Effekte und Nachhaltigkeit',
+            workPlan: 'Arbeitsplan',
+            workPlanDesc: 'Zeitplan und Meilensteine',
+            budgetNarrative: 'Budgetbeschreibung',
+            budgetNarrativeDesc: 'Begründung der Budgetposten',
+            sustainability: 'Nachhaltigkeit',
+            sustainabilityDesc: 'Langfristige Tragfähigkeit nach Förderung',
+            background: 'Organisationshintergrund',
+            backgroundDesc: 'Expertise und Erfolgsbilanz Ihrer Organisation',
+            partners: 'Partner',
+            partnersDesc: 'Partnerorganisationen und ihre Rollen',
+            recommended: 'Empfohlen',
+            back: 'Zurück',
+            generateSections: '{count} Abschnitte generieren'
+        },
+        step3: {
+            title: 'Ihr Antrag wird generiert',
+            subtitle: 'KI schreibt Ihre Antragsabschnitte. Dies kann einige Minuten dauern.',
+            overallProgress: 'Gesamtfortschritt',
+            complete: 'Fertig',
+            generating: 'Generierung...',
+            waiting: 'Wartend',
+            generationComplete: 'Generierung abgeschlossen!',
+            generationCompleteDesc: 'Ihre Antragsabschnitte wurden erfolgreich generiert.',
+            viewProposal: 'Antrag ansehen'
+        }
+    },
+
+    // Proposal Detail
+    proposalDetail: {
+        backToProposals: 'Zurück zu Anträgen',
+        budget: 'Budget:',
+        created: 'Erstellt:',
+        recordOutcome: 'Ergebnis erfassen',
+        outcome: 'Ergebnis',
+        selectOutcome: 'Ergebnis auswählen...',
+        awarded: 'Bewilligt',
+        shortlisted: 'In der engeren Auswahl',
+        rejected: 'Abgelehnt',
+        withdrawn: 'Zurückgezogen',
+        pending: 'Ausstehend',
+        amountAwarded: 'Bewilligter Betrag (€)',
+        feedbackFromFunder: 'Feedback vom Fördergeber',
+        feedbackPlaceholder: 'Erhaltenes Feedback...',
+        lessonsLearned: 'Gewonnene Erkenntnisse',
+        lessonsPlaceholder: 'Was hat funktioniert, was verbessern...',
+        saveOutcome: 'Ergebnis speichern',
+        savingOutcome: 'Wird gespeichert...',
+        proposalSections: 'Antragsabschnitte',
+        noSectionsYet: 'Noch keine Abschnitte generiert.',
+        generateAISections: 'KI-Abschnitte generieren',
+        words: 'Wörter',
+        generatedBy: 'Generiert von'
+    },
+
+    // Validation
+    validation: {
+        emailInvalid: 'Bitte geben Sie eine gültige E-Mail-Adresse ein',
+        passwordTooShort: 'Passwort ist zu kurz',
+        passwordMin8: 'Passwort muss mindestens 8 Zeichen lang sein',
+        nameTooShort: 'Name muss mindestens 2 Zeichen lang sein',
+        strengthWeak: 'Schwach — fügen Sie Zahlen oder Sonderzeichen hinzu',
+        strengthFair: 'Mittel — versuchen Sie Großbuchstaben hinzuzufügen',
+        strengthGood: 'Gut — fast geschafft!',
+        strengthStrong: 'Starkes Passwort'
+    },
+
+    // Not Found
+    notFound: {
+        title: '404',
+        message: 'Seite nicht gefunden',
+        goHome: 'Zur Startseite'
     }
 }

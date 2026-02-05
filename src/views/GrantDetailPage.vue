@@ -17,13 +17,10 @@
     <!-- Grant Detail Content -->
     <div v-else-if="grant">
       <!-- Breadcrumb -->
-      <nav class="flex items-center gap-2 text-sm text-gray-600 mb-6">
-        <router-link to="/grants" class="hover:text-primary-600">Grants</router-link>
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-        </svg>
-        <span class="text-gray-900">{{ grant.title }}</span>
-      </nav>
+      <BreadcrumbNav :crumbs="[
+        { label: $t('grantDetail.grantsLabel'), to: '/grants' },
+        { label: grant.title }
+      ]" />
 
       <!-- Header -->
       <div class="mb-8">
@@ -33,27 +30,29 @@
               {{ grant.title }}
             </h1>
             <p class="text-lg text-gray-600">
-              {{ grant.program_name || 'Grant Program' }}
+              {{ grant.program_name || $t('grantDetail.grantProgram') }}
             </p>
           </div>
 
           <div class="flex items-center gap-3 ml-4">
             <button
               @click="toggleSave"
-              :class="isSaved ? 'bg-yellow-50 text-yellow-600 border-yellow-300' : 'bg-white text-gray-600 border-gray-300'"
+              :class="isSaved ? 'bg-yellow-50 text-yellow-600 border-yellow-300' : 'bg-white text-navy-700 border-gray-300'"
               class="flex items-center gap-2 px-4 py-2 border rounded-lg hover:shadow transition-all"
+              :aria-label="isSaved ? $t('grantDetail.saved') : $t('grantDetail.save')"
+              :aria-pressed="isSaved"
             >
               <svg class="w-5 h-5" :class="isSaved ? 'fill-current' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
               </svg>
-              {{ isSaved ? 'Saved' : 'Save' }}
+              {{ isSaved ? $t('grantDetail.saved') : $t('grantDetail.save') }}
             </button>
 
-            <button class="flex items-center gap-2 px-4 py-2 bg-white text-gray-600 border border-gray-300 rounded-lg hover:shadow transition-all">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button class="flex items-center gap-2 px-4 py-2 bg-white text-navy-700 border border-gray-300 rounded-lg hover:shadow transition-all" :aria-label="$t('grantDetail.share')">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
               </svg>
-              Share
+              {{ $t('grantDetail.share') }}
             </button>
           </div>
         </div>
@@ -64,7 +63,7 @@
             :class="statusBadgeClass"
             class="px-3 py-1.5 rounded-full text-sm font-medium"
           >
-            {{ grant.status || 'Open' }}
+            {{ grant.status || $t('grantDetail.open') }}
           </span>
 
           <div v-if="grant.deadline" class="flex items-center gap-2 text-sm">
@@ -72,7 +71,7 @@
               <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
             </svg>
             <span :class="deadlineColor" class="font-medium">
-              Deadline: {{ formatDate(grant.deadline) }}
+              {{ $t('grantDetail.deadlineLabel') }} {{ formatDate(grant.deadline) }}
             </span>
           </div>
 
@@ -91,7 +90,7 @@
         <div class="lg:col-span-2 space-y-6">
           <!-- Description -->
           <div class="card">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Description</h2>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ $t('grantDetail.description') }}</h2>
             <div class="prose max-w-none">
               <p class="text-gray-700 leading-relaxed">{{ grant.description }}</p>
             </div>
@@ -107,7 +106,10 @@
                 </svg>
               </div>
               <div class="flex-1">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">AI Summary</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2 inline-flex items-center gap-2">
+                  {{ $t('grantDetail.aiSummary') }}
+                  <HelpTooltip :content="$t('grantDetail.help.aiSummary')" position="right" />
+                </h3>
                 <p class="text-gray-700">{{ aiSummary }}</p>
               </div>
             </div>
@@ -115,7 +117,10 @@
 
           <!-- Eligibility Checker -->
           <div class="card">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Eligibility Check</h2>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 inline-flex items-center gap-2">
+              {{ $t('grantDetail.eligibilityCheck') }}
+              <HelpTooltip :content="$t('grantDetail.help.eligibility')" position="right" />
+            </h2>
 
             <div v-if="authStore.isAuthenticated" class="space-y-4">
               <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
@@ -124,26 +129,26 @@
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                   </svg>
                   <div>
-                    <p class="font-medium text-gray-900">Check your eligibility</p>
-                    <p class="text-sm text-gray-600">Based on your CSO profile</p>
+                    <p class="font-medium text-gray-900">{{ $t('grantDetail.checkYourEligibility') }}</p>
+                    <p class="text-sm text-gray-600">{{ $t('grantDetail.basedOnCSOProfile') }}</p>
                   </div>
                 </div>
                 <button class="btn btn-primary">
-                  Run Check
+                  {{ $t('grantDetail.runCheck') }}
                 </button>
               </div>
             </div>
             <div v-else class="text-center py-6 text-gray-600">
-              <p>Sign in to check your eligibility for this grant</p>
+              <p>{{ $t('grantDetail.signInForEligibility') }}</p>
               <router-link to="/auth/login" class="btn btn-primary mt-4">
-                Sign In
+                {{ $t('grantDetail.signIn') }}
               </router-link>
             </div>
           </div>
 
           <!-- Similar Grants -->
           <div v-if="similarGrants.length > 0" class="card">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Similar Grants</h2>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ $t('grantDetail.similarGrants') }}</h2>
             <div class="space-y-3">
               <router-link
                 v-for="similar in similarGrants"
@@ -165,34 +170,37 @@
         <div class="space-y-6">
           <!-- Quick Facts -->
           <div class="card">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Facts</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ $t('grantDetail.quickFacts') }}</h3>
 
             <dl class="space-y-4">
               <!-- Amount -->
               <div v-if="grant.amount_min || grant.amount_max">
-                <dt class="text-sm font-medium text-gray-600 mb-1">Grant Amount</dt>
+                <dt class="text-sm font-medium text-gray-600 mb-1">{{ $t('grantDetail.grantAmount') }}</dt>
                 <dd class="text-lg font-semibold text-primary-600">
                   {{ formatAmount(grant.amount_min, grant.amount_max, grant.currency) }}
                 </dd>
                 <dd v-if="grant.funding_rate" class="text-sm text-gray-600 mt-1">
-                  Funding rate: {{ grant.funding_rate }}%
+                  {{ $t('grantDetail.fundingRateLabel', { rate: grant.funding_rate }) }}
                 </dd>
               </div>
 
               <!-- Deadline -->
               <div v-if="grant.deadline">
-                <dt class="text-sm font-medium text-gray-600 mb-1">Application Deadline</dt>
+                <dt class="text-sm font-medium text-gray-600 mb-1">{{ $t('grantDetail.applicationDeadline') }}</dt>
                 <dd :class="deadlineColor" class="text-base font-medium">
                   {{ formatDate(grant.deadline) }}
                 </dd>
                 <dd class="text-xs text-gray-500 mt-1">
-                  {{ daysUntilDeadline }} days remaining
+                  {{ $t('grantDetail.daysRemaining', { count: daysUntilDeadline }) }}
+                </dd>
+                <dd class="text-xs text-navy-400 mt-0.5 italic">
+                  {{ $t('grantDetail.timezoneNote') }}
                 </dd>
               </div>
 
               <!-- Eligible Countries -->
               <div v-if="eligibleCountries.length > 0">
-                <dt class="text-sm font-medium text-gray-600 mb-1">Eligible Countries</dt>
+                <dt class="text-sm font-medium text-gray-600 mb-1">{{ $t('grantDetail.eligibleCountries') }}</dt>
                 <dd class="flex flex-wrap gap-1">
                   <span v-for="country in eligibleCountries.slice(0, 5)" :key="country"
                     class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
@@ -200,14 +208,14 @@
                   </span>
                   <span v-if="eligibleCountries.length > 5"
                     class="px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded">
-                    +{{ eligibleCountries.length - 5 }} more
+                    {{ $t('grantDetail.moreCountries', { count: eligibleCountries.length - 5 }) }}
                   </span>
                 </dd>
               </div>
 
               <!-- Organization Types -->
               <div v-if="organizationTypes.length > 0">
-                <dt class="text-sm font-medium text-gray-600 mb-1">Organization Types</dt>
+                <dt class="text-sm font-medium text-gray-600 mb-1">{{ $t('grantDetail.organizationTypes') }}</dt>
                 <dd class="text-sm text-gray-700">
                   {{ organizationTypes.join(', ') }}
                 </dd>
@@ -215,7 +223,7 @@
 
               <!-- Topics -->
               <div v-if="topics.length > 0">
-                <dt class="text-sm font-medium text-gray-600 mb-1">Topics</dt>
+                <dt class="text-sm font-medium text-gray-600 mb-1">{{ $t('grantDetail.topics') }}</dt>
                 <dd class="flex flex-wrap gap-1">
                   <span v-for="topic in topics" :key="topic"
                     class="px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full">
@@ -228,7 +236,7 @@
 
           <!-- Actions -->
           <div class="card">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ $t('grantDetail.actions') }}</h3>
 
             <div class="space-y-3">
               <a
@@ -242,7 +250,7 @@
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                   </svg>
-                  View Official Page
+                  {{ $t('grantDetail.viewOfficialPage') }}
                 </div>
               </a>
 
@@ -255,7 +263,7 @@
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                   </svg>
-                  Start Application
+                  {{ $t('grantDetail.startApplication') }}
                 </div>
               </button>
 
@@ -264,7 +272,7 @@
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                   </svg>
-                  Export Details
+                  {{ $t('grantDetail.exportDetails') }}
                 </div>
               </button>
             </div>
@@ -272,20 +280,20 @@
 
           <!-- Source Information -->
           <div class="card bg-gray-50">
-            <h3 class="text-sm font-medium text-gray-600 mb-3">Source Information</h3>
+            <h3 class="text-sm font-medium text-gray-600 mb-3">{{ $t('grantDetail.sourceInfo') }}</h3>
             <div class="space-y-2 text-sm">
               <div class="flex items-center justify-between">
-                <span class="text-gray-600">Source:</span>
+                <span class="text-gray-600">{{ $t('grantDetail.source') }}</span>
                 <span class="font-medium text-gray-900">{{ grant.source_id }}</span>
               </div>
               <div v-if="grant.external_id" class="flex items-center justify-between">
-                <span class="text-gray-600">Reference ID:</span>
+                <span class="text-gray-600">{{ $t('grantDetail.referenceId') }}</span>
                 <span class="font-mono text-xs text-gray-900">{{ grant.external_id }}</span>
               </div>
               <div v-if="grant.confidence_score" class="flex items-center justify-between">
-                <span class="text-gray-600">Data Quality:</span>
+                <span class="text-gray-600">{{ $t('grantDetail.dataQuality') }}</span>
                 <div class="flex items-center gap-1">
-                  <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden" role="progressbar" :aria-valuenow="Math.round(grant.confidence_score * 100)" aria-valuemin="0" aria-valuemax="100">
                     <div
                       :style="{ width: `${grant.confidence_score * 100}%` }"
                       class="h-full bg-green-500"
@@ -306,12 +314,12 @@
                 </svg>
               </div>
               <div class="flex-1">
-                <h3 class="font-semibold text-gray-900 mb-1">Need Help?</h3>
+                <h3 class="font-semibold text-gray-900 mb-1">{{ $t('grantDetail.needHelp') }}</h3>
                 <p class="text-sm text-gray-700 mb-3">
-                  Our AI can help you understand requirements and prepare your application
+                  {{ $t('grantDetail.aiHelpDescription') }}
                 </p>
                 <button class="btn btn-primary text-sm w-full">
-                  Ask AI Assistant
+                  {{ $t('grantDetail.askAIAssistant') }}
                 </button>
               </div>
             </div>
@@ -325,27 +333,35 @@
       <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
       </svg>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">Grant not found</h3>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">{{ $t('grantDetail.grantNotFound') }}</h3>
       <p class="text-gray-600 mb-4">
-        The grant you're looking for doesn't exist or has been removed
+        {{ $t('grantDetail.grantNotFoundDesc') }}
       </p>
       <router-link to="/grants" class="btn btn-primary">
-        Back to Grants
+        {{ $t('grantDetail.backToGrants') }}
       </router-link>
     </div>
+    <ScrollToTop />
   </AppLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import AppLayout from '@/components/AppLayout.vue'
+import BreadcrumbNav from '@/components/BreadcrumbNav.vue'
+import ScrollToTop from '@/components/ScrollToTop.vue'
+import HelpTooltip from '@/components/HelpTooltip.vue'
 import api from '@/services/api'
+import { useToast } from '@/lib/useToast'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const authStore = useAuthStore()
+const toast = useToast()
 
 const loading = ref(true)
 const grant = ref<any>(null)
@@ -425,9 +441,9 @@ function formatAmount(min: number | null, max: number | null, currency: string =
   } else if (min) {
     return `${symbol}${(min / 1000).toFixed(0)}k+`
   } else if (max) {
-    return `Up to ${symbol}${(max / 1000).toFixed(0)}k`
+    return `${t('grantDetail.upTo')} ${symbol}${(max / 1000).toFixed(0)}k`
   }
-  return 'Amount not specified'
+  return t('grantDetail.amountNotSpecified')
 }
 
 function formatDate(dateStr: string) {
@@ -435,14 +451,15 @@ function formatDate(dateStr: string) {
   const now = new Date()
   const diffTime = date.getTime() - now.getTime()
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  const formatted = date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 
-  if (diffDays < 0) return date.toLocaleDateString() + ' (Closed)'
-  if (diffDays === 0) return 'Today'
-  if (diffDays === 1) return 'Tomorrow'
-  if (diffDays <= 7) return `${diffDays} days left (${date.toLocaleDateString()})`
-  if (diffDays <= 30) return `${Math.ceil(diffDays / 7)} weeks left (${date.toLocaleDateString()})`
+  if (diffDays < 0) return `${formatted} (${t('grantDetail.closed')})`
+  if (diffDays === 0) return `${formatted}, 23:59 UTC (${t('grantDetail.today')})`
+  if (diffDays === 1) return `${formatted}, 23:59 UTC (${t('grantDetail.tomorrow')})`
+  if (diffDays <= 7) return `${formatted}, 23:59 UTC (${t('grantDetail.daysLeft', { count: diffDays })})`
+  if (diffDays <= 30) return `${formatted}, 23:59 UTC (${t('grantDetail.weeksLeft', { count: Math.ceil(diffDays / 7) })})`
 
-  return date.toLocaleDateString()
+  return `${formatted} · UTC`
 }
 
 function toggleSave() {
@@ -450,9 +467,11 @@ function toggleSave() {
   const saved = JSON.parse(localStorage.getItem('savedGrants') || '[]')
   if (isSaved.value) {
     saved.push(grant.value.id)
+    toast.success(t('grantDetail.saved'))
   } else {
     const index = saved.indexOf(grant.value.id)
     if (index > -1) saved.splice(index, 1)
+    toast.info(t('grantDetail.removedFromSaved'))
   }
   localStorage.setItem('savedGrants', JSON.stringify(saved))
 }
@@ -488,6 +507,7 @@ async function fetchGrantDetails() {
   } catch (error) {
     console.error('Error fetching grant details:', error)
     grant.value = null
+    toast.error(t('errors.network'))
   } finally {
     loading.value = false
   }

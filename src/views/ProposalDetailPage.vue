@@ -1,14 +1,12 @@
 <template>
   <AppLayout>
     <div class="mb-8 animate-fade-in">
-      <router-link to="/proposals" class="text-navy-600 hover:text-navy-900 flex items-center gap-2 mb-4">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-        Back to Proposals
-      </router-link>
+      <BreadcrumbNav :crumbs="[
+        { label: $t('nav.proposals'), to: '/proposals' },
+        { label: proposal?.title || $t('common.loading') }
+      ]" />
       <h1 class="text-display-sm font-display text-navy-900 mb-2">
-        {{ proposal?.title || 'Loading...' }}
+        {{ proposal?.title || $t('common.loading') }}
       </h1>
     </div>
 
@@ -26,69 +24,69 @@
         <div class="flex items-center justify-between mb-4">
           <span :class="statusBadge(proposal.status)">{{ proposal.status }}</span>
           <span v-if="proposal.total_budget" class="font-semibold text-navy-900">
-            Budget: €{{ proposal.total_budget?.toLocaleString() }}
+            {{ $t('proposalDetail.budget') }} €{{ proposal.total_budget?.toLocaleString() }}
           </span>
         </div>
         <p class="text-sm text-navy-600">
-          Created: {{ formatDate(proposal.created_at) }}
+          {{ $t('proposalDetail.created') }} {{ formatDate(proposal.created_at) }}
         </p>
       </div>
 
       <!-- Outcome Recording (for submitted proposals) -->
       <div v-if="proposal.status === 'submitted'" class="card-premium border-2 border-amber-200 bg-amber-50">
-        <h3 class="font-semibold text-navy-900 mb-4">📊 Record Outcome</h3>
+        <h3 class="font-semibold text-navy-900 mb-4">📊 {{ $t('proposalDetail.recordOutcome') }}</h3>
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-navy-700 mb-2">Outcome</label>
+            <label class="block text-sm font-medium text-navy-700 mb-2">{{ $t('proposalDetail.outcome') }}</label>
             <select v-model="outcomeForm.outcome" class="input w-full">
-              <option value="">Select outcome...</option>
-              <option value="awarded">✅ Awarded</option>
-              <option value="shortlisted">📋 Shortlisted</option>
-              <option value="rejected">❌ Rejected</option>
-              <option value="withdrawn">🔙 Withdrawn</option>
-              <option value="pending">⏳ Pending</option>
+              <option value="">{{ $t('proposalDetail.selectOutcome') }}</option>
+              <option value="awarded">✅ {{ $t('proposalDetail.awarded') }}</option>
+              <option value="shortlisted">📋 {{ $t('proposalDetail.shortlisted') }}</option>
+              <option value="rejected">❌ {{ $t('proposalDetail.rejected') }}</option>
+              <option value="withdrawn">🔙 {{ $t('proposalDetail.withdrawn') }}</option>
+              <option value="pending">⏳ {{ $t('proposalDetail.pending') }}</option>
             </select>
           </div>
           <div v-if="outcomeForm.outcome === 'awarded'">
-            <label class="block text-sm font-medium text-navy-700 mb-2">Amount Awarded (€)</label>
+            <label class="block text-sm font-medium text-navy-700 mb-2">{{ $t('proposalDetail.amountAwarded') }}</label>
             <input v-model.number="outcomeForm.amountAwarded" type="number" class="input w-full" placeholder="50000" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-navy-700 mb-2">Feedback from Funder</label>
-            <textarea v-model="outcomeForm.feedbackFromFunder" class="input w-full" rows="2" placeholder="Any feedback received..."></textarea>
+            <label class="block text-sm font-medium text-navy-700 mb-2">{{ $t('proposalDetail.feedbackFromFunder') }}</label>
+            <textarea v-model="outcomeForm.feedbackFromFunder" class="input w-full" rows="2" :placeholder="$t('proposalDetail.feedbackPlaceholder')"></textarea>
           </div>
           <div>
-            <label class="block text-sm font-medium text-navy-700 mb-2">Lessons Learned</label>
-            <textarea v-model="outcomeForm.lessonsLearned" class="input w-full" rows="2" placeholder="What worked, what to improve..."></textarea>
+            <label class="block text-sm font-medium text-navy-700 mb-2">{{ $t('proposalDetail.lessonsLearned') }}</label>
+            <textarea v-model="outcomeForm.lessonsLearned" class="input w-full" rows="2" :placeholder="$t('proposalDetail.lessonsPlaceholder')"></textarea>
           </div>
-          <button 
-            @click="submitOutcome" 
+          <button
+            @click="submitOutcome"
             :disabled="!outcomeForm.outcome || submittingOutcome"
             class="btn btn-primary w-full"
             :class="{ 'opacity-50': !outcomeForm.outcome }"
           >
-            {{ submittingOutcome ? 'Saving...' : 'Save Outcome' }}
+            {{ submittingOutcome ? $t('proposalDetail.savingOutcome') : $t('proposalDetail.saveOutcome') }}
           </button>
         </div>
       </div>
 
       <!-- Sections -->
       <div v-if="sections.length > 0" class="space-y-4">
-        <h2 class="text-xl font-display font-semibold text-navy-900">Proposal Sections</h2>
+        <h2 class="text-xl font-display font-semibold text-navy-900">{{ $t('proposalDetail.proposalSections') }}</h2>
         <div v-for="section in sections" :key="section.section_type" class="card-premium">
           <h3 class="font-semibold text-navy-900 mb-3 capitalize">{{ section.section_type.replace('_', ' ') }}</h3>
           <div class="prose prose-navy max-w-none text-sm" v-html="formatMarkdown(section.content)"></div>
           <div class="mt-4 pt-4 border-t border-navy-100 flex justify-between text-xs text-navy-500">
-            <span>{{ section.word_count }} words</span>
-            <span>Generated by {{ section.ai_model_used }}</span>
+            <span>{{ section.word_count }} {{ $t('proposalDetail.words') }}</span>
+            <span>{{ $t('proposalDetail.generatedBy') }} {{ section.ai_model_used }}</span>
           </div>
         </div>
       </div>
 
       <!-- No sections yet -->
       <div v-else class="card-premium text-center py-8">
-        <p class="text-navy-600 mb-4">No sections generated yet.</p>
-        <button class="btn btn-primary">Generate AI Sections</button>
+        <p class="text-navy-600 mb-4">{{ $t('proposalDetail.noSectionsYet') }}</p>
+        <button class="btn btn-primary">{{ $t('proposalDetail.generateAISections') }}</button>
       </div>
     </div>
   </AppLayout>
@@ -98,11 +96,14 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import AppLayout from '@/components/AppLayout.vue'
+import BreadcrumbNav from '@/components/BreadcrumbNav.vue'
 import api from '@/services/api'
 import { useFeedback } from '@/lib/useFeedback'
+import { useToast } from '@/lib/useToast'
 
 const route = useRoute()
 const { trackPageView, recordOutcome } = useFeedback()
+const toast = useToast()
 
 const loading = ref(true)
 const proposal = ref<any>(null)
@@ -131,7 +132,7 @@ async function loadProposal() {
 
 async function submitOutcome() {
   if (!outcomeForm.value.outcome || !proposal.value) return
-  
+
   submittingOutcome.value = true
   try {
     await recordOutcome(proposal.value.id, outcomeForm.value.outcome as any, {
@@ -139,12 +140,12 @@ async function submitOutcome() {
       feedbackFromFunder: outcomeForm.value.feedbackFromFunder || undefined,
       lessonsLearned: outcomeForm.value.lessonsLearned || undefined
     })
-    alert('Outcome recorded successfully!')
+    toast.success('Outcome saved successfully')
     // Reload to show updated status
     await loadProposal()
   } catch (error) {
     console.error('Error recording outcome:', error)
-    alert('Failed to record outcome')
+    toast.error('Failed to save outcome. Please try again.')
   } finally {
     submittingOutcome.value = false
   }

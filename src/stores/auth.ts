@@ -33,23 +33,39 @@ export const useAuthStore = defineStore('auth', () => {
   // ACTIONS
   // =============================================================================
 
+  const initialized = ref(false)
+  const serviceUnavailable = ref(false)
+
   /**
    * Initialize auth state from stored session
+   * Gracefully handles Supabase being unreachable
    */
   async function initialize() {
-    const { data: { session: currentSession } } = await supabase.auth.getSession()
-    session.value = currentSession
-    user.value = currentSession?.user || null
+    if (initialized.value) return
 
-    // Listen for auth state changes
-    supabase.auth.onAuthStateChange((_event: string, newSession: Session | null) => {
-      session.value = newSession
-      user.value = newSession?.user || null
+    try {
+      const { data: { session: currentSession } } = await supabase.auth.getSession()
+      session.value = currentSession
+      user.value = currentSession?.user || null
+      serviceUnavailable.value = false
 
-      if (_event === 'SIGNED_OUT') {
-        error.value = null
-      }
-    })
+      // Listen for auth state changes
+      supabase.auth.onAuthStateChange((_event: string, newSession: Session | null) => {
+        session.value = newSession
+        user.value = newSession?.user || null
+
+        if (_event === 'SIGNED_OUT') {
+          error.value = null
+        }
+      })
+    } catch (err) {
+      console.warn('Auth service unavailable:', err)
+      serviceUnavailable.value = true
+      session.value = null
+      user.value = null
+    } finally {
+      initialized.value = true
+    }
   }
 
   /**
@@ -231,6 +247,8 @@ export const useAuthStore = defineStore('auth', () => {
     session,
     loading,
     error,
+    initialized,
+    serviceUnavailable,
 
     // Computed
     isAuthenticated,

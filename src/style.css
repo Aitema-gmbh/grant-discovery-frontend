@@ -27,6 +27,19 @@
   .btn {
     @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200;
     @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    min-height: 44px; /* WCAG touch target minimum */
+  }
+
+  .btn-sm {
+    @apply px-4 py-2 text-sm rounded-md;
+    min-height: 36px;
+  }
+
+  @media (max-width: 768px) {
+    .btn-sm {
+      min-height: 44px;
+      @apply px-4 py-2.5;
+    }
   }
 
   .btn-primary {
@@ -73,6 +86,7 @@
     @apply bg-white text-navy-900 placeholder-navy-400;
     @apply focus:border-navy-900 focus:ring-2 focus:ring-navy-900 focus:ring-opacity-20;
     @apply transition-all duration-200;
+    min-height: 44px; /* WCAG touch target minimum */
   }
 
   .input-lg {
@@ -81,7 +95,8 @@
 
   /* Badge Styles */
   .badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium;
+    min-height: 28px;
   }
 
   .badge-success {
@@ -297,6 +312,11 @@
 }
 
 @layer utilities {
+  /* Focus visible indicator for keyboard users */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2;
+  }
+
   /* Text shadows */
   .text-shadow-sm {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -341,5 +361,98 @@
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     @apply bg-navy-400;
+  }
+}
+
+/* Print Styles */
+@media print {
+  /* Hide non-essential UI elements */
+  nav,
+  footer,
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline,
+  .badge,
+  .hero-ukraine,
+  [role="navigation"],
+  [data-tour],
+  .fixed,
+  .sticky {
+    display: none !important;
+  }
+
+  /* Reset background and shadows for printing */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+
+  .card,
+  .card-premium,
+  .card-glass,
+  .card-ukraine,
+  .grant-card,
+  .grant-card-ukraine,
+  .stat-card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Ensure text is readable */
+  h1, h2, h3, h4, h5, h6 {
+    color: black !important;
+    page-break-after: avoid;
+  }
+
+  p, li, dd, dt, span {
+    color: #333 !important;
+  }
+
+  /* Show URLs for links */
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+    word-break: break-all;
+  }
+
+  a[href^="#"]::after,
+  a[href^="javascript"]::after {
+    content: "";
+  }
+
+  /* Grant detail: emphasize deadline */
+  [class*="deadline"],
+  [class*="Deadline"] {
+    font-size: 14pt !important;
+    font-weight: bold !important;
+  }
+
+  /* Full width layout */
+  .max-w-7xl,
+  .max-w-3xl,
+  .max-w-2xl {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  /* Show all truncated text */
+  .line-clamp-2,
+  .line-clamp-3,
+  .truncate {
+    -webkit-line-clamp: unset !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    white-space: normal !important;
+    display: block !important;
+  }
+
+  /* Page margins */
+  @page {
+    margin: 2cm;
   }
 }

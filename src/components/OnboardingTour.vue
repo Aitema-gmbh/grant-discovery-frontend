@@ -21,27 +21,30 @@
       <!-- Progress Bar -->
       <div class="h-1 bg-gray-200">
         <div
-          class="h-full bg-primary-600 transition-all duration-300"
+          class="h-full bg-amber-500 transition-all duration-300"
           :style="{ width: `${progress}%` }"
+          role="progressbar"
+          :aria-valuenow="currentStepIndex + 1"
+          :aria-valuemax="tourSteps.length"
         ></div>
       </div>
 
       <div class="p-6">
         <!-- Step Number -->
         <div class="flex items-center justify-between mb-4">
-          <span class="text-sm font-semibold text-primary-600">
-            Step {{ currentStepIndex + 1 }} of {{ steps.length }}
+          <span class="text-sm font-semibold text-amber-600">
+            {{ $t('onboarding.stepOf', { current: currentStepIndex + 1, total: tourSteps.length }) }}
           </span>
           <button
             @click="skip"
             class="text-sm text-gray-500 hover:text-gray-700"
           >
-            Skip tour
+            {{ $t('onboarding.skipTour') }}
           </button>
         </div>
 
         <!-- Title -->
-        <h3 class="text-xl font-bold text-gray-900 mb-3">
+        <h3 class="text-xl font-bold text-gray-900 mb-3 font-display">
           {{ currentStep.title }}
         </h3>
 
@@ -50,11 +53,6 @@
           {{ currentStep.description }}
         </p>
 
-        <!-- Image/GIF (optional) -->
-        <div v-if="currentStep.image" class="mb-6 rounded-lg overflow-hidden">
-          <img :src="currentStep.image" :alt="currentStep.title" class="w-full">
-        </div>
-
         <!-- Actions -->
         <div class="flex justify-between items-center">
           <button
@@ -62,24 +60,24 @@
             @click="previousStep"
             class="btn btn-outline"
           >
-            Back
+            {{ $t('common.back') }}
           </button>
           <div v-else></div>
 
           <div class="flex gap-2">
             <button
-              v-if="currentStepIndex < steps.length - 1"
+              v-if="currentStepIndex < tourSteps.length - 1"
               @click="nextStep"
               class="btn btn-primary"
             >
-              Next
+              {{ $t('common.next') }}
             </button>
             <button
               v-else
               @click="complete"
-              class="btn btn-primary"
+              class="btn btn-secondary"
             >
-              Get Started! 🚀
+              {{ $t('onboarding.getStarted') }}
             </button>
           </div>
         </div>
@@ -87,11 +85,12 @@
         <!-- Dots Navigation -->
         <div class="flex justify-center gap-2 mt-6">
           <button
-            v-for="(_step, index) in steps"
+            v-for="(_step, index) in tourSteps"
             :key="index"
             @click="goToStep(index)"
             class="w-2 h-2 rounded-full transition-all"
-            :class="index === currentStepIndex ? 'bg-primary-600 w-6' : 'bg-gray-300'"
+            :class="index === currentStepIndex ? 'bg-amber-500 w-6' : 'bg-gray-300'"
+            :aria-label="$t('onboarding.goToStep', { step: index + 1 })"
           ></button>
         </div>
       </div>
@@ -102,66 +101,54 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
+const { t } = useI18n()
 
 interface TourStep {
   title: string
   description: string
-  target?: string  // CSS selector of element to highlight
+  target?: string
   position?: 'top' | 'bottom' | 'left' | 'right'
-  image?: string
-  action?: () => void
 }
 
 const isActive = ref(false)
 const currentStepIndex = ref(0)
 
-const steps = ref<TourStep[]>([
+const tourSteps = computed<TourStep[]>(() => [
   {
-    title: '👋 Welcome to Grant Discovery!',
-    description: 'Your AI-powered platform for discovering and applying to funding opportunities. Let\'s take a quick tour to get you started.',
+    title: t('onboarding.steps.welcome.title'),
+    description: t('onboarding.steps.welcome.desc'),
     position: 'bottom'
   },
   {
-    title: '🎯 Create Your Organization Profile',
-    description: 'First, we\'ll help you create your CSO profile. This helps us match you with the most relevant grants based on your mission, location, and expertise.',
+    title: t('onboarding.steps.profile.title'),
+    description: t('onboarding.steps.profile.desc'),
     target: '[data-tour="cso-profile"]',
-    position: 'right'
+    position: 'bottom'
   },
   {
-    title: '🔍 Discover Grants',
-    description: 'Browse thousands of funding opportunities from 12+ sources including EU, US, and international foundations. Use advanced filters to find exactly what you need.',
+    title: t('onboarding.steps.grants.title'),
+    description: t('onboarding.steps.grants.desc'),
     target: '[data-tour="grants"]',
-    position: 'right'
+    position: 'bottom'
   },
   {
-    title: '✨ AI-Powered Matching',
-    description: 'Our AI analyzes grants and scores them based on 5 dimensions: semantic similarity, eligibility, thematic fit, budget match, and geography. Get personalized recommendations!',
+    title: t('onboarding.steps.matches.title'),
+    description: t('onboarding.steps.matches.desc'),
     target: '[data-tour="matches"]',
-    position: 'right'
+    position: 'bottom'
   },
   {
-    title: '📝 Write Proposals with AI',
-    description: 'Use our proposal writing suite with AI-powered section generation, budget calculator, and compliance checking to create winning applications.',
-    target: '[data-tour="proposals"]',
-    position: 'right'
-  },
-  {
-    title: '📅 Track Deadlines',
-    description: 'Never miss a deadline! Our calendar and notification system keeps you on track with all your applications.',
-    target: '[data-tour="deadlines"]',
-    position: 'right'
-  },
-  {
-    title: '🚀 Ready to Get Started?',
-    description: 'You\'re all set! Let\'s create your organization profile so we can start finding perfect grants for you.',
+    title: t('onboarding.steps.ready.title'),
+    description: t('onboarding.steps.ready.desc'),
     position: 'bottom'
   }
 ])
 
-const currentStep = computed(() => steps.value[currentStepIndex.value])
-const progress = computed(() => ((currentStepIndex.value + 1) / steps.value.length) * 100)
+const currentStep = computed(() => tourSteps.value[currentStepIndex.value])
+const progress = computed(() => ((currentStepIndex.value + 1) / tourSteps.value.length) * 100)
 
 const spotlightStyle = computed(() => {
   if (!currentStep.value?.target) {
@@ -185,7 +172,6 @@ const spotlightStyle = computed(() => {
 
 const cardStyle = computed(() => {
   if (!currentStep.value?.target) {
-    // Center on screen
     return {
       top: '50%',
       left: '50%',
@@ -203,38 +189,15 @@ const cardStyle = computed(() => {
   }
 
   const rect = element.getBoundingClientRect()
-  const position = currentStep.value.position || 'bottom'
-
-  switch (position) {
-    case 'bottom':
-      return {
-        top: `${rect.bottom + 20}px`,
-        left: `${rect.left}px`
-      }
-    case 'top':
-      return {
-        bottom: `${window.innerHeight - rect.top + 20}px`,
-        left: `${rect.left}px`
-      }
-    case 'right':
-      return {
-        top: `${rect.top}px`,
-        left: `${rect.right + 20}px`
-      }
-    case 'left':
-      return {
-        top: `${rect.top}px`,
-        right: `${window.innerWidth - rect.left + 20}px`
-      }
+  return {
+    top: `${rect.bottom + 20}px`,
+    left: `${Math.max(16, rect.left - 100)}px`
   }
 })
 
 function nextStep() {
-  if (currentStepIndex.value < steps.value.length - 1) {
+  if (currentStepIndex.value < tourSteps.value.length - 1) {
     currentStepIndex.value++
-    if (currentStep.value?.action) {
-      currentStep.value.action()
-    }
   }
 }
 
@@ -256,8 +219,7 @@ function skip() {
 function complete() {
   isActive.value = false
   localStorage.setItem('onboarding_completed', 'true')
-  // Redirect to CSO profile creation
-  router.push('/onboarding/setup')
+  router.push('/cso/create')
 }
 
 function startTour() {
@@ -273,7 +235,6 @@ defineExpose({
 })
 
 onMounted(() => {
-  // Auto-start tour for new users
   setTimeout(() => {
     startTour()
   }, 500)

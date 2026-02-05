@@ -26,6 +26,7 @@ export default {
         and: 'та',
         of: 'з',
         days: 'днів',
+        scrollToTop: 'Прокрутити вгору',
         day: 'день',
         thisMonth: 'цього місяця',
         noResults: 'Результатів не знайдено',
@@ -43,7 +44,12 @@ export default {
         settings: 'Налаштування',
         logout: 'Вийти',
         login: 'Увійти',
-        register: 'Реєстрація'
+        register: 'Реєстрація',
+        notifications: 'Сповіщення',
+        noNotifications: 'Сповіщень поки немає',
+        markAllRead: 'Позначити все як прочитане',
+        userMenu: 'Меню користувача',
+        mainNavigation: 'Головна навігація'
     },
 
     // Dashboard
@@ -62,6 +68,15 @@ export default {
         recentActivity: 'Остання активність',
         noRecentActivity: 'Активності поки немає',
         startBrowsing: 'Почніть переглядати гранти, щоб побачити активність тут',
+        emptyActivity: {
+            description: 'Ваша активність з перегляду грантів, збережень та підбору з\'являтиметься тут. Почніть досліджувати, щоб створити свою історію!',
+            setupProfile: 'Налаштувати профіль'
+        },
+        emptyDeadlines: {
+            title: 'Все чисто — немає найближчих дедлайнів',
+            description: 'Коли ви збережете гранти з дедлайнами, вони відстежуватимуться тут, щоб ви не пропустили вікно подання.',
+            browseGrants: 'Знайти гранти з дедлайнами'
+        },
         quickActions: 'Швидкі дії',
         browseGrants: 'Переглянути гранти',
         discoverOpportunities: 'Відкрийте нові можливості',
@@ -93,6 +108,7 @@ export default {
         newest: 'Найновіші',
         category: 'Категорія',
         allCategories: 'Усі категорії',
+        recentSearches: 'Останні',
         minAmount: 'Мін. сума',
         maxAmount: 'Макс. сума',
         deadlineAfter: 'Дедлайн після',
@@ -108,13 +124,84 @@ export default {
         eligibleCountries: 'Країни-учасники',
         organizationTypes: 'Типи організацій',
         noGrantsFound: 'Грантів не знайдено',
-        adjustFilters: 'Спробуйте змінити фільтри або пошуковий запит',
+        adjustFilters: 'Ми не знайшли можливостей фінансування за вашими критеріями. Спробуйте змінити фільтри або пошуковий запит.',
+        emptySearch: {
+            title: 'Немає результатів за вашим запитом',
+            description: 'Ми не знайшли грантів за запитом "{query}". Ось кілька порад:',
+            tip1: 'Спробуйте ширші або інші ключові слова',
+            tip2: 'Перевірте правопис у вашому запиті',
+            tip3: 'Спробуйте AI-пошук для кращих результатів',
+            tryAI: 'Спробувати AI-пошук'
+        },
+        emptyFilters: {
+            title: 'Жоден грант не відповідає вашим фільтрам',
+            description: 'Ваша поточна комбінація фільтрів занадто вузька. Спробуйте прибрати деякі фільтри або розширити критерії для більшої кількості результатів.'
+        },
+        emptyDefault: {
+            title: 'Наразі немає доступних грантів',
+            description: 'Нові можливості фінансування додаються регулярно. Перевірте пізніше або налаштуйте свій профіль для отримання сповіщень.',
+            goToDashboard: 'На головну панель'
+        },
         loadMore: 'Завантажити ще',
         openDeadline: 'Відкрито',
         closingSoon: 'Скоро закривається',
+        from: 'Від',
         upTo: 'До',
         programName: 'Програма',
-        description: 'Опис'
+        description: 'Опис',
+        aiSearchActive: 'Використовується семантичний пошук ШІ',
+        deadlineToday: 'Сьогодні!',
+        deadlineDaysLeft: '{days} дн.',
+        showingResults: 'Показано {from} - {to} з {total}',
+        filters: {
+            amount: 'Сума гранту (EUR)',
+            amountHint: 'Фільтр за мінімальною та максимальною сумою гранту',
+            min: 'Мін',
+            max: 'Макс',
+            anyDeadline: 'Будь-який дедлайн',
+            next7Days: 'Наступні 7 днів',
+            next14Days: 'Наступні 14 днів',
+            next30Days: 'Наступні 30 днів',
+            next90Days: 'Наступні 90 днів',
+            next6Months: 'Наступні 6 місяців',
+            country: 'Країна-учасник',
+            allCountries: 'Усі країни',
+            ukraine: 'Україна',
+            poland: 'Польща',
+            germany: 'Німеччина',
+            france: 'Франція',
+            usa: 'Сполучені Штати',
+            uk: 'Великобританія',
+            eu: 'Європейський Союз',
+            statusLabel: 'Статус',
+            allStatuses: 'Усі статуси',
+            statusOpen: 'Відкрито - Приймає заявки',
+            statusUpcoming: 'Скоро - Відкриється найближчим часом',
+            statusClosed: 'Закрито - Дедлайн минув',
+            active: 'Активні фільтри'
+        },
+        sort: {
+            relevance: 'Найбільш релевантні',
+            deadline: 'Дедлайн (найближчий)',
+            amount: 'Сума (найбільша)',
+            recent: 'Нещодавно додані'
+        },
+        sectors: {
+            humanitarian: 'Гуманітарна допомога',
+            education: 'Освіта',
+            democracy: 'Демократія',
+            environment: 'Довкілля',
+            culture: 'Культура',
+            health: 'Здоров\'я',
+            infrastructure: 'Інфраструктура',
+            economic: 'Економічний розвиток'
+        },
+        searchMode: 'Режим пошуку',
+        sortLabel: 'Сортувати результати',
+        viewMode: 'Режим перегляду',
+        gridView: 'Сітка',
+        listView: 'Список',
+        unsaveGrant: 'Видалити зі збережених'
     },
 
     // Grant Detail
@@ -142,7 +229,57 @@ export default {
         officialWebsite: 'Офіційний сайт',
         visitWebsite: 'Перейти на сайт',
         startProposal: 'Почати заявку',
-        generateWithAI: 'Згенерувати за допомогою ШІ'
+        generateWithAI: 'Згенерувати за допомогою ШІ',
+        grantsLabel: 'Грантові програми',
+        grantProgram: 'Грантова програма',
+        save: 'Зберегти',
+        saved: 'Збережено',
+        share: 'Поділитися',
+        deadlineLabel: 'Дедлайн:',
+        description: 'Опис',
+        aiSummary: 'ШІ-підсумок',
+        eligibilityCheck: 'Перевірка відповідності',
+        checkYourEligibility: 'Перевірте вашу відповідність',
+        basedOnCSOProfile: 'На основі вашого профілю ОГС',
+        runCheck: 'Перевірити',
+        signInForEligibility: 'Увійдіть, щоб перевірити відповідність для цього гранту',
+        signIn: 'Увійти',
+        similarGrants: 'Схожі гранти',
+        quickFacts: 'Ключова інформація',
+        grantAmount: 'Сума гранту',
+        fundingRateLabel: 'Рівень фінансування: {rate}%',
+        daysRemaining: '{count} днів залишилось',
+        timezoneNote: 'Дедлайни зазвичай о 23:59 UTC, якщо не зазначено інше',
+        moreCountries: '+{count} ще',
+        topics: 'Теми',
+        actions: 'Дії',
+        viewOfficialPage: 'Перейти на офіційну сторінку',
+        startApplication: 'Почати заявку',
+        exportDetails: 'Експортувати деталі',
+        sourceInfo: 'Інформація про джерело',
+        source: 'Джерело:',
+        referenceId: 'Референс ID:',
+        dataQuality: 'Якість даних:',
+        needHelp: 'Потрібна допомога?',
+        aiHelpDescription: 'Наш ШІ допоможе вам зрозуміти вимоги та підготувати заявку',
+        askAIAssistant: 'Запитати ШІ-помічника',
+        grantNotFound: 'Грант не знайдено',
+        grantNotFoundDesc: 'Грант, який ви шукаєте, не існує або був видалений',
+        amountNotSpecified: 'Сума не вказана',
+        open: 'Відкритий',
+        upcoming: 'Незабаром',
+        closed: 'Закритий',
+        today: 'Сьогодні',
+        tomorrow: 'Завтра',
+        daysLeft: '{count} днів залишилось',
+        weeksLeft: '{count} тижнів залишилось',
+        eligibleCountries: 'Країни-учасниці',
+        organizationTypes: 'Типи організацій',
+        removedFromSaved: 'Видалено зі збережених грантів',
+        help: {
+            aiSummary: 'Це резюме створено ШІ на основі опису гранту. Воно виділяє ключові моменти для швидкої оцінки відповідності.',
+            eligibility: 'Перевірка відповідності порівнює профіль вашої організації (країна, тип, бюджет) з вимогами гранту.'
+        }
     },
 
     // Matches
@@ -158,7 +295,36 @@ export default {
         noMatches: 'Збігів не знайдено',
         createProfile: 'Створіть профіль організації, щоб побачити збіги',
         matchScore: 'Оцінка збігу',
-        basedOn: 'На основі вашого профілю'
+        basedOn: 'На основі вашого профілю',
+        chooseOrg: 'Оберіть організацію...',
+        semantic: 'Семантична',
+        eligibilityScore: 'Відповідність',
+        thematic: 'Тематична',
+        budgetFit: 'Бюджетна відповідність',
+        eligible: 'Відповідає',
+        checkEligibility: 'Перевірити відповідність',
+        selectAnOrg: 'Оберіть організацію',
+        selectAnOrgDesc: 'Оберіть одну з ваших організацій вище, щоб знайти відповідні гранти на основі вашого профілю.',
+        createOrgFirst: 'Спочатку створіть організацію',
+        createOrgFirstDesc: 'Щоб побачити відповідні гранти, потрібно створити профіль ОГС, який описує вашу організацію.',
+        createOrganization: 'Створити організацію',
+        noMatchesDesc: 'Ми не змогли знайти відповідні гранти для цієї організації наразі. Ось що ви можете зробити:',
+        emptyTips: {
+            tip1: 'Додайте більше напрямків діяльності у профіль вашої організації',
+            tip2: 'Оновіть діапазон бюджету та розмір команди для кращого підбору',
+            tip3: 'Нові гранти додаються регулярно — перевірте через кілька днів',
+            updateProfile: 'Оновити профіль',
+            browseManually: 'Переглянути всі гранти'
+        },
+        unknownProgram: 'Невідома програма',
+        noDescription: 'Опис недоступний',
+        overallScore: 'Загальна оцінка відповідності',
+        help: {
+            semantic: 'Наскільки ваша місія та діяльність збігаються з описом гранту, проаналізовано ШІ.',
+            eligibility: 'Чи відповідає ваша організація формальним вимогам — країна, тип організації, бюджет.',
+            thematic: 'Наскільки ваші фокусні напрямки перетинаються з темами гранту.',
+            budgetFit: 'Чи підходять ваш річний бюджет та сума гранту один одному.'
+        }
     },
 
     // Organizations / CSO
@@ -179,7 +345,45 @@ export default {
         website: 'Веб-сайт',
         email: 'Контактна електронна пошта',
         noOrganizations: 'Організацій ще немає',
-        addFirst: 'Додайте свою першу організацію, щоб почати'
+        addFirst: 'Додайте свою першу організацію, щоб почати',
+        aiQuickSetup: 'ШІ-швидке налаштування',
+        manualSetup: 'Ручне налаштування',
+        active: 'Активна',
+        noDescription: 'Без опису',
+        experience: 'Досвід:',
+        notSpecified: 'Не вказано',
+        findMatches: 'Знайти гранти',
+        createFirst: 'Створіть перший профіль ОГС, щоб почати знаходити відповідні гранти та можливості фінансування.',
+        createFirstOrg: 'Створити першу організацію'
+    },
+
+    // CSO Detail
+    csoDetail: {
+        about: 'Про цю організацію',
+        quickFacts: 'Основні факти',
+        matchedGrants: 'Найкращі відповідні гранти',
+        noMatchesYet: 'Відповідності ще не розраховані',
+        runMatching: 'Запустити AI-підбір →',
+        registered: 'Зареєстровано в',
+        operatingIn: 'Працює в',
+        grantExperience: 'Досвід з грантами',
+        languages: 'Мови',
+        targetGroups: 'Цільові групи',
+        memberSince: 'Учасник з',
+        notFound: 'Організацію не знайдено',
+        notFoundDesc: 'Цей профіль організації не існує або був видалений.',
+        backToOrgs: 'Назад до організацій'
+    },
+
+    // CSO Create
+    csoCreate: {
+        title: 'Створити профіль організації',
+        subtitle: 'Оберіть спосіб налаштування профілю вашої організації',
+        smartTitle: 'Розумне налаштування',
+        smartDesc: 'Вставте URL вашого сайту — ШІ автоматично витягне дані про організацію.',
+        manualTitle: 'Ручне налаштування',
+        manualDesc: 'Заповніть дані організації крок за кроком через наш покроковий майстер.',
+        recommended: 'Рекомендовано'
     },
 
     // Proposals
@@ -196,7 +400,12 @@ export default {
         lastEdited: 'Останнє редагування',
         targetGrant: 'Цільовий грант',
         noProposals: 'Заявок ще немає',
-        startFirst: 'Почніть свою першу заявку'
+        startFirst: 'Почніть свою першу заявку',
+        created: 'Створено',
+        aiGenerate: 'ШІ-генерація',
+        view: 'Переглянути',
+        noProposalsDesc: 'Почніть заявку, знайшовши відповідний грант та натиснувши "Створити заявку".',
+        browseGrants: 'Переглянути гранти'
     },
 
     // Onboarding
@@ -215,7 +424,33 @@ export default {
         teamSizeRange: 'Яка чисельність вашої команди?',
         congratulations: 'Вітаємо!',
         profileComplete: 'Ваш профіль готовий. Починайте шукати гранти!',
-        goToDashboard: 'Перейти до панелі керування'
+        goToDashboard: 'Перейти до панелі керування',
+        stepOf: 'Крок {current} з {total}',
+        skipTour: 'Пропустити тур',
+        getStarted: 'Почати!',
+        goToStep: 'Перейти до кроку {step}',
+        steps: {
+            welcome: {
+                title: 'Ласкаво просимо до Grants Bridge Ukraine!',
+                desc: 'Ваша платформа з ШІ для пошуку та подання заявок на грантове фінансування. Давайте покажемо вам навколо.'
+            },
+            profile: {
+                title: 'Створіть профіль організації',
+                desc: 'Налаштуйте профіль вашої ОГС, щоб ми могли підібрати найрелевантніші гранти на основі вашої місії, розташування та досвіду.'
+            },
+            grants: {
+                title: 'Знайдіть гранти',
+                desc: 'Переглядайте можливості фінансування з різних джерел. Використовуйте текстовий або ШІ-семантичний пошук.'
+            },
+            matches: {
+                title: 'ШІ-підбір грантів',
+                desc: 'Наш ШІ оцінює гранти за семантичною схожістю, відповідністю вимогам, тематичним збігом та бюджетом. Отримуйте персональні рекомендації!'
+            },
+            ready: {
+                title: 'Готові почати?',
+                desc: 'Створіть профіль організації, щоб активувати ШІ-підбір та знайти ідеальні гранти для вашої місії.'
+            }
+        }
     },
 
     // Auth
@@ -231,7 +466,68 @@ export default {
         signUp: 'Зареєструватися',
         signIn: 'Увійти',
         orContinueWith: 'Або продовжити з',
-        termsAgree: 'Я погоджуюся з Умовами використання та Політикою конфіденційності'
+        termsAgree: 'Я погоджуюся з Умовами використання та Політикою конфіденційності',
+        signInSubtitle: 'Увійдіть, щоб отримати доступ до можливостей фінансування',
+        emailPlaceholder: 'ви@організація.org',
+        rememberMe: 'Запам\'ятати мене на 30 днів',
+        signInButton: 'Увійти до панелі керування',
+        signingIn: 'Вхід...',
+        googleSignIn: 'Увійти через Google',
+        createAccount: 'Створити безкоштовний акаунт',
+        securityNote: 'Захищено шифруванням промислового стандарту',
+        trustedBy: 'Довіряють понад 500 організацій громадянського суспільства по всьому світу',
+        serviceUnavailable: 'Сервіс авторизації тимчасово недоступний',
+        serviceUnavailableDesc: 'Ви все ще можете переглядати гранти без входу. Вхід буде доступний найближчим часом.',
+        browseGrantsInstead: 'Переглянути гранти',
+        registerTitle: 'Приєднуйтесь до Grants Bridge Ukraine',
+        registerSubtitle: 'Підключіть вашу українську організацію до можливостей фінансування',
+        fullName: "Повне ім'я",
+        fullNamePlaceholder: 'Іван Петренко',
+        passwordHint: 'Мінімум 8 символів з поєднанням літер та цифр',
+        passwordsDontMatch: 'Паролі не збігаються',
+        accountCreated: 'Акаунт створено! Перевірте електронну пошту для підтвердження.',
+        goToLogin: 'Перейти до входу',
+        orSignUpWith: 'Або зареєструватися через',
+        googleSignUp: 'Зареєструватися через Google',
+        creatingAccount: 'Створення акаунту...',
+        dataSecure: 'Ваші дані зашифровані та захищені',
+        joinOrgs: 'Приєднуйтесь до 500+ організацій, які знаходять фінансування',
+        termsPrefix: 'Я погоджуюся з',
+        termsOfService: 'Умовами використання',
+        privacyPolicy: 'Політикою конфіденційності'
+    },
+
+    // Settings
+    settings: {
+        title: 'Налаштування',
+        description: 'Керуйте налаштуваннями вашого акаунту',
+        language: 'Мова',
+        languageDescription: 'Оберіть бажану мову',
+        notifications: 'Сповіщення',
+        comingSoon: 'Скоро буде',
+        account: 'Акаунт',
+        changePassword: 'Змінити пароль',
+        deleteAccount: 'Видалити акаунт',
+        notificationsRoadmap: 'Ми працюємо над email-сповіщеннями, щоб тримати вас в курсі нових грантів та дедлайнів.',
+        accountRoadmap: 'Функції керування обліковим записом, такі як зміна пароля та експорт даних, розробляються.',
+        notifGrantMatches: 'Сповіщення про нові відповідні гранти',
+        notifWeeklyDigest: 'Щотижневий огляд збережених грантів',
+        notifDeadlineReminders: 'Нагадування про дедлайни'
+    },
+
+    // Profile
+    profile: {
+        title: 'Профіль',
+        description: 'Інформація про ваш акаунт',
+        noName: 'Ім\'я не вказано',
+        email: 'Електронна пошта',
+        memberId: 'ID учасника',
+        memberSince: 'Учасник з',
+        lastLogin: 'Останній вхід',
+        editSettings: 'Редагувати налаштування',
+        logout: 'Вийти',
+        notLoggedIn: 'Не авторизовано',
+        pleaseLogin: 'Будь ласка, увійдіть, щоб переглянути свій профіль'
     },
 
     // Feedback
@@ -264,6 +560,23 @@ export default {
         deadline: 'Останній термін подачі заявки'
     },
 
+    // Offline
+    offline: {
+        banner: 'Ви офлайн. Деякі функції можуть бути недоступні.'
+    },
+
+    // Validation
+    validation: {
+        emailInvalid: 'Будь ласка, введіть дійсну електронну адресу',
+        passwordTooShort: 'Пароль занадто короткий',
+        passwordMin8: 'Пароль повинен містити щонайменше 8 символів',
+        nameTooShort: "Ім'я повинно містити щонайменше 2 символи",
+        strengthWeak: 'Слабкий — додайте цифри або символи',
+        strengthFair: 'Середній — спробуйте додати великі літери',
+        strengthGood: 'Добрий — майже готово!',
+        strengthStrong: 'Надійний пароль'
+    },
+
     // Errors
     errors: {
         generic: 'Щось пішло не так. Будь ласка, спробуйте ще раз.',
@@ -271,5 +584,236 @@ export default {
         notFound: 'Сторінку не знайдено',
         unauthorized: 'Будь ласка, увійдіть, щоб продовжити',
         forbidden: 'У вас немає доступу до цього'
+    },
+
+    // Setup Wizard
+    setup: {
+        welcomeTitle: 'Ласкаво просимо до Grant Discovery!',
+        welcomeSubtitle: 'Налаштуємо все за кілька хвилин',
+        steps: {
+            aboutYou: 'Про вас',
+            organization: 'Організація',
+            focusAreas: 'Напрямки',
+            budgetSize: 'Бюджет',
+            preferences: 'Налаштування'
+        },
+        step1: {
+            title: 'Розкажіть про себе',
+            subtitle: 'Ми використаємо це для персоналізації вашого досвіду',
+            yourName: "Ваше ім'я",
+            email: 'Електронна пошта',
+            roleInOrg: 'Роль в організації',
+            selectRole: 'Оберіть роль',
+            executiveDirector: 'Виконавчий директор',
+            programManager: 'Програмний менеджер',
+            fundraisingManager: 'Менеджер з фандрейзингу',
+            grantsOfficer: 'Грантовий менеджер',
+            other: 'Інше',
+            hearAboutUs: 'Як ви дізнались про нас?',
+            selectSource: 'Оберіть джерело',
+            googleSearch: 'Пошук Google',
+            socialMedia: 'Соціальні мережі',
+            colleagueRec: 'Рекомендація колеги',
+            conferenceEvent: 'Конференція/Захід'
+        },
+        step2: {
+            title: 'Про вашу організацію',
+            subtitle: 'Це допоможе знайти найбільш релевантні гранти',
+            orgName: 'Назва організації',
+            orgNamePlaceholder: 'напр., Фонд демократії України',
+            orgType: 'Тип організації',
+            selectType: 'Оберіть тип',
+            ngo: 'Неурядова організація (НУО)',
+            foundation: 'Фонд',
+            association: 'Асоціація',
+            cooperative: 'Кооператив',
+            socialEnterprise: 'Соціальне підприємство',
+            research: 'Науково-дослідна установа',
+            university: 'Університет',
+            regCountry: 'Країна реєстрації',
+            selectCountry: 'Оберіть країну',
+            website: "Вебсайт (необов'язково)"
+        },
+        step3: {
+            title: 'В яких сферах ви працюєте?',
+            subtitle: 'Оберіть усі, що підходять - це допоможе знайти відповідні гранти',
+            democracy: 'Демократія',
+            humanRights: 'Права людини',
+            civilSociety: 'Громадянське суспільство',
+            education: 'Освіта',
+            health: "Здоров'я",
+            environment: 'Довкілля',
+            genderEquality: 'Гендерна рівність',
+            youth: 'Молодь',
+            mediaFreedom: 'Свобода ЗМІ',
+            artsCulture: 'Мистецтво та культура',
+            peaceBuilding: 'Миробудівництво',
+            development: 'Розвиток'
+        },
+        step4: {
+            title: 'Розмір організації та бюджет',
+            subtitle: 'Це допоможе рекомендувати гранти відповідно до вашого потенціалу',
+            annualBudget: 'Річний бюджет (EUR)',
+            selectBudget: 'Оберіть діапазон бюджету',
+            under50k: 'До €50 000',
+            range50k200k: '€50 000 - €200 000',
+            range200k500k: '€200 000 - €500 000',
+            range500k1m: '€500 000 - €1 000 000',
+            over1m: 'Понад €1 000 000',
+            staffMembers: 'Кількість співробітників',
+            selectStaff: 'Оберіть розмір команди',
+            staff1to5: '1-5 осіб',
+            staff6to20: '6-20 осіб',
+            staff21to50: '21-50 осіб',
+            staff51to100: '51-100 осіб',
+            staff100plus: 'Понад 100 осіб',
+            grantExperience: 'Досвід роботи з грантами',
+            beginner: 'Початківець',
+            beginnerDesc: 'Перші гранти',
+            intermediate: 'Середній',
+            intermediateDesc: '1-5 грантів',
+            experienced: 'Досвідчений',
+            experiencedDesc: '5+ грантів',
+            preferredGrantSize: 'Бажаний розмір гранту (EUR)'
+        },
+        step5: {
+            title: 'Майже готово!',
+            subtitle: 'Ще кілька налаштувань для персоналізації',
+            whatHelp: 'З чим вам потрібна допомога? (Оберіть усі, що підходять)',
+            findingGrants: 'Пошук релевантних грантів',
+            writingProposals: 'Написання заявок',
+            creatingBudgets: 'Створення бюджетів',
+            trackingDeadlines: 'Відстеження дедлайнів',
+            addSampleData: 'Додати демонстраційні дані для ознайомлення (рекомендовано для нових користувачів)',
+            emailNotifications: 'Надсилати сповіщення про нові відповідні гранти',
+            whatYouGet: 'Що ви отримаєте після налаштування:',
+            benefit1: 'Персоналізовані рекомендації грантів на основі вашого профілю',
+            benefit2: 'Доступ до 12+ міжнародних джерел грантів',
+            benefit3: 'ШІ-підбір з детальними оцінками',
+            benefit4: 'Інструменти для написання заявок та шаблони',
+            benefit5: 'Відстеження дедлайнів та сповіщення',
+            benefitSample: 'Демонстраційні гранти та заявки для ознайомлення'
+        },
+        back: '← Назад',
+        continue: 'Далі →',
+        creatingProfile: 'Створення вашого профілю...',
+        completeSetup: 'Завершити налаштування',
+        needHelp: 'Потрібна допомога?',
+        contactSupport: 'Звʼязатися з підтримкою'
+    },
+
+    // Smart Onboarding
+    smartOnboarding: {
+        title: 'ШІ-розумне налаштування',
+        subtitle: 'Просто вкажіть назву організації - наш ШІ зробить решту',
+        orgName: 'Назва організації',
+        orgNamePlaceholder: 'напр., Фонд відбудови України',
+        website: 'Вебсайт',
+        websiteOptional: "(необов'язково - для кращої точності)",
+        websitePlaceholder: 'www.your-organization.org',
+        websiteHint: 'Введіть з або без https://',
+        country: 'Країна',
+        generateButton: 'Створити профіль за допомогою ШІ',
+        aiAnalyzing: 'ШІ аналізує...',
+        howItWorks: 'Як це працює',
+        howItWorksDesc: 'Наш ШІ проаналізує вашу організацію та автоматично заповнить напрямки діяльності, цільові групи, рівень досвіду тощо. Ви зможете переглянути та відредагувати перед збереженням.',
+        aiConfidence: '{percent}% впевненість ШІ',
+        readyToSave: 'Готово до збереження',
+        description: 'Опис',
+        mission: 'Місія',
+        focusAreas: 'Напрямки діяльності',
+        targetGroups: 'Цільові групи',
+        experience: 'Досвід',
+        budgetRange: 'Діапазон бюджету',
+        languages: 'Мови',
+        operatingIn: 'Діє в',
+        goBack: '← Назад',
+        saveAndContinue: 'Зберегти та продовжити',
+        saving: 'Збереження...'
+    },
+
+    // Proposal Wizard
+    proposalWizard: {
+        title: 'Почати заявку',
+        steps: {
+            selectOrg: 'Обрати організацію',
+            chooseSections: 'Обрати розділи',
+            generate: 'Генерація'
+        },
+        step1: {
+            title: 'Оберіть організацію',
+            subtitle: 'Оберіть профіль ОГС для цієї заявки',
+            noCSOProfiles: 'Ви ще не створили жодного профілю ОГС',
+            createCSOProfile: 'Створити профіль ОГС',
+            continue: 'Продовжити'
+        },
+        step2: {
+            title: 'Оберіть розділи для генерації',
+            subtitle: 'Оберіть, які розділи заявки має створити ШІ',
+            objectives: 'Цілі проєкту',
+            objectivesDesc: 'Цілі та очікувані результати проєкту',
+            methodology: 'Методологія',
+            methodologyDesc: 'Підхід та стратегія реалізації',
+            impact: 'Очікуваний вплив',
+            impactDesc: 'Довгострокові ефекти та сталість',
+            workPlan: 'Робочий план',
+            workPlanDesc: 'Графік та етапи',
+            budgetNarrative: 'Бюджетний наратив',
+            budgetNarrativeDesc: 'Обґрунтування бюджетних статей',
+            sustainability: 'Сталість',
+            sustainabilityDesc: 'Довгострокова життєздатність після фінансування',
+            background: 'Про організацію',
+            backgroundDesc: 'Експертиза та досвід вашої організації',
+            partners: 'Партнери',
+            partnersDesc: 'Партнерські організації та їхні ролі',
+            recommended: 'Рекомендовано',
+            back: 'Назад',
+            generateSections: 'Згенерувати {count} розділів'
+        },
+        step3: {
+            title: 'Генерація вашої заявки',
+            subtitle: 'ШІ пише розділи заявки. Це може зайняти кілька хвилин.',
+            overallProgress: 'Загальний прогрес',
+            complete: 'Завершено',
+            generating: 'Генерація...',
+            waiting: 'Очікування',
+            generationComplete: 'Генерацію завершено!',
+            generationCompleteDesc: 'Розділи вашої заявки успішно згенеровано.',
+            viewProposal: 'Переглянути заявку'
+        }
+    },
+
+    // Proposal Detail
+    proposalDetail: {
+        backToProposals: 'Назад до заявок',
+        budget: 'Бюджет:',
+        created: 'Створено:',
+        recordOutcome: 'Записати результат',
+        outcome: 'Результат',
+        selectOutcome: 'Оберіть результат...',
+        awarded: 'Схвалено',
+        shortlisted: 'У шорт-листі',
+        rejected: 'Відхилено',
+        withdrawn: 'Відкликано',
+        pending: 'На розгляді',
+        amountAwarded: 'Присуджена сума (€)',
+        feedbackFromFunder: 'Відгук від донора',
+        feedbackPlaceholder: 'Будь-який отриманий відгук...',
+        lessonsLearned: 'Отримані уроки',
+        lessonsPlaceholder: 'Що спрацювало, що покращити...',
+        saveOutcome: 'Зберегти результат',
+        savingOutcome: 'Збереження...',
+        proposalSections: 'Розділи заявки',
+        noSectionsYet: 'Розділів ще не згенеровано.',
+        generateAISections: 'Згенерувати ШІ-розділи',
+        words: 'слів',
+        generatedBy: 'Згенеровано'
+    },
+
+    // Not Found
+    notFound: {
+        title: '404',
+        message: 'Сторінку не знайдено',
+        goHome: 'На головну'
     }
 }

@@ -5,10 +5,10 @@
       <div class="absolute inset-0 bg-gradient-to-r from-blue-50 via-amber-50 to-blue-50 rounded-3xl opacity-50"></div>
       <div class="relative p-8 animate-fade-in">
         <h2 class="text-display-sm font-display text-navy-900 gradient-text">
-          🇺🇦 Welcome back, {{ displayName }}!
+          🇺🇦 {{ $t('dashboard.welcome', { name: displayName }) }}
         </h2>
         <p class="mt-3 text-lg text-navy-600 font-sans">
-          Connecting Ukrainian civil society with global funding opportunities
+          {{ $t('dashboard.subtitle') }}
         </p>
       </div>
     </div>
@@ -23,9 +23,9 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
-          <span class="badge badge-warning">Live</span>
+          <span class="badge badge-warning">{{ $t('dashboard.live') }}</span>
         </div>
-        <div class="stat-label">Active Grants</div>
+        <div class="stat-label">{{ $t('dashboard.activeGrants') }}</div>
         <div class="stat-value">
           {{ stats.activeGrants !== null ? stats.activeGrants.toLocaleString() : '...' }}
         </div>
@@ -34,7 +34,7 @@
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"/>
             </svg>
-            +{{ stats.activeGrantsChange || 12 }}% this month
+            {{ $t('dashboard.changeThisMonth', { percent: stats.activeGrantsChange || 12 }) }}
           </span>
         </p>
       </div>
@@ -47,14 +47,14 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
-          <span class="badge badge-success">AI</span>
+          <span class="badge badge-success">{{ $t('dashboard.ai') }}</span>
         </div>
-        <div class="stat-label">Matched Grants</div>
+        <div class="stat-label">{{ $t('dashboard.matchedGrants') }}</div>
         <div class="stat-value">
           {{ stats.matchedGrants !== null ? stats.matchedGrants.toLocaleString() : '...' }}
         </div>
         <p class="mt-2 text-sm text-navy-500">
-          Based on your organization profile
+          {{ $t('dashboard.basedOnProfile') }}
         </p>
       </div>
 
@@ -66,14 +66,14 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
             </svg>
           </div>
-          <span class="badge badge-info">Profile</span>
+          <span class="badge badge-info">{{ $t('dashboard.profile') }}</span>
         </div>
-        <div class="stat-label">My Organizations</div>
+        <div class="stat-label">{{ $t('dashboard.myOrganizations') }}</div>
         <div class="stat-value">
           {{ stats.csoProfiles !== null ? stats.csoProfiles : '...' }}
         </div>
         <p class="mt-2 text-sm text-navy-500">
-          CSO profiles configured
+          {{ $t('dashboard.csoProfilesConfigured') }}
         </p>
       </div>
 
@@ -85,14 +85,14 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
           </div>
-          <span class="badge badge-warning">Urgent</span>
+          <span class="badge badge-warning">{{ $t('dashboard.urgent') }}</span>
         </div>
-        <div class="stat-label">Deadlines Soon</div>
+        <div class="stat-label">{{ $t('dashboard.deadlinesSoon') }}</div>
         <div class="stat-value">
           {{ stats.upcomingDeadlines !== null ? stats.upcomingDeadlines : '...' }}
         </div>
         <p class="mt-2 text-sm text-amber-600 font-medium">
-          Next 30 days
+          {{ $t('dashboard.next30Days') }}
         </p>
       </div>
     </div>
@@ -103,23 +103,28 @@
       <div class="lg:col-span-2">
         <div class="card animate-slide-up" style="animation-delay: 0.1s">
           <div class="section-header">
-            <h3 class="section-title">Recent Activity</h3>
+            <h3 class="section-title">{{ $t('dashboard.recentActivity') }}</h3>
             <button class="link text-sm">
-              View all →
+              {{ $t('common.viewAll') }} →
             </button>
           </div>
 
           <div v-if="recentActivity.length === 0" class="text-center py-12">
-            <div class="w-16 h-16 mx-auto mb-4 bg-navy-100 rounded-full flex items-center justify-center">
-              <svg class="w-8 h-8 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            <div class="w-16 h-16 mx-auto mb-4 bg-amber-100 rounded-full flex items-center justify-center">
+              <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
               </svg>
             </div>
-            <p class="text-lg font-medium text-navy-700">No recent activity yet</p>
-            <p class="text-sm text-navy-500 mt-2">Start browsing grants to see activity here</p>
-            <router-link to="/grants" class="btn btn-primary inline-flex mt-6">
-              Browse Grants
-            </router-link>
+            <p class="text-lg font-medium text-navy-700">{{ $t('dashboard.noRecentActivity') }}</p>
+            <p class="text-sm text-navy-500 mt-2 max-w-sm mx-auto">{{ $t('dashboard.emptyActivity.description') }}</p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center mt-6">
+              <router-link to="/grants" class="btn btn-primary">
+                {{ $t('dashboard.browseGrants') }}
+              </router-link>
+              <router-link to="/onboarding/setup" class="btn btn-outline">
+                {{ $t('dashboard.emptyActivity.setupProfile') }}
+              </router-link>
+            </div>
           </div>
 
           <div v-else class="space-y-3">
@@ -148,7 +153,7 @@
       <div class="space-y-8">
         <!-- Quick Actions -->
         <div class="card animate-slide-up" style="animation-delay: 0.2s">
-          <h3 class="section-title mb-6">Quick Actions</h3>
+          <h3 class="section-title mb-6">{{ $t('dashboard.quickActions') }}</h3>
           <div class="space-y-3">
             <router-link to="/grants"
               class="block p-4 bg-gradient-to-br from-amber-50 to-amber-100 hover:shadow-glow-amber rounded-xl transition-all duration-300 group border border-amber-200">
@@ -159,8 +164,8 @@
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <p class="font-semibold text-navy-900 group-hover:text-amber-800 transition-colors">Browse Grants</p>
-                  <p class="text-sm text-navy-600">Discover new opportunities</p>
+                  <p class="font-semibold text-navy-900 group-hover:text-amber-800 transition-colors">{{ $t('dashboard.browseGrants') }}</p>
+                  <p class="text-sm text-navy-600">{{ $t('dashboard.discoverOpportunities') }}</p>
                 </div>
               </div>
             </router-link>
@@ -174,8 +179,8 @@
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <p class="font-semibold text-navy-900 group-hover:text-sage-800 transition-colors">Create CSO Profile</p>
-                  <p class="text-sm text-navy-600">Set up your organization</p>
+                  <p class="font-semibold text-navy-900 group-hover:text-sage-800 transition-colors">{{ $t('dashboard.createCSOProfile') }}</p>
+                  <p class="text-sm text-navy-600">{{ $t('dashboard.setupOrganization') }}</p>
                 </div>
               </div>
             </router-link>
@@ -189,8 +194,8 @@
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <p class="font-semibold text-navy-900 group-hover:text-navy-700 transition-colors">View Matches</p>
-                  <p class="text-sm text-navy-600">AI-matched grants for you</p>
+                  <p class="font-semibold text-navy-900 group-hover:text-navy-700 transition-colors">{{ $t('dashboard.viewMatches') }}</p>
+                  <p class="text-sm text-navy-600">{{ $t('dashboard.aiMatchedGrants') }}</p>
                 </div>
               </div>
             </router-link>
@@ -200,21 +205,24 @@
         <!-- Upcoming Deadlines List -->
         <div class="card animate-slide-up" style="animation-delay: 0.3s">
           <div class="flex items-center justify-between mb-6">
-            <h3 class="section-title">Upcoming Deadlines</h3>
+            <h3 class="section-title">{{ $t('dashboard.upcomingDeadlines') }}</h3>
             <HelpTooltip
-              content="Grants with deadlines in the next 30 days"
+              :content="$t('dashboard.next30Days')"
               position="left"
             />
           </div>
 
           <div v-if="upcomingDeadlinesList.length === 0" class="text-center py-8">
-            <div class="w-12 h-12 mx-auto mb-3 bg-navy-100 rounded-full flex items-center justify-center">
-              <svg class="w-6 h-6 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            <div class="w-12 h-12 mx-auto mb-3 bg-sage-100 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-sage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
             </div>
-            <p class="text-sm text-navy-600 font-medium">No upcoming deadlines</p>
-            <p class="text-xs text-navy-400 mt-1">Saved grants will appear here</p>
+            <p class="text-sm text-navy-600 font-medium">{{ $t('dashboard.emptyDeadlines.title') }}</p>
+            <p class="text-xs text-navy-400 mt-1 max-w-xs mx-auto">{{ $t('dashboard.emptyDeadlines.description') }}</p>
+            <router-link to="/grants" class="inline-flex items-center gap-1 text-sm font-medium text-amber-600 hover:text-amber-700 mt-3 transition-colors">
+              {{ $t('dashboard.emptyDeadlines.browseGrants') }} →
+            </router-link>
           </div>
 
           <div v-else class="space-y-3">
@@ -233,9 +241,9 @@
                 </div>
                 <div class="text-right">
                   <p class="text-xs font-bold" :class="deadlineTextClass(deadline.daysLeft)">
-                    {{ deadline.daysLeft }} days
+                    {{ deadline.daysLeft }} {{ $t('common.days') }}
                   </p>
-                  <p class="text-xs text-navy-400 font-mono">{{ deadline.date }}</p>
+                  <p class="text-xs text-navy-400 font-mono">{{ deadline.date }} · UTC</p>
                 </div>
               </div>
             </div>
@@ -247,29 +255,37 @@
     <!-- Charts Section (if we have data) -->
     <div v-if="stats.activeGrants && stats.activeGrants > 0" class="mt-12 animate-fade-in" style="animation-delay: 0.4s">
       <div class="card-premium">
-        <h3 class="section-title mb-6">Grant Discovery Trends</h3>
+        <h3 class="section-title mb-6">{{ $t('dashboard.grantTrends') }}</h3>
         <div class="h-64 flex items-center justify-center">
           <div class="text-center">
             <svg class="w-16 h-16 mx-auto mb-4 text-navy-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
             </svg>
-            <p class="text-lg font-medium text-navy-600">Chart visualization coming soon</p>
-            <p class="text-sm text-navy-400 mt-1">Track your grant discovery progress over time</p>
+            <p class="text-lg font-medium text-navy-600">{{ $t('dashboard.chartComingSoon') }}</p>
+            <p class="text-sm text-navy-400 mt-1">{{ $t('dashboard.trackProgress') }}</p>
           </div>
         </div>
       </div>
     </div>
+    <!-- Onboarding Tour (auto-starts for new users) -->
+    <OnboardingTour />
   </AppLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import AppLayout from '@/components/AppLayout.vue'
 import HelpTooltip from '@/components/HelpTooltip.vue'
+import OnboardingTour from '@/components/OnboardingTour.vue'
 import api from '@/services/api'
+import { useToast } from '@/lib/useToast'
+
+const toast = useToast()
 
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 // Stats
 const stats = ref({
@@ -371,7 +387,7 @@ async function fetchDashboardData() {
 
   } catch (error) {
     console.error('Error fetching dashboard data:', error)
-    // Set default values on error
+    toast.error(t('errors.network'))
     stats.value.activeGrants = 0
     stats.value.matchedGrants = 0
     stats.value.csoProfiles = 0
@@ -385,7 +401,6 @@ onMounted(async () => {
   // Check if user just completed onboarding
   const urlParams = new URLSearchParams(window.location.search)
   if (urlParams.get('welcome') === 'true') {
-    // Could show a welcome celebration modal here
     console.log('Welcome! Onboarding completed successfully!')
   }
 })

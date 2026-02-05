@@ -8,9 +8,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
         </div>
-        <h1 class="text-display-sm font-display text-navy-900 mb-3">AI Smart Onboarding</h1>
+        <h1 class="text-display-sm font-display text-navy-900 mb-3">{{ $t('smartOnboarding.title') }}</h1>
         <p class="text-navy-600 text-lg">
-          Just tell us your organization name - our AI will do the rest ✨
+          {{ $t('smartOnboarding.subtitle') }}
         </p>
       </div>
 
@@ -20,12 +20,12 @@
           <!-- Organization Name -->
           <div>
             <label class="block text-sm font-medium text-navy-700 mb-2">
-              Organization Name *
+              {{ $t('smartOnboarding.orgName') }} *
             </label>
             <input
               v-model="orgName"
               type="text"
-              placeholder="e.g., Rebuild Ukraine Foundation"
+              :placeholder="$t('smartOnboarding.orgNamePlaceholder')"
               class="input-premium w-full text-lg py-3"
               :disabled="loading"
               required
@@ -35,31 +35,31 @@
           <!-- Website (Optional) -->
           <div>
             <label class="block text-sm font-medium text-navy-700 mb-2">
-              Website
-              <span class="text-navy-400 font-normal">(optional - for better accuracy)</span>
+              {{ $t('smartOnboarding.website') }}
+              <span class="text-navy-400 font-normal">{{ $t('smartOnboarding.websiteOptional') }}</span>
             </label>
             <input
               v-model="website"
               type="text"
-              placeholder="www.your-organization.org"
+              :placeholder="$t('smartOnboarding.websitePlaceholder')"
               class="input-premium w-full"
               :disabled="loading"
               @blur="normalizeWebsite"
             />
-            <p class="text-xs text-navy-400 mt-1">Enter with or without https://</p>
+            <p class="text-xs text-navy-400 mt-1">{{ $t('smartOnboarding.websiteHint') }}</p>
           </div>
 
           <!-- Country -->
           <div>
             <label class="block text-sm font-medium text-navy-700 mb-2">
-              Country
+              {{ $t('smartOnboarding.country') }}
             </label>
             <select v-model="country" class="input-premium w-full" :disabled="loading">
-              <option value="UA">🇺🇦 Ukraine</option>
-              <option value="PL">🇵🇱 Poland</option>
-              <option value="DE">🇩🇪 Germany</option>
-              <option value="GE">🇬🇪 Georgia</option>
-              <option value="MD">🇲🇩 Moldova</option>
+              <option value="UA">Ukraine</option>
+              <option value="PL">Poland</option>
+              <option value="DE">Germany</option>
+              <option value="GE">Georgia</option>
+              <option value="MD">Moldova</option>
               <option value="OTHER">Other</option>
             </select>
           </div>
@@ -75,13 +75,13 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
               </svg>
-              AI is analyzing...
+              {{ $t('smartOnboarding.aiAnalyzing') }}
             </template>
             <template v-else>
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              Generate Profile with AI
+              {{ $t('smartOnboarding.generateButton') }}
             </template>
           </button>
         </form>
@@ -93,10 +93,9 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div class="text-sm text-blue-800">
-              <p class="font-medium">How it works</p>
+              <p class="font-medium">{{ $t('smartOnboarding.howItWorks') }}</p>
               <p class="mt-1 text-blue-600">
-                Our AI will analyze your organization and automatically fill in focus areas,
-                target groups, experience level, and more. You can review and edit before saving.
+                {{ $t('smartOnboarding.howItWorksDesc') }}
               </p>
             </div>
           </div>
@@ -107,14 +106,14 @@
       <div v-else-if="step === 'preview' && generatedProfile" class="animate-fade-in">
         <!-- Confidence Badge -->
         <div class="flex justify-center mb-6">
-          <div 
+          <div
             class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
             :class="confidenceBadgeClass"
           >
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812z" clip-rule="evenodd" />
             </svg>
-            {{ Math.round(confidence * 100) }}% AI Confidence
+            {{ $t('smartOnboarding.aiConfidence', { percent: Math.round(confidence * 100) }) }}
             <span class="text-xs opacity-75">({{ sourcesUsed.join(', ') }})</span>
           </div>
         </div>
@@ -126,27 +125,27 @@
               <h2 class="text-2xl font-display font-bold text-navy-900">{{ generatedProfile.name }}</h2>
               <p class="text-navy-500">{{ generatedProfile.org_type }} • {{ generatedProfile.headquarters_country }}</p>
             </div>
-            <span class="badge badge-success">Ready to save</span>
+            <span class="badge badge-success">{{ $t('smartOnboarding.readyToSave') }}</span>
           </div>
 
           <!-- Description -->
           <div class="mb-6">
-            <h3 class="text-sm font-medium text-navy-500 mb-2">Description</h3>
+            <h3 class="text-sm font-medium text-navy-500 mb-2">{{ $t('smartOnboarding.description') }}</h3>
             <p class="text-navy-700">{{ generatedProfile.description }}</p>
           </div>
 
           <!-- Mission -->
           <div v-if="generatedProfile.mission_statement" class="mb-6">
-            <h3 class="text-sm font-medium text-navy-500 mb-2">Mission</h3>
+            <h3 class="text-sm font-medium text-navy-500 mb-2">{{ $t('smartOnboarding.mission') }}</h3>
             <p class="text-navy-700 italic">{{ generatedProfile.mission_statement }}</p>
           </div>
 
           <!-- Focus Areas -->
           <div class="mb-6">
-            <h3 class="text-sm font-medium text-navy-500 mb-2">Focus Areas</h3>
+            <h3 class="text-sm font-medium text-navy-500 mb-2">{{ $t('smartOnboarding.focusAreas') }}</h3>
             <div class="flex flex-wrap gap-2">
-              <span 
-                v-for="area in generatedProfile.focus_areas" 
+              <span
+                v-for="area in generatedProfile.focus_areas"
                 :key="area"
                 class="px-3 py-1 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 rounded-full text-sm font-medium"
               >
@@ -157,10 +156,10 @@
 
           <!-- Target Groups -->
           <div v-if="generatedProfile.target_groups?.length" class="mb-6">
-            <h3 class="text-sm font-medium text-navy-500 mb-2">Target Groups</h3>
+            <h3 class="text-sm font-medium text-navy-500 mb-2">{{ $t('smartOnboarding.targetGroups') }}</h3>
             <div class="flex flex-wrap gap-2">
-              <span 
-                v-for="group in generatedProfile.target_groups" 
+              <span
+                v-for="group in generatedProfile.target_groups"
                 :key="group"
                 class="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-sm font-medium"
               >
@@ -172,19 +171,19 @@
           <!-- Grid Info -->
           <div class="grid grid-cols-2 gap-4 pt-6 border-t border-navy-100">
             <div>
-              <h3 class="text-xs font-medium text-navy-400 uppercase tracking-wide">Experience</h3>
+              <h3 class="text-xs font-medium text-navy-400 uppercase tracking-wide">{{ $t('smartOnboarding.experience') }}</h3>
               <p class="text-navy-900 font-medium">{{ generatedProfile.grant_experience_level }}</p>
             </div>
             <div>
-              <h3 class="text-xs font-medium text-navy-400 uppercase tracking-wide">Budget Range</h3>
+              <h3 class="text-xs font-medium text-navy-400 uppercase tracking-wide">{{ $t('smartOnboarding.budgetRange') }}</h3>
               <p class="text-navy-900 font-medium">{{ formatBudget(generatedProfile.estimated_budget_range) }}</p>
             </div>
             <div>
-              <h3 class="text-xs font-medium text-navy-400 uppercase tracking-wide">Languages</h3>
+              <h3 class="text-xs font-medium text-navy-400 uppercase tracking-wide">{{ $t('smartOnboarding.languages') }}</h3>
               <p class="text-navy-900 font-medium">{{ generatedProfile.working_languages?.join(', ') }}</p>
             </div>
             <div>
-              <h3 class="text-xs font-medium text-navy-400 uppercase tracking-wide">Operating In</h3>
+              <h3 class="text-xs font-medium text-navy-400 uppercase tracking-wide">{{ $t('smartOnboarding.operatingIn') }}</h3>
               <p class="text-navy-900 font-medium">{{ generatedProfile.operating_countries?.join(', ') }}</p>
             </div>
           </div>
@@ -197,7 +196,7 @@
             class="btn btn-secondary flex-1 py-3"
             :disabled="saving"
           >
-            ← Go Back
+            {{ $t('smartOnboarding.goBack') }}
           </button>
           <button
             @click="saveProfile"
@@ -209,13 +208,13 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
               </svg>
-              Saving...
+              {{ $t('smartOnboarding.saving') }}
             </template>
             <template v-else>
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              Save & Continue
+              {{ $t('smartOnboarding.saveAndContinue') }}
             </template>
           </button>
         </div>

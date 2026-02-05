@@ -26,6 +26,7 @@ export default {
         and: 'and',
         of: 'of',
         days: 'days',
+        scrollToTop: 'Scroll to top',
         day: 'day',
         thisMonth: 'this month',
         noResults: 'No results found',
@@ -43,7 +44,12 @@ export default {
         settings: 'Settings',
         logout: 'Logout',
         login: 'Login',
-        register: 'Register'
+        register: 'Register',
+        notifications: 'Notifications',
+        noNotifications: 'No notifications yet',
+        markAllRead: 'Mark all as read',
+        userMenu: 'User menu',
+        mainNavigation: 'Main navigation'
     },
 
     // Dashboard
@@ -62,6 +68,15 @@ export default {
         recentActivity: 'Recent Activity',
         noRecentActivity: 'No recent activity yet',
         startBrowsing: 'Start browsing grants to see activity here',
+        emptyActivity: {
+            description: 'Your grant browsing, saves, and match activity will appear here. Start exploring to build your history!',
+            setupProfile: 'Set Up Profile'
+        },
+        emptyDeadlines: {
+            title: 'All clear — no upcoming deadlines',
+            description: 'When you save grants with deadlines, they\'ll be tracked here so you never miss a submission window.',
+            browseGrants: 'Find grants with deadlines'
+        },
         quickActions: 'Quick Actions',
         browseGrants: 'Browse Grants',
         discoverOpportunities: 'Discover new opportunities',
@@ -93,6 +108,7 @@ export default {
         newest: 'Newest',
         category: 'Category',
         allCategories: 'All Categories',
+        recentSearches: 'Recent',
         minAmount: 'Min Amount',
         maxAmount: 'Max Amount',
         deadlineAfter: 'Deadline After',
@@ -108,13 +124,85 @@ export default {
         eligibleCountries: 'Eligible Countries',
         organizationTypes: 'Organization Types',
         noGrantsFound: 'No grants found',
-        adjustFilters: 'Try adjusting your filters or search terms',
+        adjustFilters: 'We couldn\'t find any funding opportunities matching your criteria. Try adjusting your filters or search terms.',
+        emptySearch: {
+            title: 'No results for your search',
+            description: 'We couldn\'t find grants matching "{query}". Here are some tips:',
+            tip1: 'Try broader or different keywords',
+            tip2: 'Check for typos in your search',
+            tip3: 'Try AI search for smarter results',
+            tryAI: 'Try AI Search'
+        },
+        emptyFilters: {
+            title: 'No grants match your filters',
+            description: 'Your current filter combination is too narrow. Try removing some filters or broadening your criteria to see more results.'
+        },
+        emptyDefault: {
+            title: 'No grants available right now',
+            description: 'New funding opportunities are added regularly. Check back soon or set up your profile to receive notifications.',
+            goToDashboard: 'Go to Dashboard'
+        },
         loadMore: 'Load More',
         openDeadline: 'Open',
         closingSoon: 'Closing Soon',
+        from: 'From',
         upTo: 'Up to',
         programName: 'Program',
-        description: 'Description'
+        description: 'Description',
+        aiSearchActive: 'Using AI semantic search',
+        deadlineToday: 'Today!',
+        deadlineDaysLeft: '{days}d left',
+        showingResults: 'Showing {from} - {to} of {total}',
+        filters: {
+            amount: 'Grant Amount (EUR)',
+            amountHint: 'Filter by minimum and maximum grant amount',
+            min: 'Min',
+            max: 'Max',
+            anyDeadline: 'Any deadline',
+            next7Days: 'Next 7 days',
+            next14Days: 'Next 14 days',
+            next30Days: 'Next 30 days',
+            next90Days: 'Next 90 days',
+            next6Months: 'Next 6 months',
+            country: 'Eligible Country',
+            allCountries: 'All countries',
+            ukraine: 'Ukraine',
+            poland: 'Poland',
+            germany: 'Germany',
+            france: 'France',
+            usa: 'United States',
+            uk: 'United Kingdom',
+            eu: 'European Union',
+            statusLabel: 'Status',
+            allStatuses: 'All statuses',
+            statusOpen: 'Open - Accepting applications',
+            statusUpcoming: 'Upcoming - Opens soon',
+            statusClosed: 'Closed - Deadline passed',
+            active: 'Active filters'
+        },
+        sort: {
+            relevance: 'Most Relevant',
+            deadline: 'Deadline (Soonest)',
+            amount: 'Amount (Highest)',
+            recent: 'Recently Added'
+        },
+        sectors: {
+            humanitarian: 'Humanitarian',
+            education: 'Education',
+            democracy: 'Democracy',
+            environment: 'Environment',
+            culture: 'Culture',
+            health: 'Health',
+            infrastructure: 'Infrastructure',
+            economic: 'Economic Development'
+        },
+        // Accessibility labels
+        searchMode: 'Search mode',
+        sortLabel: 'Sort results',
+        viewMode: 'View mode',
+        gridView: 'Grid view',
+        listView: 'List view',
+        unsaveGrant: 'Remove from saved'
     },
 
     // Grant Detail
@@ -142,7 +230,57 @@ export default {
         officialWebsite: 'Official Website',
         visitWebsite: 'Visit Website',
         startProposal: 'Start Proposal',
-        generateWithAI: 'Generate with AI'
+        generateWithAI: 'Generate with AI',
+        grantsLabel: 'Grants',
+        grantProgram: 'Grant Program',
+        save: 'Save',
+        saved: 'Saved',
+        share: 'Share',
+        deadlineLabel: 'Deadline:',
+        description: 'Description',
+        aiSummary: 'AI Summary',
+        eligibilityCheck: 'Eligibility Check',
+        checkYourEligibility: 'Check your eligibility',
+        basedOnCSOProfile: 'Based on your CSO profile',
+        runCheck: 'Run Check',
+        signInForEligibility: 'Sign in to check your eligibility for this grant',
+        signIn: 'Sign In',
+        similarGrants: 'Similar Grants',
+        quickFacts: 'Quick Facts',
+        grantAmount: 'Grant Amount',
+        fundingRateLabel: 'Funding rate: {rate}%',
+        daysRemaining: '{count} days remaining',
+        timezoneNote: 'Deadlines are typically at 23:59 UTC unless stated otherwise',
+        moreCountries: '+{count} more',
+        topics: 'Topics',
+        actions: 'Actions',
+        viewOfficialPage: 'View Official Page',
+        startApplication: 'Start Application',
+        exportDetails: 'Export Details',
+        sourceInfo: 'Source Information',
+        source: 'Source:',
+        referenceId: 'Reference ID:',
+        dataQuality: 'Data Quality:',
+        needHelp: 'Need Help?',
+        aiHelpDescription: 'Our AI can help you understand requirements and prepare your application',
+        askAIAssistant: 'Ask AI Assistant',
+        grantNotFound: 'Grant not found',
+        grantNotFoundDesc: "The grant you're looking for doesn't exist or has been removed",
+        amountNotSpecified: 'Amount not specified',
+        open: 'Open',
+        upcoming: 'Upcoming',
+        closed: 'Closed',
+        today: 'Today',
+        tomorrow: 'Tomorrow',
+        daysLeft: '{count} days left',
+        weeksLeft: '{count} weeks left',
+        eligibleCountries: 'Eligible Countries',
+        organizationTypes: 'Organization Types',
+        removedFromSaved: 'Removed from saved grants',
+        help: {
+            aiSummary: 'This summary was generated by AI based on the grant description. It highlights key points to help you quickly assess relevance.',
+            eligibility: 'The eligibility check compares your CSO profile (country, org type, budget) against the grant requirements to identify potential issues.'
+        }
     },
 
     // Matches
@@ -158,7 +296,36 @@ export default {
         noMatches: 'No matches found',
         createProfile: 'Create an organization profile to see matches',
         matchScore: 'Match Score',
-        basedOn: 'Based on your profile'
+        basedOn: 'Based on your profile',
+        chooseOrg: 'Choose an organization...',
+        semantic: 'Semantic',
+        eligibilityScore: 'Eligibility',
+        thematic: 'Thematic',
+        budgetFit: 'Budget Fit',
+        eligible: 'Eligible',
+        checkEligibility: 'Check eligibility',
+        selectAnOrg: 'Select an organization',
+        selectAnOrgDesc: 'Choose one of your organizations above to discover matching grants based on your profile.',
+        createOrgFirst: 'Create an organization first',
+        createOrgFirstDesc: 'To see matched grants, you need to create a CSO profile that describes your organization.',
+        createOrganization: 'Create organization',
+        noMatchesDesc: "We couldn't find suitable grants for this organization right now. Here's what you can do:",
+        emptyTips: {
+            tip1: 'Add more focus areas to your organization profile',
+            tip2: 'Update your budget range and team size for better matching',
+            tip3: 'New grants are added regularly — check back in a few days',
+            updateProfile: 'Update Profile',
+            browseManually: 'Browse All Grants'
+        },
+        unknownProgram: 'Unknown program',
+        noDescription: 'No description available',
+        overallScore: 'Overall match score',
+        help: {
+            semantic: 'How closely your mission and activities align with the grant description, analyzed by AI.',
+            eligibility: 'Whether your organization meets the formal requirements like country, org type, and budget range.',
+            thematic: 'How well your focus areas and sectors overlap with the grant topics.',
+            budgetFit: 'Whether your annual budget and the grant amount are a good fit for each other.'
+        }
     },
 
     // Organizations / CSO
@@ -179,7 +346,45 @@ export default {
         website: 'Website',
         email: 'Contact Email',
         noOrganizations: 'No organizations yet',
-        addFirst: 'Add your first organization to get started'
+        addFirst: 'Add your first organization to get started',
+        aiQuickSetup: 'AI Quick Setup',
+        manualSetup: 'Manual Setup',
+        active: 'Active',
+        noDescription: 'No description',
+        experience: 'Experience:',
+        notSpecified: 'Not specified',
+        findMatches: 'Find matches',
+        createFirst: 'Create your first CSO profile to start discovering matching grants and funding opportunities.',
+        createFirstOrg: 'Create your first organization'
+    },
+
+    // CSO Detail
+    csoDetail: {
+        about: 'About This Organization',
+        quickFacts: 'Quick Facts',
+        matchedGrants: 'Top Matched Grants',
+        noMatchesYet: 'No matches calculated yet',
+        runMatching: 'Run AI matching →',
+        registered: 'Registered In',
+        operatingIn: 'Operating In',
+        grantExperience: 'Grant Experience',
+        languages: 'Languages',
+        targetGroups: 'Target Groups',
+        memberSince: 'Member Since',
+        notFound: 'Organization not found',
+        notFoundDesc: 'This organization profile doesn\'t exist or has been removed.',
+        backToOrgs: 'Back to Organizations'
+    },
+
+    // CSO Create
+    csoCreate: {
+        title: 'Create Organization Profile',
+        subtitle: 'Choose how you want to set up your organization profile',
+        smartTitle: 'Smart Setup',
+        smartDesc: 'Paste your website URL and let AI extract your organization details automatically.',
+        manualTitle: 'Manual Setup',
+        manualDesc: 'Fill in your organization details step by step using our guided wizard.',
+        recommended: 'Recommended'
     },
 
     // Proposals
@@ -196,7 +401,12 @@ export default {
         lastEdited: 'Last Edited',
         targetGrant: 'Target Grant',
         noProposals: 'No proposals yet',
-        startFirst: 'Start your first proposal'
+        startFirst: 'Start your first proposal',
+        created: 'Created',
+        aiGenerate: 'AI Generate',
+        view: 'View',
+        noProposalsDesc: 'Start a proposal by finding a matching grant and clicking "Create Proposal".',
+        browseGrants: 'Browse grants'
     },
 
     // Onboarding
@@ -215,14 +425,41 @@ export default {
         teamSizeRange: 'How large is your team?',
         congratulations: 'Congratulations!',
         profileComplete: 'Your profile is complete. Start discovering grants!',
-        goToDashboard: 'Go to Dashboard'
+        goToDashboard: 'Go to Dashboard',
+        // Tour
+        stepOf: 'Step {current} of {total}',
+        skipTour: 'Skip tour',
+        getStarted: 'Get Started!',
+        goToStep: 'Go to step {step}',
+        steps: {
+            welcome: {
+                title: 'Welcome to Grants Bridge Ukraine!',
+                desc: 'Your AI-powered platform for discovering and applying to funding opportunities. Let us show you around.'
+            },
+            profile: {
+                title: 'Create Your Organization Profile',
+                desc: 'Set up your CSO profile so we can match you with the most relevant grants based on your mission, location, and expertise.'
+            },
+            grants: {
+                title: 'Discover Grants',
+                desc: 'Browse funding opportunities from multiple sources. Use text or AI-powered semantic search to find exactly what you need.'
+            },
+            matches: {
+                title: 'AI-Powered Matching',
+                desc: 'Our AI scores grants based on semantic similarity, eligibility, thematic fit, and budget match. Get personalized recommendations!'
+            },
+            ready: {
+                title: 'Ready to Get Started?',
+                desc: 'Create your organization profile to unlock AI matching and start finding the perfect grants for your mission.'
+            }
+        }
     },
 
     // Auth
     auth: {
         login: 'Login',
         register: 'Register',
-        email: 'Email',
+        email: 'Email address',
         password: 'Password',
         confirmPassword: 'Confirm Password',
         forgotPassword: 'Forgot password?',
@@ -231,7 +468,68 @@ export default {
         signUp: 'Sign Up',
         signIn: 'Sign In',
         orContinueWith: 'Or continue with',
-        termsAgree: 'I agree to the Terms of Service and Privacy Policy'
+        termsAgree: 'I agree to the Terms of Service and Privacy Policy',
+        signInSubtitle: 'Sign in to connect with funding opportunities',
+        emailPlaceholder: 'you@organization.org',
+        rememberMe: 'Remember me for 30 days',
+        signInButton: 'Sign in to Dashboard',
+        signingIn: 'Signing in...',
+        googleSignIn: 'Sign in with Google',
+        createAccount: 'Create free account',
+        securityNote: 'Secured with industry-standard encryption',
+        trustedBy: 'Trusted by 500+ civil society organizations worldwide',
+        serviceUnavailable: 'Authentication service is temporarily unavailable',
+        serviceUnavailableDesc: 'You can still browse grants without signing in. Login will be available again shortly.',
+        browseGrantsInstead: 'Browse grants instead',
+        registerTitle: 'Join Grants Bridge Ukraine',
+        registerSubtitle: 'Connect your Ukrainian organization with funding opportunities',
+        fullName: 'Full name',
+        fullNamePlaceholder: 'Jane Smith',
+        passwordHint: 'Must be at least 8 characters with a mix of letters and numbers',
+        passwordsDontMatch: "Passwords don't match",
+        accountCreated: 'Account created! Please check your email to verify your account.',
+        goToLogin: 'Go to Login',
+        orSignUpWith: 'Or sign up with',
+        googleSignUp: 'Sign up with Google',
+        creatingAccount: 'Creating account...',
+        dataSecure: 'Your data is encrypted and secure',
+        joinOrgs: 'Join 500+ organizations finding funding opportunities',
+        termsPrefix: 'I agree to the',
+        termsOfService: 'Terms of Service',
+        privacyPolicy: 'Privacy Policy'
+    },
+
+    // Settings
+    settings: {
+        title: 'Settings',
+        description: 'Manage your account preferences',
+        language: 'Language',
+        languageDescription: 'Choose your preferred language',
+        notifications: 'Notifications',
+        comingSoon: 'Coming soon',
+        account: 'Account',
+        changePassword: 'Change Password',
+        deleteAccount: 'Delete Account',
+        notificationsRoadmap: 'We are working on email notifications to keep you updated on new grants and deadlines.',
+        accountRoadmap: 'Account management features like password changes and data export are being developed.',
+        notifGrantMatches: 'Email notifications for new grant matches',
+        notifWeeklyDigest: 'Weekly digest of saved grants',
+        notifDeadlineReminders: 'Deadline reminders'
+    },
+
+    // Profile
+    profile: {
+        title: 'Profile',
+        description: 'Your account information',
+        noName: 'No name set',
+        email: 'Email',
+        memberId: 'Member ID',
+        memberSince: 'Member since',
+        lastLogin: 'Last login',
+        editSettings: 'Edit Settings',
+        logout: 'Logout',
+        notLoggedIn: 'Not logged in',
+        pleaseLogin: 'Please log in to view your profile'
     },
 
     // Feedback
@@ -271,5 +569,253 @@ export default {
         notFound: 'Page not found',
         unauthorized: 'Please login to continue',
         forbidden: 'You do not have permission to access this'
+    },
+
+    // Setup Wizard
+    setup: {
+        welcomeTitle: 'Welcome to Grant Discovery!',
+        welcomeSubtitle: "Let's get you set up in just a few minutes",
+        steps: {
+            aboutYou: 'About You',
+            organization: 'Organization',
+            focusAreas: 'Focus Areas',
+            budgetSize: 'Budget & Size',
+            preferences: 'Preferences'
+        },
+        step1: {
+            title: 'Tell us about yourself',
+            subtitle: "We'll use this to personalize your experience",
+            yourName: 'Your Name',
+            email: 'Email',
+            roleInOrg: 'Role in Organization',
+            selectRole: 'Select your role',
+            executiveDirector: 'Executive Director',
+            programManager: 'Program Manager',
+            fundraisingManager: 'Fundraising Manager',
+            grantsOfficer: 'Grants Officer',
+            other: 'Other',
+            hearAboutUs: 'How did you hear about us?',
+            selectSource: 'Select source',
+            googleSearch: 'Google Search',
+            socialMedia: 'Social Media',
+            colleagueRec: 'Colleague Recommendation',
+            conferenceEvent: 'Conference/Event'
+        },
+        step2: {
+            title: 'About your organization',
+            subtitle: 'This helps us find the most relevant grants for you',
+            orgName: 'Organization Name',
+            orgNamePlaceholder: 'e.g., Ukrainian Democracy Foundation',
+            orgType: 'Organization Type',
+            selectType: 'Select type',
+            ngo: 'Non-Governmental Organization (NGO)',
+            foundation: 'Foundation',
+            association: 'Association',
+            cooperative: 'Cooperative',
+            socialEnterprise: 'Social Enterprise',
+            research: 'Research Institution',
+            university: 'University',
+            regCountry: 'Registration Country',
+            selectCountry: 'Select country',
+            website: 'Website (optional)'
+        },
+        step3: {
+            title: 'What areas do you work in?',
+            subtitle: 'Select all that apply - this helps us match you with relevant grants',
+            democracy: 'Democracy',
+            humanRights: 'Human Rights',
+            civilSociety: 'Civil Society',
+            education: 'Education',
+            health: 'Health',
+            environment: 'Environment',
+            genderEquality: 'Gender Equality',
+            youth: 'Youth',
+            mediaFreedom: 'Media Freedom',
+            artsCulture: 'Arts & Culture',
+            peaceBuilding: 'Peace Building',
+            development: 'Development'
+        },
+        step4: {
+            title: 'Organization size & budget',
+            subtitle: 'This helps us recommend grants that fit your capacity',
+            annualBudget: 'Annual Budget (EUR)',
+            selectBudget: 'Select budget range',
+            under50k: 'Under €50,000',
+            range50k200k: '€50,000 - €200,000',
+            range200k500k: '€200,000 - €500,000',
+            range500k1m: '€500,000 - €1,000,000',
+            over1m: 'Over €1,000,000',
+            staffMembers: 'Number of Staff Members',
+            selectStaff: 'Select staff size',
+            staff1to5: '1-5 people',
+            staff6to20: '6-20 people',
+            staff21to50: '21-50 people',
+            staff51to100: '51-100 people',
+            staff100plus: 'Over 100 people',
+            grantExperience: 'Grant Experience Level',
+            beginner: 'Beginner',
+            beginnerDesc: 'First grants',
+            intermediate: 'Intermediate',
+            intermediateDesc: '1-5 grants',
+            experienced: 'Experienced',
+            experiencedDesc: '5+ grants',
+            preferredGrantSize: 'Preferred Grant Size Range (EUR)'
+        },
+        step5: {
+            title: 'Almost done!',
+            subtitle: 'Just a few more preferences to personalize your experience',
+            whatHelp: 'What would you like help with? (Select all that apply)',
+            findingGrants: 'Finding relevant grants',
+            writingProposals: 'Writing proposals',
+            creatingBudgets: 'Creating budgets',
+            trackingDeadlines: 'Tracking deadlines',
+            addSampleData: 'Add sample data to explore features (recommended for first-time users)',
+            emailNotifications: 'Send me email notifications about new matching grants',
+            whatYouGet: 'What you\'ll get after setup:',
+            benefit1: 'Personalized grant recommendations based on your profile',
+            benefit2: 'Access to 12+ international grant sources',
+            benefit3: 'AI-powered matching with detailed scores',
+            benefit4: 'Proposal writing tools and templates',
+            benefit5: 'Deadline tracking and notifications',
+            benefitSample: 'Sample grants and proposals to explore'
+        },
+        back: '← Back',
+        continue: 'Continue →',
+        creatingProfile: 'Creating your profile...',
+        completeSetup: 'Complete Setup',
+        needHelp: 'Need help?',
+        contactSupport: 'Contact Support'
+    },
+
+    // Smart Onboarding
+    smartOnboarding: {
+        title: 'AI Smart Onboarding',
+        subtitle: 'Just tell us your organization name - our AI will do the rest',
+        orgName: 'Organization Name',
+        orgNamePlaceholder: 'e.g., Rebuild Ukraine Foundation',
+        website: 'Website',
+        websiteOptional: '(optional - for better accuracy)',
+        websitePlaceholder: 'www.your-organization.org',
+        websiteHint: 'Enter with or without https://',
+        country: 'Country',
+        generateButton: 'Generate Profile with AI',
+        aiAnalyzing: 'AI is analyzing...',
+        howItWorks: 'How it works',
+        howItWorksDesc: 'Our AI will analyze your organization and automatically fill in focus areas, target groups, experience level, and more. You can review and edit before saving.',
+        aiConfidence: '{percent}% AI Confidence',
+        readyToSave: 'Ready to save',
+        description: 'Description',
+        mission: 'Mission',
+        focusAreas: 'Focus Areas',
+        targetGroups: 'Target Groups',
+        experience: 'Experience',
+        budgetRange: 'Budget Range',
+        languages: 'Languages',
+        operatingIn: 'Operating In',
+        goBack: '← Go Back',
+        saveAndContinue: 'Save & Continue',
+        saving: 'Saving...'
+    },
+
+    // Proposal Wizard
+    proposalWizard: {
+        title: 'Start Application',
+        steps: {
+            selectOrg: 'Select Organization',
+            chooseSections: 'Choose Sections',
+            generate: 'Generate'
+        },
+        step1: {
+            title: 'Select Organization',
+            subtitle: 'Choose which CSO profile to use for this application',
+            noCSOProfiles: "You haven't created any CSO profiles yet",
+            createCSOProfile: 'Create CSO Profile',
+            continue: 'Continue'
+        },
+        step2: {
+            title: 'Select Sections to Generate',
+            subtitle: 'Choose which proposal sections the AI should generate',
+            objectives: 'Project Objectives',
+            objectivesDesc: 'Goals and expected outcomes of the project',
+            methodology: 'Methodology',
+            methodologyDesc: 'Approach and implementation strategy',
+            impact: 'Expected Impact',
+            impactDesc: 'Long-term effects and sustainability',
+            workPlan: 'Work Plan',
+            workPlanDesc: 'Timeline and milestones',
+            budgetNarrative: 'Budget Narrative',
+            budgetNarrativeDesc: 'Justification for budget items',
+            sustainability: 'Sustainability',
+            sustainabilityDesc: 'Long-term viability after funding',
+            background: 'Organization Background',
+            backgroundDesc: "Your organization's expertise and track record",
+            partners: 'Partners',
+            partnersDesc: 'Partner organizations and their roles',
+            recommended: 'Recommended',
+            back: 'Back',
+            generateSections: 'Generate {count} Sections'
+        },
+        step3: {
+            title: 'Generating Your Proposal',
+            subtitle: 'AI is writing your proposal sections. This may take a few minutes.',
+            overallProgress: 'Overall Progress',
+            complete: 'Complete',
+            generating: 'Generating...',
+            waiting: 'Waiting',
+            generationComplete: 'Generation Complete!',
+            generationCompleteDesc: 'Your proposal sections have been generated successfully.',
+            viewProposal: 'View Proposal'
+        }
+    },
+
+    // Proposal Detail
+    proposalDetail: {
+        backToProposals: 'Back to Proposals',
+        budget: 'Budget:',
+        created: 'Created:',
+        recordOutcome: 'Record Outcome',
+        outcome: 'Outcome',
+        selectOutcome: 'Select outcome...',
+        awarded: 'Awarded',
+        shortlisted: 'Shortlisted',
+        rejected: 'Rejected',
+        withdrawn: 'Withdrawn',
+        pending: 'Pending',
+        amountAwarded: 'Amount Awarded (€)',
+        feedbackFromFunder: 'Feedback from Funder',
+        feedbackPlaceholder: 'Any feedback received...',
+        lessonsLearned: 'Lessons Learned',
+        lessonsPlaceholder: 'What worked, what to improve...',
+        saveOutcome: 'Save Outcome',
+        savingOutcome: 'Saving...',
+        proposalSections: 'Proposal Sections',
+        noSectionsYet: 'No sections generated yet.',
+        generateAISections: 'Generate AI Sections',
+        words: 'words',
+        generatedBy: 'Generated by'
+    },
+
+    // Offline
+    offline: {
+        banner: 'You are offline. Some features may not be available.'
+    },
+
+    // Validation
+    validation: {
+        emailInvalid: 'Please enter a valid email address',
+        passwordTooShort: 'Password is too short',
+        passwordMin8: 'Password must be at least 8 characters',
+        nameTooShort: 'Name must be at least 2 characters',
+        strengthWeak: 'Weak — add numbers or symbols',
+        strengthFair: 'Fair — try adding uppercase letters',
+        strengthGood: 'Good — almost there!',
+        strengthStrong: 'Strong password'
+    },
+
+    // Not Found
+    notFound: {
+        title: '404',
+        message: 'Page not found',
+        goHome: 'Go Home'
     }
 }

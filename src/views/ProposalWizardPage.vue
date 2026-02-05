@@ -3,7 +3,7 @@
     <div class="max-w-4xl mx-auto">
       <!-- Header with Progress -->
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Start Application</h1>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $t('proposalWizard.title') }}</h1>
         <p class="text-gray-600 mb-6">{{ grantTitle }}</p>
 
         <!-- Progress Steps -->
@@ -36,8 +36,8 @@
 
       <!-- Step 1: Select CSO -->
       <div v-if="currentStep === 0" class="card">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Select Organization</h2>
-        <p class="text-gray-600 mb-6">Choose which CSO profile to use for this application</p>
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ $t('proposalWizard.step1.title') }}</h2>
+        <p class="text-gray-600 mb-6">{{ $t('proposalWizard.step1.subtitle') }}</p>
 
         <div v-if="loadingCsos" class="animate-pulse space-y-3">
           <div class="h-20 bg-gray-200 rounded-lg"></div>
@@ -45,8 +45,8 @@
         </div>
 
         <div v-else-if="csos.length === 0" class="text-center py-8">
-          <p class="text-gray-600 mb-4">You haven't created any CSO profiles yet</p>
-          <router-link to="/cso/create" class="btn btn-primary">Create CSO Profile</router-link>
+          <p class="text-gray-600 mb-4">{{ $t('proposalWizard.step1.noCSOProfiles') }}</p>
+          <router-link to="/cso/create" class="btn btn-primary">{{ $t('proposalWizard.step1.createCSOProfile') }}</router-link>
         </div>
 
         <div v-else class="space-y-3">
@@ -63,6 +63,7 @@
               :value="cso.id"
               v-model="selectedCsoId"
               class="sr-only"
+              :aria-label="cso.name"
             />
             <div class="flex items-center justify-between">
               <div>
@@ -84,15 +85,15 @@
             :disabled="!selectedCsoId"
             class="btn btn-primary"
           >
-            Continue
+            {{ $t('proposalWizard.step1.continue') }}
           </button>
         </div>
       </div>
 
       <!-- Step 2: Select Sections -->
       <div v-if="currentStep === 1" class="card">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Select Sections to Generate</h2>
-        <p class="text-gray-600 mb-6">Choose which proposal sections the AI should generate</p>
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ $t('proposalWizard.step2.title') }}</h2>
+        <p class="text-gray-600 mb-6">{{ $t('proposalWizard.step2.subtitle') }}</p>
 
         <div class="space-y-3">
           <label
@@ -108,6 +109,7 @@
               :value="section.type"
               v-model="selectedSections"
               class="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+              :aria-label="section.label"
             />
             <div class="ml-4 flex-1">
               <h3 class="font-medium text-gray-900">{{ section.label }}</h3>
@@ -117,19 +119,19 @@
               v-if="section.recommended"
               class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded"
             >
-              Recommended
+              {{ $t('proposalWizard.step2.recommended') }}
             </span>
           </label>
         </div>
 
         <div class="flex justify-between mt-6">
-          <button @click="prevStep" class="btn btn-outline">Back</button>
+          <button @click="prevStep" class="btn btn-outline">{{ $t('proposalWizard.step2.back') }}</button>
           <button
             @click="startGeneration"
             :disabled="selectedSections.length === 0"
             class="btn btn-primary"
           >
-            Generate {{ selectedSections.length }} Section{{ selectedSections.length !== 1 ? 's' : '' }}
+            {{ $t('proposalWizard.step2.generateSections', { count: selectedSections.length }) }}
           </button>
         </div>
       </div>
@@ -137,18 +139,18 @@
       <!-- Step 3: Generation -->
       <div v-if="currentStep === 2" class="space-y-6">
         <div class="card">
-          <h2 class="text-xl font-semibold text-gray-900 mb-4">Generating Your Proposal</h2>
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ $t('proposalWizard.step3.title') }}</h2>
           <p class="text-gray-600 mb-6">
-            AI is writing your proposal sections. This may take a few minutes.
+            {{ $t('proposalWizard.step3.subtitle') }}
           </p>
 
           <!-- Overall Progress -->
           <div class="mb-6">
             <div class="flex items-center justify-between text-sm mb-2">
-              <span class="text-gray-600">Overall Progress</span>
+              <span class="text-gray-600">{{ $t('proposalWizard.step3.overallProgress') }}</span>
               <span class="font-medium">{{ completedSections.length }} / {{ selectedSections.length }}</span>
             </div>
-            <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden" role="progressbar" :aria-valuenow="completedSections.length" :aria-valuemax="selectedSections.length" aria-valuemin="0" :aria-label="$t('proposalWizard.step3.overallProgress')">
               <div
                 class="h-full bg-primary-600 transition-all duration-500"
                 :style="{ width: `${(completedSections.length / selectedSections.length) * 100}%` }"
@@ -181,9 +183,9 @@
             <div>
               <h3 class="font-medium text-gray-900">{{ getSectionLabel(sectionType) }}</h3>
               <p class="text-sm text-gray-500">
-                <span v-if="completedSections.includes(sectionType)">Complete</span>
-                <span v-else-if="currentGeneratingSection === sectionType">Generating...</span>
-                <span v-else>Waiting</span>
+                <span v-if="completedSections.includes(sectionType)">{{ $t('proposalWizard.step3.complete') }}</span>
+                <span v-else-if="currentGeneratingSection === sectionType">{{ $t('proposalWizard.step3.generating') }}</span>
+                <span v-else>{{ $t('proposalWizard.step3.waiting') }}</span>
               </p>
             </div>
           </div>
@@ -207,11 +209,11 @@
               </svg>
             </div>
             <div class="flex-1">
-              <h3 class="text-lg font-semibold text-gray-900">Generation Complete!</h3>
-              <p class="text-gray-600">Your proposal sections have been generated successfully.</p>
+              <h3 class="text-lg font-semibold text-gray-900">{{ $t('proposalWizard.step3.generationComplete') }}</h3>
+              <p class="text-gray-600">{{ $t('proposalWizard.step3.generationCompleteDesc') }}</p>
             </div>
             <button @click="viewProposal" class="btn btn-primary">
-              View Proposal
+              {{ $t('proposalWizard.step3.viewProposal') }}
             </button>
           </div>
         </div>
@@ -223,35 +225,39 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/AppLayout.vue'
+import { useToast } from '@/lib/useToast'
 import { csoApi, grantsApi, proposalsApi, type SectionType } from '@/services/api'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
+const toast = useToast()
 
 // Wizard state
-const steps = ['Select Organization', 'Choose Sections', 'Generate']
+const steps = computed(() => [t('proposalWizard.steps.selectOrg'), t('proposalWizard.steps.chooseSections'), t('proposalWizard.steps.generate')])
 const currentStep = ref(0)
 
 // Data
 const grantId = ref('')
-const grantTitle = ref('Loading...')
+const grantTitle = ref(t('common.loading'))
 const csos = ref<any[]>([])
 const loadingCsos = ref(true)
 const selectedCsoId = ref('')
 const proposalId = ref('')
 
 // Section selection
-const availableSections = [
-  { type: 'objectives' as SectionType, label: 'Project Objectives', description: 'Goals and expected outcomes of the project', recommended: true },
-  { type: 'methodology' as SectionType, label: 'Methodology', description: 'Approach and implementation strategy', recommended: true },
-  { type: 'impact' as SectionType, label: 'Expected Impact', description: 'Long-term effects and sustainability', recommended: true },
-  { type: 'work_plan' as SectionType, label: 'Work Plan', description: 'Timeline and milestones', recommended: true },
-  { type: 'budget_narrative' as SectionType, label: 'Budget Narrative', description: 'Justification for budget items', recommended: false },
-  { type: 'sustainability' as SectionType, label: 'Sustainability', description: 'Long-term viability after funding', recommended: false },
-  { type: 'background' as SectionType, label: 'Organization Background', description: 'Your organization\'s expertise and track record', recommended: false },
-  { type: 'partners' as SectionType, label: 'Partners', description: 'Partner organizations and their roles', recommended: false },
-]
+const availableSections = computed(() => [
+  { type: 'objectives' as SectionType, label: t('proposalWizard.step2.objectives'), description: t('proposalWizard.step2.objectivesDesc'), recommended: true },
+  { type: 'methodology' as SectionType, label: t('proposalWizard.step2.methodology'), description: t('proposalWizard.step2.methodologyDesc'), recommended: true },
+  { type: 'impact' as SectionType, label: t('proposalWizard.step2.impact'), description: t('proposalWizard.step2.impactDesc'), recommended: true },
+  { type: 'work_plan' as SectionType, label: t('proposalWizard.step2.workPlan'), description: t('proposalWizard.step2.workPlanDesc'), recommended: true },
+  { type: 'budget_narrative' as SectionType, label: t('proposalWizard.step2.budgetNarrative'), description: t('proposalWizard.step2.budgetNarrativeDesc'), recommended: false },
+  { type: 'sustainability' as SectionType, label: t('proposalWizard.step2.sustainability'), description: t('proposalWizard.step2.sustainabilityDesc'), recommended: false },
+  { type: 'background' as SectionType, label: t('proposalWizard.step2.background'), description: t('proposalWizard.step2.backgroundDesc'), recommended: false },
+  { type: 'partners' as SectionType, label: t('proposalWizard.step2.partners'), description: t('proposalWizard.step2.partnersDesc'), recommended: false },
+])
 
 const selectedSections = ref<SectionType[]>(['objectives', 'methodology', 'impact', 'work_plan'])
 
@@ -263,7 +269,7 @@ const generationComplete = computed(() => completedSections.value.length === sel
 
 // Methods
 function nextStep() {
-  if (currentStep.value < steps.length - 1) {
+  if (currentStep.value < steps.value.length - 1) {
     currentStep.value++
   }
 }
@@ -275,7 +281,7 @@ function prevStep() {
 }
 
 function getSectionLabel(type: string): string {
-  return availableSections.find(s => s.type === type)?.label || type
+  return availableSections.value.find(s => s.type === type)?.label || type
 }
 
 function formatContent(content: string): string {
@@ -350,6 +356,7 @@ async function startGeneration() {
     }
   } catch (error) {
     console.error('Error creating proposal:', error)
+    toast.error('Failed to create proposal. Please try again.')
   }
 }
 
@@ -384,6 +391,7 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Error loading CSOs:', error)
+    toast.error('Failed to load organizations.')
   } finally {
     loadingCsos.value = false
   }

@@ -41,19 +41,29 @@ api.interceptors.request.use(
 )
 
 /**
- * Response interceptor: Handle auth errors
+ * Response interceptor: Handle auth errors + retry on network failures
  */
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    const config = error.config
+
     if (error.response?.status === 401) {
       const authStore = useAuthStore()
-
-      // Token expired or invalid - logout user
       authStore.logout()
-
-      // Redirect to login page
       window.location.href = '/login'
+      return Promise.reject(error)
+    }
+
+    // Retry on network errors or 5xx (max 2 retries with exponential backoff)
+    const isRetryable = !error.response || (error.response.status >= 500 && error.response.status < 600)
+    const retryCount = config.__retryCount || 0
+
+    if (isRetryable && retryCount < 2 && config.method !== 'post') {
+      config.__retryCount = retryCount + 1
+      const delay = Math.pow(2, retryCount) * 1000 // 1s, 2s
+      await new Promise(resolve => setTimeout(resolve, delay))
+      return api(config)
     }
 
     return Promise.reject(error)
