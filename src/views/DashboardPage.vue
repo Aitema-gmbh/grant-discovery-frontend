@@ -103,6 +103,32 @@
       </div>
     </div>
 
+    <!-- Smart Insights -->
+    <div v-if="insights.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12 animate-fade-in" style="animation-delay: 0.15s">
+      <div
+        v-for="(insight, index) in insights"
+        :key="index"
+        class="p-5 rounded-xl border transition-all hover:shadow-soft"
+        :class="insight.color"
+      >
+        <div class="flex items-start gap-3">
+          <span class="text-2xl flex-shrink-0">{{ insight.icon }}</span>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-navy-900">{{ insight.title }}</p>
+            <p class="text-xs text-navy-600 mt-1">{{ insight.description }}</p>
+            <router-link
+              v-if="insight.actionTo"
+              :to="insight.actionTo"
+              class="inline-flex items-center gap-1 text-xs font-medium mt-2 transition-colors"
+              :class="insight.actionColor"
+            >
+              {{ insight.actionLabel }} →
+            </router-link>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Main Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <!-- Recent Activity -->
@@ -311,6 +337,72 @@ const upcomingDeadlinesList = ref<any[]>([])
 // Display name
 const displayName = computed(() => {
   return authStore.user?.user_metadata?.full_name || authStore.user?.email?.split('@')[0] || 'User'
+})
+
+// Smart insights based on user data
+const insights = computed(() => {
+  const items: Array<{
+    icon: string; title: string; description: string;
+    color: string; actionTo?: string; actionLabel?: string; actionColor?: string
+  }> = []
+
+  // Insight: Urgent deadlines
+  if (stats.value.upcomingDeadlines && stats.value.upcomingDeadlines > 0) {
+    const urgentCount = upcomingDeadlinesList.value.filter(d => d.daysLeft <= 7).length
+    if (urgentCount > 0) {
+      items.push({
+        icon: '⏰',
+        title: t('dashboard.insights.urgentDeadlines', { count: urgentCount }),
+        description: t('dashboard.insights.urgentDeadlinesDesc'),
+        color: 'bg-red-50 border-red-200',
+        actionTo: '/grants?deadline=7',
+        actionLabel: t('dashboard.insights.viewUrgent'),
+        actionColor: 'text-red-600 hover:text-red-700'
+      })
+    }
+  }
+
+  // Insight: No CSO profile
+  if (stats.value.csoProfiles === 0) {
+    items.push({
+      icon: '🏢',
+      title: t('dashboard.insights.noProfile'),
+      description: t('dashboard.insights.noProfileDesc'),
+      color: 'bg-amber-50 border-amber-200',
+      actionTo: '/onboarding/setup',
+      actionLabel: t('dashboard.insights.createProfile'),
+      actionColor: 'text-amber-600 hover:text-amber-700'
+    })
+  }
+
+  // Insight: Saved grants without proposals
+  const savedCount = JSON.parse(localStorage.getItem('savedGrants') || '[]').length
+  if (savedCount > 0) {
+    items.push({
+      icon: '📋',
+      title: t('dashboard.insights.savedGrants', { count: savedCount }),
+      description: t('dashboard.insights.savedGrantsDesc'),
+      color: 'bg-blue-50 border-blue-200',
+      actionTo: '/grants',
+      actionLabel: t('dashboard.insights.reviewSaved'),
+      actionColor: 'text-blue-600 hover:text-blue-700'
+    })
+  }
+
+  // Insight: Has matches available
+  if (stats.value.matchedGrants && stats.value.matchedGrants > 0 && stats.value.csoProfiles && stats.value.csoProfiles > 0) {
+    items.push({
+      icon: '🎯',
+      title: t('dashboard.insights.matchesAvailable', { count: stats.value.matchedGrants }),
+      description: t('dashboard.insights.matchesAvailableDesc'),
+      color: 'bg-green-50 border-green-200',
+      actionTo: '/matches',
+      actionLabel: t('dashboard.insights.viewMatches'),
+      actionColor: 'text-green-600 hover:text-green-700'
+    })
+  }
+
+  return items.slice(0, 3) // Max 3 insights
 })
 
 // Activity icon class

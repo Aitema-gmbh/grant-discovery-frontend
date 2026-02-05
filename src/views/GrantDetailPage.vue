@@ -144,7 +144,41 @@
               <HelpTooltip :content="$t('grantDetail.help.eligibility')" position="right" />
             </h2>
 
-            <div v-if="authStore.isAuthenticated" class="space-y-4">
+            <div v-if="authStore.isAuthenticated && eligibilityResult" class="space-y-3">
+              <!-- Overall Result -->
+              <div class="flex items-center gap-3 p-4 rounded-lg" :class="eligibilityBgClass">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" :class="eligibilityIconClass">
+                  <svg v-if="eligibilityResult.score >= 0.7" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <svg v-else-if="eligibilityResult.score >= 0.4" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                  </svg>
+                  <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+                <div>
+                  <p class="font-semibold text-navy-900">{{ eligibilityResult.label }}</p>
+                  <p class="text-sm text-navy-600">{{ eligibilityResult.summary }}</p>
+                </div>
+              </div>
+
+              <!-- Check Items -->
+              <div v-for="(check, idx) in eligibilityResult.checks" :key="idx"
+                class="flex items-start gap-2 px-3 py-2 text-sm">
+                <span v-if="check.pass" class="text-green-500 mt-0.5">&#x2713;</span>
+                <span v-else class="text-red-500 mt-0.5">&#x2717;</span>
+                <span :class="check.pass ? 'text-navy-700' : 'text-red-700'">{{ check.message }}</span>
+              </div>
+
+              <!-- CTA to Matches -->
+              <router-link to="/matches" class="inline-flex items-center gap-1 text-sm font-medium text-amber-600 hover:text-amber-700 mt-2">
+                {{ $t('grantDetail.viewFullMatch') }} →
+              </router-link>
+            </div>
+
+            <div v-else-if="authStore.isAuthenticated && !eligibilityResult" class="space-y-4">
               <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
                 <div class="flex items-center gap-3">
                   <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -155,8 +189,8 @@
                     <p class="text-sm text-gray-600">{{ $t('grantDetail.basedOnCSOProfile') }}</p>
                   </div>
                 </div>
-                <button class="btn btn-primary">
-                  {{ $t('grantDetail.runCheck') }}
+                <button @click="runEligibilityCheck" class="btn btn-primary" :disabled="checkingEligibility">
+                  {{ checkingEligibility ? $t('common.loading') : $t('grantDetail.runCheck') }}
                 </button>
               </div>
             </div>
@@ -276,18 +310,37 @@
                 </div>
               </a>
 
-              <button
-                v-if="authStore.isAuthenticated"
-                @click="startApplication"
-                class="block w-full btn btn-primary text-center"
-              >
-                <div class="flex items-center justify-center gap-2">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                  </svg>
-                  {{ $t('grantDetail.startApplication') }}
-                </div>
-              </button>
+              <!-- Proposal Status or Start Application -->
+              <div v-if="authStore.isAuthenticated">
+                <router-link
+                  v-if="grantProposal"
+                  :to="`/proposals/${grantProposal.id}`"
+                  class="block w-full btn text-center"
+                  :class="grantProposal.status === 'submitted' ? 'btn-outline border-green-300 text-green-700 hover:bg-green-50' : 'btn-primary'"
+                >
+                  <div class="flex items-center justify-center gap-2">
+                    <svg v-if="grantProposal.status === 'submitted'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    {{ $t('grantDetail.proposalStatus.' + (grantProposal.status || 'draft')) }}
+                  </div>
+                </router-link>
+                <button
+                  v-else
+                  @click="startApplication"
+                  class="block w-full btn btn-primary text-center"
+                >
+                  <div class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    {{ $t('grantDetail.startApplication') }}
+                  </div>
+                </button>
+              </div>
 
               <button class="block w-full btn btn-outline text-center">
                 <div class="flex items-center justify-center gap-2">
@@ -391,6 +444,9 @@ const similarGrants = ref<any[]>([])
 const aiSummary = ref('')
 const isSaved = ref(false)
 const linkCopied = ref(false)
+const grantProposal = ref<any>(null)
+const eligibilityResult = ref<any>(null)
+const checkingEligibility = ref(false)
 const descExpanded = ref(false)
 const descNeedsExpand = ref(false)
 const descriptionEl = ref<HTMLElement | null>(null)
@@ -534,6 +590,97 @@ function trackRecentlyViewed(id: string, title: string) {
   } catch { /* ignore */ }
 }
 
+// Eligibility check
+const eligibilityBgClass = computed(() => {
+  if (!eligibilityResult.value) return ''
+  if (eligibilityResult.value.score >= 0.7) return 'bg-green-50'
+  if (eligibilityResult.value.score >= 0.4) return 'bg-amber-50'
+  return 'bg-red-50'
+})
+
+const eligibilityIconClass = computed(() => {
+  if (!eligibilityResult.value) return ''
+  if (eligibilityResult.value.score >= 0.7) return 'bg-green-100 text-green-600'
+  if (eligibilityResult.value.score >= 0.4) return 'bg-amber-100 text-amber-600'
+  return 'bg-red-100 text-red-600'
+})
+
+async function runEligibilityCheck() {
+  checkingEligibility.value = true
+  try {
+    // Load CSO profiles
+    const csoResponse = await api.get('/api/cso', { params: { user_id: authStore.userId } })
+    let profiles = csoResponse.data.profiles || csoResponse.data.csos || []
+    if (authStore.userId && profiles.length > 0 && profiles[0].owner_id) {
+      profiles = profiles.filter((p: any) => p.owner_id === authStore.userId)
+    }
+
+    if (profiles.length === 0) {
+      eligibilityResult.value = {
+        score: 0,
+        label: t('grantDetail.eligibilityResults.noProfile'),
+        summary: t('grantDetail.eligibilityResults.noProfileDesc'),
+        checks: []
+      }
+      return
+    }
+
+    const cso = profiles[0]
+    const checks: Array<{pass: boolean, message: string}> = []
+    let passed = 0
+
+    // Check country
+    const countries = eligibleCountries.value.map((c: string) => c.toUpperCase())
+    const csoCountry = (cso.registration_country || cso.headquarters_country || '').toUpperCase()
+    if (countries.length === 0 || countries.includes(csoCountry)) {
+      checks.push({ pass: true, message: t('grantDetail.eligibilityResults.countryMatch') })
+      passed++
+    } else {
+      checks.push({ pass: false, message: t('grantDetail.eligibilityResults.countryMismatch', { country: csoCountry }) })
+    }
+
+    // Check org type
+    const grantOrgTypes = organizationTypes.value.map((t: string) => t.toLowerCase())
+    const csoType = (cso.org_type || '').toLowerCase()
+    if (grantOrgTypes.length === 0 || grantOrgTypes.some((t: string) => csoType.includes(t) || t.includes(csoType))) {
+      checks.push({ pass: true, message: t('grantDetail.eligibilityResults.orgTypeMatch') })
+      passed++
+    } else {
+      checks.push({ pass: false, message: t('grantDetail.eligibilityResults.orgTypeMismatch', { type: cso.org_type }) })
+    }
+
+    // Check budget range
+    const grantMin = grant.value?.amount_min || 0
+    const grantMax = grant.value?.amount_max || Infinity
+    const csoBudget = cso.annual_budget_eur || 0
+    if (csoBudget === 0 || (csoBudget >= grantMin * 0.1 && csoBudget <= grantMax * 10)) {
+      checks.push({ pass: true, message: t('grantDetail.eligibilityResults.budgetOk') })
+      passed++
+    } else {
+      checks.push({ pass: false, message: t('grantDetail.eligibilityResults.budgetMismatch') })
+    }
+
+    const score = checks.length > 0 ? passed / checks.length : 0
+    let label: string, summary: string
+    if (score >= 0.7) {
+      label = t('grantDetail.eligibilityResults.likelyEligible')
+      summary = t('grantDetail.eligibilityResults.likelyEligibleDesc')
+    } else if (score >= 0.4) {
+      label = t('grantDetail.eligibilityResults.possiblyEligible')
+      summary = t('grantDetail.eligibilityResults.possiblyEligibleDesc')
+    } else {
+      label = t('grantDetail.eligibilityResults.likelyIneligible')
+      summary = t('grantDetail.eligibilityResults.likelyIneligibleDesc')
+    }
+
+    eligibilityResult.value = { score, label, summary, checks }
+  } catch {
+    toast.error(t('errors.network'))
+  } finally {
+    checkingEligibility.value = false
+  }
+}
+
 function startApplication() {
   router.push({ 
     name: 'proposal-wizard', 
@@ -555,6 +702,15 @@ async function fetchGrantDetails() {
     // Check if saved
     const saved = JSON.parse(localStorage.getItem('savedGrants') || '[]')
     isSaved.value = saved.includes(grantId)
+
+    // Check for existing proposals for this grant
+    if (authStore.isAuthenticated) {
+      try {
+        const proposalResponse = await api.get('/api/proposals')
+        const proposals = proposalResponse.data.proposals || []
+        grantProposal.value = proposals.find((p: any) => p.grant_id === grantId) || null
+      } catch { /* ignore - proposals not critical */ }
+    }
 
     // Fetch similar grants
     try {

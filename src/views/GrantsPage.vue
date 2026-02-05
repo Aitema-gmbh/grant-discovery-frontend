@@ -54,7 +54,7 @@
 
       <!-- Advanced Filters Toggle -->
       <button
-        @click="showFilters = !showFilters"
+        @click="toggleFilters"
         class="flex items-center gap-2 text-sm font-medium text-navy-700 hover:text-amber-600 mb-4 transition-colors"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,8 +66,8 @@
         </span>
       </button>
 
-      <!-- Filters Panel -->
-      <div v-show="showFilters" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-navy-100 animate-slide-down">
+      <!-- Filters Panel (Desktop) -->
+      <div v-show="showFilters" class="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-navy-100 animate-slide-down">
         <!-- Amount Range -->
         <div>
           <label class="block text-sm font-medium text-navy-700 mb-2">
@@ -135,6 +135,84 @@
           </select>
         </div>
       </div>
+
+      <!-- Mobile Filter Bottom Sheet -->
+      <Teleport to="body">
+        <Transition
+          enter-active-class="transition duration-300 ease-out"
+          enter-from-class="opacity-0"
+          enter-to-class="opacity-100"
+          leave-active-class="transition duration-200 ease-in"
+          leave-from-class="opacity-100"
+          leave-to-class="opacity-0"
+        >
+          <div v-if="showMobileFilters" class="fixed inset-0 z-50 sm:hidden" @click.self="showMobileFilters = false">
+            <div class="absolute inset-0 bg-black/40"></div>
+            <Transition
+              enter-active-class="transition duration-300 ease-out"
+              enter-from-class="translate-y-full"
+              enter-to-class="translate-y-0"
+              leave-active-class="transition duration-200 ease-in"
+              leave-from-class="translate-y-0"
+              leave-to-class="translate-y-full"
+            >
+              <div v-if="showMobileFilters" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-lg max-h-[80vh] overflow-y-auto">
+                <div class="sticky top-0 bg-white px-5 pt-4 pb-3 border-b border-navy-100 flex items-center justify-between rounded-t-2xl">
+                  <h3 class="text-lg font-semibold text-navy-900 font-display">{{ $t('grants.showAdvanced') }}</h3>
+                  <button @click="showMobileFilters = false" class="p-2 -mr-2 text-navy-400 hover:text-navy-700">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="p-5 space-y-5">
+                  <div>
+                    <label class="block text-sm font-medium text-navy-700 mb-2">{{ $t('grants.filters.amount') }}</label>
+                    <div class="grid grid-cols-2 gap-2">
+                      <input v-model.number="filters.amountMin" type="number" :placeholder="$t('grants.filters.min')" class="input text-sm" />
+                      <input v-model.number="filters.amountMax" type="number" :placeholder="$t('grants.filters.max')" class="input text-sm" />
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-navy-700 mb-2">{{ $t('grants.deadline') }}</label>
+                    <select v-model="filters.deadline" class="input text-sm w-full">
+                      <option value="">{{ $t('grants.filters.anyDeadline') }}</option>
+                      <option value="7">{{ $t('grants.filters.next7Days') }}</option>
+                      <option value="14">{{ $t('grants.filters.next14Days') }}</option>
+                      <option value="30">{{ $t('grants.filters.next30Days') }}</option>
+                      <option value="90">{{ $t('grants.filters.next90Days') }}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-navy-700 mb-2">{{ $t('grants.filters.country') }}</label>
+                    <select v-model="filters.country" class="input text-sm w-full">
+                      <option value="">{{ $t('grants.filters.allCountries') }}</option>
+                      <option value="UA">{{ $t('grants.filters.ukraine') }}</option>
+                      <option value="EU">{{ $t('grants.filters.eu') }}</option>
+                      <option value="DE">{{ $t('grants.filters.germany') }}</option>
+                      <option value="PL">{{ $t('grants.filters.poland') }}</option>
+                      <option value="US">{{ $t('grants.filters.usa') }}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-navy-700 mb-2">{{ $t('grants.filters.statusLabel') }}</label>
+                    <select v-model="filters.status" class="input text-sm w-full">
+                      <option value="">{{ $t('grants.filters.allStatuses') }}</option>
+                      <option value="open">{{ $t('grants.filters.statusOpen') }}</option>
+                      <option value="upcoming">{{ $t('grants.filters.statusUpcoming') }}</option>
+                      <option value="closed">{{ $t('grants.filters.statusClosed') }}</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="sticky bottom-0 bg-white px-5 py-4 border-t border-navy-100 flex gap-3">
+                  <button @click="clearMobileFilters" class="btn btn-outline flex-1">{{ $t('common.clear') }}</button>
+                  <button @click="applyMobileFilters" class="btn btn-primary flex-1">{{ $t('common.apply') }}</button>
+                </div>
+              </div>
+            </Transition>
+          </div>
+        </Transition>
+      </Teleport>
 
       <!-- Recent & Saved Searches -->
       <div v-if="recentSearches.length > 0 && !searchQuery" class="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-navy-100">
@@ -493,7 +571,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/AppLayout.vue'
 import HelpTooltip from '@/components/HelpTooltip.vue'
@@ -504,6 +582,7 @@ import { useToast } from '@/lib/useToast'
 import { useFeedback } from '@/lib/useFeedback'
 
 const router = useRouter()
+const route = useRoute()
 const { t } = useI18n()
 const { trackPageView, trackGrantAction } = useFeedback()
 const toast = useToast()
@@ -597,6 +676,65 @@ function loadRecentlyViewed() {
   } catch { /* ignore */ }
 }
 
+// Mobile filter drawer
+const showMobileFilters = ref(false)
+
+function toggleFilters() {
+  // On mobile, show bottom sheet; on desktop, toggle inline
+  if (window.innerWidth < 640) {
+    showMobileFilters.value = !showMobileFilters.value
+  } else {
+    showFilters.value = !showFilters.value
+  }
+}
+
+function clearMobileFilters() {
+  filters.value.amountMin = null
+  filters.value.amountMax = null
+  filters.value.deadline = ''
+  filters.value.country = ''
+  filters.value.status = ''
+}
+
+function applyMobileFilters() {
+  showMobileFilters.value = false
+  searchGrants()
+}
+
+// Sync filters to/from URL
+function hydrateFromUrl() {
+  const q = route.query
+  if (q.q) searchQuery.value = q.q as string
+  if (q.mode === 'semantic') searchMode.value = 'semantic'
+  if (q.sort) sortBy.value = q.sort as string
+  if (q.view === 'list') viewMode.value = 'list'
+  if (q.cat) filters.value.category = q.cat as string
+  if (q.country) filters.value.country = q.country as string
+  if (q.status) filters.value.status = q.status as string
+  if (q.deadline) filters.value.deadline = q.deadline as string
+  if (q.min) filters.value.amountMin = Number(q.min)
+  if (q.max) filters.value.amountMax = Number(q.max)
+  if (q.page) currentPage.value = Number(q.page)
+  // Show filters panel if any filter is active
+  if (q.min || q.max || q.deadline || q.country || q.status) showFilters.value = true
+}
+
+function syncToUrl() {
+  const query: Record<string, string> = {}
+  if (searchQuery.value) query.q = searchQuery.value
+  if (searchMode.value !== 'text') query.mode = searchMode.value
+  if (sortBy.value !== 'relevance') query.sort = sortBy.value
+  if (viewMode.value !== 'grid') query.view = viewMode.value
+  if (filters.value.category) query.cat = filters.value.category
+  if (filters.value.country) query.country = filters.value.country
+  if (filters.value.status) query.status = filters.value.status
+  if (filters.value.deadline) query.deadline = filters.value.deadline
+  if (filters.value.amountMin) query.min = String(filters.value.amountMin)
+  if (filters.value.amountMax) query.max = String(filters.value.amountMax)
+  if (currentPage.value > 1) query.page = String(currentPage.value)
+  router.replace({ query })
+}
+
 // Active filters count
 const activeFiltersCount = computed(() => {
   let count = 0
@@ -621,6 +759,7 @@ function debouncedSearch() {
 // Search grants
 async function searchGrants() {
   loading.value = true
+  syncToUrl()
   if (searchQuery.value) saveRecentSearch(searchQuery.value, searchMode.value)
   try {
     const params = new URLSearchParams()
@@ -884,6 +1023,8 @@ onMounted(() => {
   }
   loadRecentSearches()
   loadRecentlyViewed()
+  // Hydrate filters from URL params
+  hydrateFromUrl()
   // Track page view
   trackPageView('grants')
   searchGrants()

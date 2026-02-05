@@ -99,7 +99,21 @@ export default {
         },
         csoProfilesConfigured: 'CSO-Profile konfiguriert',
         basedOnProfile: 'Basierend auf Ihrem Organisationsprofil',
-        changeThisMonth: '+{percent}% diesen Monat'
+        changeThisMonth: '+{percent}% diesen Monat',
+        insights: {
+            urgentDeadlines: '{count} Frist(en) läuft/laufen diese Woche ab',
+            urgentDeadlinesDesc: 'Handeln Sie jetzt, um diese Fördermöglichkeiten nicht zu verpassen',
+            viewUrgent: 'Dringende ansehen',
+            noProfile: 'Erstellen Sie Ihr Organisationsprofil',
+            noProfileDesc: 'Richten Sie Ihr CSO-Profil ein, um KI-gestütztes Förder-Matching zu nutzen',
+            createProfile: 'Jetzt starten',
+            savedGrants: '{count} gespeicherte(r) Förderung(en) zum Überprüfen',
+            savedGrantsDesc: 'Sie haben Förderungen gespeichert — erwägen Sie einen Antrag',
+            reviewSaved: 'Gespeicherte prüfen',
+            matchesAvailable: '{count} KI-Treffer gefunden',
+            matchesAvailableDesc: 'Unsere KI hat Förderungen gefunden, die zu Ihrem Organisationsprofil passen',
+            viewMatches: 'Treffer ansehen'
+        }
     },
 
     // Grants
@@ -268,6 +282,13 @@ export default {
         actions: 'Aktionen',
         viewOfficialPage: 'Offizielle Seite aufrufen',
         startApplication: 'Bewerbung starten',
+        proposalStatus: {
+            draft: 'Entwurf fortsetzen',
+            in_review: 'In Prüfung',
+            submitted: 'Eingereicht',
+            approved: 'Genehmigt',
+            rejected: 'Antrag ansehen'
+        },
         exportDetails: 'Details exportieren',
         sourceInfo: 'Quellinformationen',
         source: 'Quelle:',
@@ -292,7 +313,24 @@ export default {
         help: {
             aiSummary: 'Diese Zusammenfassung wurde von KI basierend auf der Förderbeschreibung erstellt. Sie hebt wichtige Punkte hervor.',
             eligibility: 'Die Eignungsprüfung vergleicht Ihr Organisationsprofil (Land, Typ, Budget) mit den Förderanforderungen.'
-        }
+        },
+        eligibilityResults: {
+            noProfile: 'Kein Profil gefunden',
+            noProfileDesc: 'Erstellen Sie zuerst ein Organisationsprofil, um die Förderfähigkeit zu prüfen.',
+            countryMatch: 'Ihr Land entspricht den förderfähigen Ländern',
+            countryMismatch: 'Ihr Land ({country}) ist nicht als förderfähig aufgeführt',
+            orgTypeMatch: 'Ihr Organisationstyp ist förderfähig',
+            orgTypeMismatch: 'Ihr Organisationstyp ({type}) ist möglicherweise nicht förderfähig',
+            budgetOk: 'Die Fördersumme passt zu Ihrem Budgetrahmen',
+            budgetMismatch: 'Die Fördersumme passt möglicherweise nicht zu Ihrem Budgetbedarf',
+            likelyEligible: 'Wahrscheinlich förderfähig',
+            likelyEligibleDesc: 'Ihre Organisation scheint die wesentlichen Anforderungen für diese Förderung zu erfüllen.',
+            possiblyEligible: 'Möglicherweise förderfähig',
+            possiblyEligibleDesc: 'Einige Anforderungen stimmen möglicherweise nicht vollständig überein — prüfen Sie die Details sorgfältig.',
+            likelyIneligible: 'Wahrscheinlich nicht förderfähig',
+            likelyIneligibleDesc: 'Ihre Organisation erfüllt möglicherweise mehrere wesentliche Anforderungen dieser Förderung nicht.'
+        },
+        viewFullMatch: 'Vollständige Übereinstimmungsanalyse anzeigen'
     },
 
     // Matches
