@@ -30,7 +30,9 @@ export default {
         day: 'Tag',
         thisMonth: 'diesen Monat',
         noResults: 'Keine Ergebnisse gefunden',
-        tryAgain: 'Erneut versuchen'
+        tryAgain: 'Erneut versuchen',
+        unsavedChanges: 'Sie haben ungespeicherte Änderungen. Sind Sie sicher, dass Sie die Seite verlassen möchten?',
+        generationInProgress: 'Die KI-Generierung läuft noch. Sind Sie sicher, dass Sie die Seite verlassen möchten? Der Fortschritt geht verloren.'
     },
 
     // Navigation
@@ -90,6 +92,11 @@ export default {
         grantTrends: 'Förderungs-Trends',
         chartComingSoon: 'Diagramm kommt bald',
         trackProgress: 'Verfolgen Sie Ihren Fortschritt bei der Fördersuche',
+        help: {
+            live: 'Echtzeit-Anzahl der aktuell offenen Fördermittel aus allen Quellen',
+            ai: 'Fördermittel, die KI basierend auf Ihrem Organisationsprofil und Schwerpunkten zugeordnet hat',
+            urgent: 'Fördermittel mit Bewerbungsfristen in den nächsten 30 Tagen'
+        },
         csoProfilesConfigured: 'CSO-Profile konfiguriert',
         basedOnProfile: 'Basierend auf Ihrem Organisationsprofil',
         changeThisMonth: '+{percent}% diesen Monat'
@@ -109,6 +116,9 @@ export default {
         category: 'Kategorie',
         allCategories: 'Alle Kategorien',
         recentSearches: 'Letzte Suchen',
+        recentlyViewed: 'Zuletzt angesehen',
+        exportCsv: 'Als CSV exportieren',
+        csvExported: 'Förderungen als CSV exportiert',
         minAmount: 'Mindestbetrag',
         maxAmount: 'Höchstbetrag',
         deadlineAfter: 'Frist nach',
@@ -212,6 +222,9 @@ export default {
         documents: 'Dokumente',
         apply: 'Bewerben',
         backToGrants: 'Zurück zu Förderungen',
+        readMore: 'Mehr lesen',
+        showLess: 'Weniger anzeigen',
+        linkCopied: 'Link kopiert!',
         aboutGrant: 'Über diese Förderung',
         keyDates: 'Wichtige Termine',
         applicationDeadline: 'Bewerbungsfrist',
@@ -303,6 +316,8 @@ export default {
         budgetFit: 'Budget-Passung',
         eligible: 'Förderfähig',
         checkEligibility: 'Förderfähigkeit prüfen',
+        exportCsv: 'Als CSV exportieren',
+        csvExported: 'Übereinstimmungen als CSV exportiert',
         selectAnOrg: 'Organisation auswählen',
         selectAnOrgDesc: 'Wählen Sie eine Ihrer Organisationen, um passende Förderungen basierend auf Ihrem Profil zu finden.',
         createOrgFirst: 'Erstellen Sie zuerst eine Organisation',

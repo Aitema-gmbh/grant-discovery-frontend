@@ -48,11 +48,18 @@
               {{ isSaved ? $t('grantDetail.saved') : $t('grantDetail.save') }}
             </button>
 
-            <button class="flex items-center gap-2 px-4 py-2 bg-white text-navy-700 border border-gray-300 rounded-lg hover:shadow transition-all" :aria-label="$t('grantDetail.share')">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <button
+              @click="shareGrant"
+              class="flex items-center gap-2 px-4 py-2 bg-white text-navy-700 border border-gray-300 rounded-lg hover:shadow transition-all"
+              :aria-label="$t('grantDetail.share')"
+            >
+              <svg v-if="!linkCopied" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
               </svg>
-              {{ $t('grantDetail.share') }}
+              <svg v-else class="w-5 h-5 text-sage-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              {{ linkCopied ? $t('grantDetail.linkCopied') : $t('grantDetail.share') }}
             </button>
           </div>
         </div>
@@ -91,9 +98,24 @@
           <!-- Description -->
           <div class="card">
             <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ $t('grantDetail.description') }}</h2>
-            <div class="prose max-w-none">
-              <p class="text-gray-700 leading-relaxed">{{ grant.description }}</p>
+            <div class="prose max-w-none relative">
+              <p
+                class="text-gray-700 leading-relaxed transition-all duration-300 overflow-hidden"
+                :class="descExpanded ? '' : 'max-h-48'"
+                ref="descriptionEl"
+              >{{ grant.description }}</p>
+              <div v-if="!descExpanded && descNeedsExpand" class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
             </div>
+            <button
+              v-if="descNeedsExpand"
+              @click="descExpanded = !descExpanded"
+              class="mt-3 text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors flex items-center gap-1"
+            >
+              {{ descExpanded ? $t('grantDetail.showLess') : $t('grantDetail.readMore') }}
+              <svg class="w-4 h-4 transition-transform" :class="descExpanded ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
           </div>
 
           <!-- AI Summary (if available) -->
@@ -346,7 +368,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
@@ -368,6 +390,10 @@ const grant = ref<any>(null)
 const similarGrants = ref<any[]>([])
 const aiSummary = ref('')
 const isSaved = ref(false)
+const linkCopied = ref(false)
+const descExpanded = ref(false)
+const descNeedsExpand = ref(false)
+const descriptionEl = ref<HTMLElement | null>(null)
 
 // Computed properties
 const eligibleCountries = computed(() => {
@@ -476,6 +502,38 @@ function toggleSave() {
   localStorage.setItem('savedGrants', JSON.stringify(saved))
 }
 
+async function shareGrant() {
+  const url = window.location.href
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: grant.value?.title, url })
+    } catch { /* user cancelled */ }
+  } else {
+    await navigator.clipboard.writeText(url)
+    linkCopied.value = true
+    toast.success(t('grantDetail.linkCopied'))
+    setTimeout(() => { linkCopied.value = false }, 2000)
+  }
+}
+
+function checkDescriptionHeight() {
+  nextTick(() => {
+    if (descriptionEl.value) {
+      descNeedsExpand.value = descriptionEl.value.scrollHeight > 200
+    }
+  })
+}
+
+function trackRecentlyViewed(id: string, title: string) {
+  try {
+    const key = 'recentlyViewedGrants'
+    const existing: Array<{id: string, title: string, ts: number}> = JSON.parse(localStorage.getItem(key) || '[]')
+    const filtered = existing.filter(g => g.id !== id)
+    filtered.unshift({ id, title, ts: Date.now() })
+    localStorage.setItem(key, JSON.stringify(filtered.slice(0, 10)))
+  } catch { /* ignore */ }
+}
+
 function startApplication() {
   router.push({ 
     name: 'proposal-wizard', 
@@ -491,6 +549,8 @@ async function fetchGrantDetails() {
     // Fetch grant details
     const response = await api.get(`/api/grants/${grantId}`)
     grant.value = response.data.grant
+    checkDescriptionHeight()
+    trackRecentlyViewed(grantId, grant.value.title)
 
     // Check if saved
     const saved = JSON.parse(localStorage.getItem('savedGrants') || '[]')

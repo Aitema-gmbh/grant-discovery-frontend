@@ -7,7 +7,20 @@
 
     <!-- CSO Selector -->
     <div class="card-premium mb-8" v-if="csoProfiles.length > 0">
-      <label class="block text-sm font-medium text-navy-700 mb-2">{{ $t('matches.selectOrganization') }}</label>
+      <div class="flex items-center justify-between mb-2">
+        <label class="block text-sm font-medium text-navy-700">{{ $t('matches.selectOrganization') }}</label>
+        <button
+          v-if="matches.length > 0"
+          @click="exportMatchesCsv"
+          class="btn btn-outline btn-sm inline-flex items-center gap-1.5"
+          :aria-label="$t('matches.exportCsv')"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          CSV
+        </button>
+      </div>
       <select v-model="selectedCsoId" @change="loadMatches" class="input w-full max-w-md" :aria-label="$t('matches.selectOrganization')">
         <option value="">{{ $t('matches.chooseOrg') }}</option>
         <option v-for="cso in csoProfiles" :key="cso.id" :value="cso.id">
@@ -183,6 +196,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/AppLayout.vue'
 import ScrollToTop from '@/components/ScrollToTop.vue'
 import HelpTooltip from '@/components/HelpTooltip.vue'
@@ -193,6 +207,7 @@ import { useToast } from '@/lib/useToast'
 
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 const authStore = useAuthStore()
 const { trackPageView, trackGrantAction } = useFeedback()
 const toast = useToast()
@@ -257,6 +272,28 @@ function viewGrant(grantId: string, matchScore?: number) {
     match_score: matchScore
   })
   router.push(`/grants/${grantId}`)
+}
+
+function exportMatchesCsv() {
+  const headers = ['Grant Title', 'Program', 'Overall Score', 'Semantic Score', 'Eligible', 'Eligibility Issues']
+  const rows = matches.value.map((m: any) => [
+    `"${(m.grant?.title || '').replace(/"/g, '""')}"`,
+    `"${(m.grant?.program_name || '').replace(/"/g, '""')}"`,
+    Math.round(m.overall_score * 100) + '%',
+    Math.round(m.semantic_score * 100) + '%',
+    m.is_eligible ? 'Yes' : 'No',
+    `"${(m.eligibility_issues || []).join('; ').replace(/"/g, '""')}"`
+  ])
+
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `matches-export-${new Date().toISOString().split('T')[0]}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+  toast.success(t('matches.csvExported'))
 }
 
 function scoreClass(score: number) {

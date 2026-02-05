@@ -163,6 +163,23 @@
         </button>
       </div>
 
+      <!-- Recently Viewed Grants -->
+      <div v-if="recentlyViewed.length > 0 && !searchQuery" class="flex flex-wrap items-center gap-2 mt-3">
+        <span class="text-xs font-medium text-navy-500">{{ $t('grants.recentlyViewed') }}:</span>
+        <router-link
+          v-for="rv in recentlyViewed"
+          :key="rv.id"
+          :to="`/grants/${rv.id}`"
+          class="inline-flex items-center gap-1 px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs hover:bg-amber-100 transition-colors"
+        >
+          <svg class="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+          {{ rv.title.length > 30 ? rv.title.slice(0, 30) + '...' : rv.title }}
+        </router-link>
+      </div>
+
       <!-- Active Filters Tags -->
       <div v-if="activeFiltersCount > 0" class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-navy-100">
         <span class="text-sm font-medium text-navy-700">{{ $t('grants.filters.active') }}:</span>
@@ -225,6 +242,19 @@
       </div>
 
       <div class="flex items-center gap-3">
+        <!-- CSV Export -->
+        <button
+          v-if="grants.length > 0"
+          @click="exportGrantsCsv"
+          class="btn btn-outline btn-sm hidden sm:inline-flex items-center gap-1.5"
+          :aria-label="$t('grants.exportCsv')"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          CSV
+        </button>
+
         <!-- Sort -->
         <select v-model="sortBy" @change="searchGrants" class="input text-sm" :aria-label="$t('grants.sortLabel')">
           <option value="relevance">{{ $t('grants.sort.relevance') }}</option>
@@ -557,6 +587,16 @@ function clearRecentSearches() {
   localStorage.removeItem('recentSearches')
 }
 
+// Recently viewed grants
+const recentlyViewed = ref<Array<{id: string, title: string}>>([])
+
+function loadRecentlyViewed() {
+  try {
+    const saved = localStorage.getItem('recentlyViewedGrants')
+    if (saved) recentlyViewed.value = JSON.parse(saved).slice(0, 5)
+  } catch { /* ignore */ }
+}
+
 // Active filters count
 const activeFiltersCount = computed(() => {
   let count = 0
@@ -684,6 +724,32 @@ function toggleSaveGrant(grantId: string) {
     trackGrantAction(grantId, 'save', { source_page: 'grants' })
   }
   localStorage.setItem('savedGrants', JSON.stringify(savedGrants.value))
+}
+
+// CSV Export
+function exportGrantsCsv() {
+  const headers = ['Title', 'Category', 'Donor', 'Amount Min', 'Amount Max', 'Currency', 'Deadline', 'Countries', 'URL']
+  const rows = grants.value.map((g: any) => [
+    `"${(g.title || '').replace(/"/g, '""')}"`,
+    g.category || '',
+    `"${(g.donor_name || '').replace(/"/g, '""')}"`,
+    g.amount_min || '',
+    g.amount_max || '',
+    g.currency || 'EUR',
+    g.deadline || '',
+    `"${(Array.isArray(g.eligible_countries) ? g.eligible_countries.join(', ') : g.eligible_countries || '').replace(/"/g, '""')}"`,
+    g.url || ''
+  ])
+
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `grants-export-${new Date().toISOString().split('T')[0]}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+  toast.success(t('grants.csvExported'))
 }
 
 // Formatting helpers
@@ -817,6 +883,7 @@ onMounted(() => {
     savedGrants.value = JSON.parse(saved)
   }
   loadRecentSearches()
+  loadRecentlyViewed()
   // Track page view
   trackPageView('grants')
   searchGrants()

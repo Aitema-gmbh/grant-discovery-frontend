@@ -412,8 +412,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
 import { useToast } from '@/lib/useToast'
@@ -424,6 +424,35 @@ const toast = useToast()
 
 const currentStep = ref(0)
 const loading = ref(false)
+const setupCompleted = ref(false)
+
+// Unsaved form warning
+const hasUnsavedChanges = computed(() => {
+  if (setupCompleted.value) return false
+  const d = formData.value
+  return !!(d.fullName || d.email || d.orgName || d.selectedAreas.length > 0)
+})
+
+function beforeUnloadHandler(e: BeforeUnloadEvent) {
+  if (hasUnsavedChanges.value) {
+    e.preventDefault()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('beforeunload', beforeUnloadHandler)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('beforeunload', beforeUnloadHandler)
+})
+
+onBeforeRouteLeave(() => {
+  if (hasUnsavedChanges.value) {
+    return window.confirm(t('common.unsavedChanges'))
+  }
+  return true
+})
 
 const wizardSteps = computed(() => [
   { name: t('setup.steps.aboutYou') },
@@ -554,6 +583,7 @@ async function completeSetup() {
     }
 
     // Mark onboarding as complete
+    setupCompleted.value = true
     localStorage.setItem('onboarding_completed', 'true')
     localStorage.setItem('onboarding_data', JSON.stringify(formData.value))
 

@@ -30,7 +30,9 @@ export default {
         day: 'день',
         thisMonth: 'цього місяця',
         noResults: 'Результатів не знайдено',
-        tryAgain: 'Спробувати ще раз'
+        tryAgain: 'Спробувати ще раз',
+        unsavedChanges: 'У вас є незбережені зміни. Ви впевнені, що хочете піти?',
+        generationInProgress: 'Генерація ШІ в процесі. Ви впевнені, що хочете піти? Прогрес буде втрачено.'
     },
 
     // Navigation
@@ -90,6 +92,11 @@ export default {
         grantTrends: 'Тенденції пошуку грантів',
         chartComingSoon: 'Візуалізація графіків скоро буде',
         trackProgress: 'Відстежуйте свій прогрес у пошуку грантів з часом',
+        help: {
+            live: 'Кількість відкритих грантів з усіх джерел у реальному часі',
+            ai: 'Гранти, підібрані ШІ на основі профілю вашої організації та напрямків діяльності',
+            urgent: 'Гранти з дедлайнами подачі заявок протягом найближчих 30 днів'
+        },
         csoProfilesConfigured: 'Налаштовано профілів ОГС',
         basedOnProfile: 'На основі профілю вашої організації',
         changeThisMonth: '+{percent}% цього місяця'
@@ -109,6 +116,9 @@ export default {
         category: 'Категорія',
         allCategories: 'Усі категорії',
         recentSearches: 'Останні',
+        recentlyViewed: 'Нещодавно переглянуті',
+        exportCsv: 'Експорт у CSV',
+        csvExported: 'Гранти експортовано у CSV',
         minAmount: 'Мін. сума',
         maxAmount: 'Макс. сума',
         deadlineAfter: 'Дедлайн після',
@@ -212,6 +222,9 @@ export default {
         documents: 'Документи',
         apply: 'Подати заявку',
         backToGrants: 'Назад до грантів',
+        readMore: 'Читати далі',
+        showLess: 'Згорнути',
+        linkCopied: 'Посилання скопійовано!',
         aboutGrant: 'Про цей грант',
         keyDates: 'Ключові дати',
         applicationDeadline: 'Кінцевий термін подачі',
@@ -303,6 +316,8 @@ export default {
         budgetFit: 'Бюджетна відповідність',
         eligible: 'Відповідає',
         checkEligibility: 'Перевірити відповідність',
+        exportCsv: 'Експорт у CSV',
+        csvExported: 'Збіги експортовано у CSV',
         selectAnOrg: 'Оберіть організацію',
         selectAnOrgDesc: 'Оберіть одну з ваших організацій вище, щоб знайти відповідні гранти на основі вашого профілю.',
         createOrgFirst: 'Спочатку створіть організацію',

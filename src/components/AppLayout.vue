@@ -355,8 +355,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import ToastContainer from '@/components/ToastContainer.vue'
@@ -365,10 +365,18 @@ import { useNetworkStatus } from '@/lib/useNetworkStatus'
 const { isOnline } = useNetworkStatus()
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const showUserMenu = ref(false)
 const showNotifications = ref(false)
 const showMobileMenu = ref(false)
+
+// Close mobile menu and dropdowns on route change (handles browser back/forward)
+watch(() => route.fullPath, () => {
+  showMobileMenu.value = false
+  showUserMenu.value = false
+  showNotifications.value = false
+})
 
 // Notifications state (placeholder - can be connected to real backend later)
 interface Notification {

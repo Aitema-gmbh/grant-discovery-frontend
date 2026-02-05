@@ -223,8 +223,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/AppLayout.vue'
 import { useToast } from '@/lib/useToast'
@@ -266,6 +266,25 @@ const currentGeneratingSection = ref<SectionType | null>(null)
 const completedSections = ref<SectionType[]>([])
 const generatedContent = ref<Record<string, string>>({})
 const generationComplete = computed(() => completedSections.value.length === selectedSections.value.length && selectedSections.value.length > 0)
+
+// Unsaved form warning
+const isGenerating = computed(() => currentGeneratingSection.value !== null)
+
+function beforeUnloadHandler(e: BeforeUnloadEvent) {
+  if (isGenerating.value || (currentStep.value > 0 && !generationComplete.value)) {
+    e.preventDefault()
+  }
+}
+
+onBeforeRouteLeave(() => {
+  if (isGenerating.value) {
+    return window.confirm(t('common.generationInProgress'))
+  }
+  if (currentStep.value > 0 && !generationComplete.value) {
+    return window.confirm(t('common.unsavedChanges'))
+  }
+  return true
+})
 
 // Methods
 function nextStep() {
@@ -365,6 +384,8 @@ function viewProposal() {
 }
 
 onMounted(async () => {
+  window.addEventListener('beforeunload', beforeUnloadHandler)
+
   // Get grant ID from query
   grantId.value = route.query.grantId as string
 
@@ -395,5 +416,9 @@ onMounted(async () => {
   } finally {
     loadingCsos.value = false
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('beforeunload', beforeUnloadHandler)
 })
 </script>

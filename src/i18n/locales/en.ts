@@ -30,7 +30,9 @@ export default {
         day: 'day',
         thisMonth: 'this month',
         noResults: 'No results found',
-        tryAgain: 'Try again'
+        tryAgain: 'Try again',
+        unsavedChanges: 'You have unsaved changes. Are you sure you want to leave?',
+        generationInProgress: 'AI generation is in progress. Are you sure you want to leave? Progress will be lost.'
     },
 
     // Navigation
@@ -90,6 +92,11 @@ export default {
         grantTrends: 'Grant Discovery Trends',
         chartComingSoon: 'Chart visualization coming soon',
         trackProgress: 'Track your grant discovery progress over time',
+        help: {
+            live: 'Real-time count of currently open grants from all sources',
+            ai: 'Grants matched by AI based on your organization profile and focus areas',
+            urgent: 'Grants with application deadlines in the next 30 days'
+        },
         csoProfilesConfigured: 'CSO profiles configured',
         basedOnProfile: 'Based on your organization profile',
         changeThisMonth: '+{percent}% this month'
@@ -109,6 +116,9 @@ export default {
         category: 'Category',
         allCategories: 'All Categories',
         recentSearches: 'Recent',
+        recentlyViewed: 'Recently viewed',
+        exportCsv: 'Export as CSV',
+        csvExported: 'Grants exported to CSV',
         minAmount: 'Min Amount',
         maxAmount: 'Max Amount',
         deadlineAfter: 'Deadline After',
@@ -213,6 +223,9 @@ export default {
         documents: 'Documents',
         apply: 'Apply',
         backToGrants: 'Back to Grants',
+        readMore: 'Read more',
+        showLess: 'Show less',
+        linkCopied: 'Link copied!',
         aboutGrant: 'About this Grant',
         keyDates: 'Key Dates',
         applicationDeadline: 'Application Deadline',
@@ -304,6 +317,8 @@ export default {
         budgetFit: 'Budget Fit',
         eligible: 'Eligible',
         checkEligibility: 'Check eligibility',
+        exportCsv: 'Export as CSV',
+        csvExported: 'Matches exported to CSV',
         selectAnOrg: 'Select an organization',
         selectAnOrgDesc: 'Choose one of your organizations above to discover matching grants based on your profile.',
         createOrgFirst: 'Create an organization first',
