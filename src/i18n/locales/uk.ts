@@ -253,6 +253,8 @@ export default {
         gridView: 'Сітка',
         listView: 'Список',
         unsaveGrant: 'Видалити зі збережених',
+        textSearch: 'Текстовий пошук',
+        aiSearch: 'AI пошук',
         batch: {
             select: 'Вибрати',
             selected: '{count} вибрано',

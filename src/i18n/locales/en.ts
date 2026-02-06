@@ -254,6 +254,8 @@ export default {
         gridView: 'Grid view',
         listView: 'List view',
         unsaveGrant: 'Remove from saved',
+        textSearch: 'Text Search',
+        aiSearch: 'AI Search',
         batch: {
             select: 'Select',
             selected: '{count} selected',

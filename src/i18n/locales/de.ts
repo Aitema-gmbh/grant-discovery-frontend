@@ -253,6 +253,8 @@ export default {
         gridView: 'Rasteransicht',
         listView: 'Listenansicht',
         unsaveGrant: 'Aus Gespeicherten entfernen',
+        textSearch: 'Textsuche',
+        aiSearch: 'KI-Suche',
         batch: {
             select: 'Auswählen',
             selected: '{count} ausgewählt',

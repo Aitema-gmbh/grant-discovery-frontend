@@ -92,6 +92,34 @@
         </div>
       </div>
 
+      <!-- Mobile Search Mode Toggle -->
+      <div class="flex sm:hidden gap-2 mb-4" role="group" :aria-label="$t('grants.searchMode')">
+        <button
+          @click="searchMode = 'text'"
+          :class="[
+            'flex-1 py-2 rounded-lg text-sm font-medium transition-all border',
+            searchMode === 'text' ? 'bg-navy-900 text-white border-navy-900' : 'bg-white text-navy-600 border-navy-200'
+          ]"
+          :aria-pressed="searchMode === 'text'"
+        >
+          {{ $t('grants.textSearch') }}
+        </button>
+        <button
+          @click="searchMode = 'semantic'"
+          :class="[
+            'flex-1 py-2 rounded-lg text-sm font-medium transition-all border flex items-center justify-center gap-1.5',
+            searchMode === 'semantic' ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-navy-600 border-navy-200'
+          ]"
+          :aria-pressed="searchMode === 'semantic'"
+        >
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M13 7H7v6h6V7z"/>
+            <path fill-rule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z" clip-rule="evenodd"/>
+          </svg>
+          {{ $t('grants.aiSearch') }}
+        </button>
+      </div>
+
       <!-- Quick Filter Presets -->
       <div class="flex flex-wrap gap-2 mb-4">
         <button
