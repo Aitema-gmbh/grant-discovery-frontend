@@ -741,6 +741,9 @@ export default {
             later: 'Later',
             noDeadline: 'No Deadline',
         },
+        kanban: {
+            dropHere: 'Drag grants here',
+        },
     },
 
     // Footer

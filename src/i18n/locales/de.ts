@@ -744,6 +744,9 @@ export default {
             later: 'Später',
             noDeadline: 'Ohne Frist',
         },
+        kanban: {
+            dropHere: 'Förderungen hierher ziehen',
+        },
     },
 
     // Footer

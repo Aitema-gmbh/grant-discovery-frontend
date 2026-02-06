@@ -756,6 +756,9 @@ export default {
             later: 'Пізніше',
             noDeadline: 'Без дедлайну',
         },
+        kanban: {
+            dropHere: 'Перетягніть гранти сюди',
+        },
     },
 
     // Footer

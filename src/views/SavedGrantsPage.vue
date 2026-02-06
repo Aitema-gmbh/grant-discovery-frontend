@@ -15,6 +15,9 @@
           <button @click="viewMode = 'timeline'" :class="['px-3 py-1.5 rounded-md text-xs font-medium transition-all', viewMode === 'timeline' ? 'bg-white text-navy-900 shadow-sm' : 'text-navy-500 hover:text-navy-700']">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
           </button>
+          <button @click="viewMode = 'kanban'" :class="['px-3 py-1.5 rounded-md text-xs font-medium transition-all', viewMode === 'kanban' ? 'bg-white text-navy-900 shadow-sm' : 'text-navy-500 hover:text-navy-700']">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+          </button>
         </div>
         <button v-if="allGrants.length > 0" @click="exportSavedCsv" class="btn btn-outline btn-sm flex items-center gap-1.5">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,6 +176,65 @@
       </div>
     </div>
 
+    <!-- Kanban View -->
+    <div v-else-if="!loading && filteredGrants.length > 0 && viewMode === 'kanban'" class="animate-fade-in">
+      <div class="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-2 px-2">
+        <div
+          v-for="status in workflowStatuses"
+          :key="status.id"
+          class="flex-shrink-0 w-64 sm:w-72 snap-start"
+          @dragover.prevent
+          @dragenter.prevent="dragOverColumn = status.id"
+          @dragleave="dragOverColumn = ''"
+          @drop="onDrop(status.id)"
+        >
+          <div class="rounded-xl p-3 min-h-[200px] transition-colors" :class="dragOverColumn === status.id ? 'bg-amber-50 ring-2 ring-amber-300' : 'bg-stone-100'">
+            <!-- Column Header -->
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-sm">{{ status.icon }}</span>
+                <h3 class="text-sm font-bold text-navy-800">{{ status.label }}</h3>
+              </div>
+              <span class="text-xs font-medium bg-white text-navy-600 rounded-full px-2 py-0.5">
+                {{ kanbanColumns[status.id]?.length || 0 }}
+              </span>
+            </div>
+
+            <!-- Cards -->
+            <div class="space-y-2">
+              <div
+                v-for="grant in (kanbanColumns[status.id] || [])"
+                :key="grant.id"
+                draggable="true"
+                @dragstart="onDragStart(grant)"
+                class="bg-white rounded-lg p-3 shadow-sm border border-stone-200 cursor-grab active:cursor-grabbing hover:shadow-md transition-all"
+              >
+                <router-link :to="`/grants/${grant.id}`" class="block" @click.stop>
+                  <h4 class="text-xs font-semibold text-navy-900 line-clamp-2 hover:text-amber-600 transition-colors">
+                    {{ grant.title }}
+                  </h4>
+                  <p class="text-[10px] text-navy-500 mt-1 truncate">{{ grant.program_name || '' }}</p>
+                </router-link>
+                <div class="flex items-center justify-between mt-2">
+                  <span v-if="grant.amount_max" class="text-[10px] text-amber-600 font-medium">
+                    {{ formatAmount(grant.amount_min, grant.amount_max, grant.currency) }}
+                  </span>
+                  <span v-if="grant.deadline" class="text-[10px] font-medium" :class="deadlineColor(grant.deadline)">
+                    {{ formatDeadline(grant.deadline) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty column -->
+            <div v-if="!(kanbanColumns[status.id]?.length)" class="text-center py-6 text-xs text-navy-400">
+              {{ $t('savedGrants.kanban.dropHere') }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Empty State -->
     <div v-else class="text-center py-16 animate-fade-in">
       <div class="inline-flex items-center justify-center w-20 h-20 bg-amber-100 rounded-full mb-6">
@@ -205,7 +267,7 @@ const loading = ref(true)
 const allGrants = ref<any[]>([])
 const activeStatusFilter = ref<string | null>(null)
 const loadError = ref(false)
-const viewMode = ref<'cards' | 'timeline'>('cards')
+const viewMode = ref<'cards' | 'timeline' | 'kanban'>('cards')
 
 // Workflow statuses
 const workflowStatuses = computed(() => [
@@ -239,6 +301,33 @@ function grantsForStatus(statusId: string): any[] {
 const filteredGrants = computed(() => {
   if (!activeStatusFilter.value) return allGrants.value
   return allGrants.value.filter(g => getGrantStatus(g.id) === activeStatusFilter.value)
+})
+
+// Kanban drag-and-drop
+const dragOverColumn = ref('')
+const draggedGrant = ref<any>(null)
+
+function onDragStart(grant: any) {
+  draggedGrant.value = grant
+}
+
+function onDrop(statusId: string) {
+  if (draggedGrant.value) {
+    setGrantStatus(draggedGrant.value.id, statusId)
+    draggedGrant.value = null
+  }
+  dragOverColumn.value = ''
+}
+
+const kanbanColumns = computed(() => {
+  const cols: Record<string, any[]> = {}
+  workflowStatuses.value.forEach(s => { cols[s.id] = [] })
+  filteredGrants.value.forEach(g => {
+    const status = getGrantStatus(g.id)
+    if (cols[status]) cols[status]!.push(g)
+    else if (cols['interested']) cols['interested']!.push(g)
+  })
+  return cols
 })
 
 function getStatusIcon(grantId: string): string {

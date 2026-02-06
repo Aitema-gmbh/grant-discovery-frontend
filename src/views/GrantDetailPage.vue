@@ -611,6 +611,30 @@
         {{ $t('grantDetail.backToGrants') }}
       </router-link>
     </div>
+    <!-- Mobile Sticky CTA Bar -->
+    <div v-if="grant && !loading" class="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white/95 backdrop-blur-sm border-t border-stone-200 px-4 py-3 shadow-lg">
+      <div class="flex items-center gap-3 max-w-lg mx-auto">
+        <button
+          @click="toggleSave"
+          :class="isSaved ? 'bg-amber-50 text-amber-600 border-amber-300' : 'bg-white text-navy-700 border-navy-200'"
+          class="flex-1 flex items-center justify-center gap-2 py-2.5 border rounded-xl text-sm font-semibold transition-all"
+        >
+          <svg class="w-4 h-4" :class="isSaved ? 'fill-current' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+          </svg>
+          {{ isSaved ? $t('grantDetail.saved') : $t('grantDetail.save') }}
+        </button>
+        <router-link
+          :to="`/proposals/new?grantId=${grant.id}`"
+          class="flex-1 flex items-center justify-center gap-2 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-semibold hover:bg-amber-600 transition-all"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+          </svg>
+          {{ $t('grantDetail.startProposal') }}
+        </router-link>
+      </div>
+    </div>
     <ScrollToTop />
   </AppLayout>
 </template>
