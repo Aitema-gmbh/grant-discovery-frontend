@@ -1,5 +1,8 @@
 <template>
   <div class="min-h-screen bg-stone-50">
+    <!-- Skip to Content (a11y) -->
+    <a href="#main-content" class="skip-link">{{ $t('common.skipToContent') }}</a>
+
     <!-- Navigation Bar -->
     <nav class="bg-white shadow-soft border-b border-navy-100" role="navigation" :aria-label="$t('nav.mainNavigation')">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -324,7 +327,7 @@
     </Transition>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" role="main">
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" role="main">
       <slot />
     </main>
 

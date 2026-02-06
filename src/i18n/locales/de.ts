@@ -26,6 +26,7 @@ export default {
         and: 'und',
         of: 'von',
         days: 'Tage',
+        skipToContent: 'Zum Hauptinhalt springen',
         scrollToTop: 'Nach oben scrollen',
         scrollProgress: 'Lesefortschritt',
         day: 'Tag',
@@ -228,6 +229,13 @@ export default {
             infrastructure: 'Infrastruktur',
             economic: 'Wirtschaftsentwicklung'
         },
+        presets: {
+            closingSoon: 'Bald ablaufend',
+            largeGrants: 'Große Grants',
+            education: 'Bildung',
+            humanitarian: 'Humanitär',
+            openNow: 'Jetzt offen'
+        },
         searchMode: 'Suchmodus',
         sortLabel: 'Ergebnisse sortieren',
         viewMode: 'Ansichtsmodus',
@@ -303,7 +311,8 @@ export default {
         reminderRemoved: 'Fristerinnerung entfernt.',
         notes: 'Meine Notizen',
         notesPlaceholder: 'Fügen Sie Ihre Notizen zu diesem Grant hinzu — Gedanken, Fragen, Aufgaben...',
-        exportDetails: 'Details exportieren',
+        exportDetails: 'Drucken / PDF',
+        exportPdfHint: 'Verwenden Sie "Als PDF speichern" im Druckdialog für den Offline-Zugriff',
         sourceInfo: 'Quellinformationen',
         source: 'Quelle:',
         referenceId: 'Referenz-ID:',

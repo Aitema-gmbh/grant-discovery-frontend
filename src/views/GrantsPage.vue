@@ -92,6 +92,30 @@
         </div>
       </div>
 
+      <!-- Quick Filter Presets -->
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button
+          v-for="preset in filterPresets"
+          :key="preset.id"
+          @click="applyPreset(preset)"
+          :class="[
+            'px-3 py-1.5 rounded-full text-xs font-medium transition-all border',
+            activePreset === preset.id
+              ? 'bg-amber-500 text-white border-amber-500'
+              : 'bg-white text-navy-600 border-navy-200 hover:border-amber-400 hover:text-amber-600'
+          ]"
+        >
+          {{ preset.icon }} {{ preset.label }}
+        </button>
+        <button
+          v-if="activePreset"
+          @click="clearPreset"
+          class="px-3 py-1.5 rounded-full text-xs font-medium text-navy-400 hover:text-navy-600 transition-colors"
+        >
+          {{ $t('common.clear') }}
+        </button>
+      </div>
+
       <!-- Advanced Filters Toggle -->
       <button
         @click="toggleFilters"
@@ -186,7 +210,7 @@
           leave-from-class="opacity-100"
           leave-to-class="opacity-0"
         >
-          <div v-if="showMobileFilters" class="fixed inset-0 z-50 sm:hidden" @click.self="showMobileFilters = false" @keydown.escape="showMobileFilters = false" role="dialog" aria-modal="true">
+          <div v-if="showMobileFilters" ref="mobileFilterRef" class="fixed inset-0 z-50 sm:hidden" @click.self="showMobileFilters = false" @keydown.escape="showMobileFilters = false" role="dialog" aria-modal="true">
             <div class="absolute inset-0 bg-black/40"></div>
             <Transition
               enter-active-class="transition duration-300 ease-out"
@@ -665,7 +689,7 @@
         leave-from-class="opacity-100"
         leave-to-class="opacity-0"
       >
-        <div v-if="showCompareModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="showCompareModal = false" @keydown.escape="showCompareModal = false">
+        <div v-if="showCompareModal" ref="compareModalRef" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="showCompareModal = false" @keydown.escape="showCompareModal = false">
           <div class="absolute inset-0 bg-black/50"></div>
           <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-y-auto">
             <div class="sticky top-0 bg-white px-6 py-4 border-b border-navy-100 flex items-center justify-between rounded-t-2xl z-10">
@@ -751,6 +775,7 @@ import api from '@/services/api'
 import { useToast } from '@/lib/useToast'
 import { useFeedback } from '@/lib/useFeedback'
 import { usePageTitle } from '@/lib/usePageTitle'
+import { useFocusTrap } from '@/lib/useFocusTrap'
 
 const router = useRouter()
 const route = useRoute()
@@ -813,6 +838,41 @@ const sectorChips = computed(() => [
   { value: 'infrastructure', icon: '🏗️', label: t('grants.sectors.infrastructure') },
   { value: 'economic', icon: '💼', label: t('grants.sectors.economic') },
 ])
+
+// Filter presets
+const activePreset = ref<string | null>(null)
+
+const filterPresets = computed(() => [
+  { id: 'closing-soon', icon: '⏰', label: t('grants.presets.closingSoon'), filters: { deadline: '7' } },
+  { id: 'large-grants', icon: '💰', label: t('grants.presets.largeGrants'), filters: { amountMin: 100000 } },
+  { id: 'education', icon: '📚', label: t('grants.presets.education'), filters: { category: 'education' } },
+  { id: 'humanitarian', icon: '🏥', label: t('grants.presets.humanitarian'), filters: { category: 'humanitarian' } },
+  { id: 'open-now', icon: '✅', label: t('grants.presets.openNow'), filters: { status: 'open' } },
+])
+
+function applyPreset(preset: any) {
+  if (activePreset.value === preset.id) {
+    clearPreset()
+    return
+  }
+  activePreset.value = preset.id
+  // Reset filters first
+  filters.value = { amountMin: null, amountMax: null, deadline: '', country: '', status: '', category: '' }
+  // Apply preset filters
+  if (preset.filters.deadline) filters.value.deadline = preset.filters.deadline
+  if (preset.filters.amountMin) filters.value.amountMin = preset.filters.amountMin
+  if (preset.filters.amountMax) filters.value.amountMax = preset.filters.amountMax
+  if (preset.filters.category) filters.value.category = preset.filters.category
+  if (preset.filters.status) filters.value.status = preset.filters.status
+  if (preset.filters.country) filters.value.country = preset.filters.country
+  searchGrants()
+}
+
+function clearPreset() {
+  activePreset.value = null
+  filters.value = { amountMin: null, amountMax: null, deadline: '', country: '', status: '', category: '' }
+  searchGrants()
+}
 
 // Saved grants (localStorage)
 const savedGrants = ref<string[]>([])
@@ -1118,6 +1178,10 @@ function toggleSaveGrant(grantId: string) {
 // Compare grants
 const compareGrants = ref<any[]>([])
 const showCompareModal = ref(false)
+const compareModalRef = ref<HTMLElement | null>(null)
+const mobileFilterRef = ref<HTMLElement | null>(null)
+useFocusTrap(showCompareModal, compareModalRef)
+useFocusTrap(showMobileFilters, mobileFilterRef)
 
 function toggleCompareGrant(grant: any) {
   const idx = compareGrants.value.findIndex(g => g.id === grant.id)

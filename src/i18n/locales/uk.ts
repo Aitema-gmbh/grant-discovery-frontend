@@ -26,6 +26,7 @@ export default {
         and: 'та',
         of: 'з',
         days: 'днів',
+        skipToContent: 'Перейти до основного вмісту',
         scrollToTop: 'Прокрутити вгору',
         scrollProgress: 'Прогрес читання',
         day: 'день',
@@ -228,6 +229,13 @@ export default {
             infrastructure: 'Інфраструктура',
             economic: 'Економічний розвиток'
         },
+        presets: {
+            closingSoon: 'Скоро закриваються',
+            largeGrants: 'Великі гранти',
+            education: 'Освіта',
+            humanitarian: 'Гуманітарні',
+            openNow: 'Відкриті зараз'
+        },
         searchMode: 'Режим пошуку',
         sortLabel: 'Сортувати результати',
         viewMode: 'Режим перегляду',
@@ -303,7 +311,8 @@ export default {
         reminderRemoved: 'Нагадування про дедлайн видалено.',
         notes: 'Мої нотатки',
         notesPlaceholder: 'Додайте нотатки про цей грант — думки, запитання, плани дій...',
-        exportDetails: 'Експортувати деталі',
+        exportDetails: 'Друк / PDF',
+        exportPdfHint: 'Використовуйте "Зберегти як PDF" у діалозі друку для офлайн доступу',
         sourceInfo: 'Інформація про джерело',
         source: 'Джерело:',
         referenceId: 'Референс ID:',

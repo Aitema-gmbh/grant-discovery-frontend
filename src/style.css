@@ -399,6 +399,19 @@
 }
 
 @layer utilities {
+  /* Skip to main content link (a11y) */
+  .skip-link {
+    @apply absolute top-0 left-0 z-50 px-4 py-2 bg-navy-900 text-white text-sm font-medium rounded-br-lg;
+    transform: translateY(-100%);
+    transition: transform 0.2s ease;
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+    outline: 2px solid #f59e0b;
+    outline-offset: 2px;
+  }
+
   /* Focus visible indicator for keyboard users */
   .focus-ring {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2;
@@ -550,6 +563,30 @@
     text-overflow: unset !important;
     white-space: normal !important;
     display: block !important;
+  }
+
+  /* Grant detail: add print header with branding */
+  .card::before {
+    content: "Grants Bridge Ukraine — Grant Details";
+    display: block;
+    font-size: 10pt;
+    color: #666;
+    text-align: center;
+    padding-bottom: 8pt;
+    margin-bottom: 12pt;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .card ~ .card::before {
+    content: none;
+  }
+
+  /* Show notes section in print */
+  textarea {
+    display: block !important;
+    border: 1px solid #ccc !important;
+    min-height: 60px !important;
+    white-space: pre-wrap !important;
   }
 
   /* Page margins */
