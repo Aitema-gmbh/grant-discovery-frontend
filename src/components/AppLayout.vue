@@ -366,19 +366,31 @@
     <!-- Footer -->
     <footer class="bg-white border-t border-navy-100 mt-auto">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Branding -->
           <div>
-            <p class="text-sm font-medium text-navy-700">
+            <p class="text-sm font-semibold text-navy-800">
               🇺🇦 Grants Bridge Ukraine
             </p>
             <p class="text-xs text-navy-500 mt-1">
-              © 2026 Supporting Ukrainian Civil Society. Powered by AI.
+              {{ $t('footer.tagline') }}
+            </p>
+            <p class="text-xs text-navy-400 mt-2">
+              © {{ new Date().getFullYear() }} Aitema GmbH
             </p>
           </div>
-          <div class="flex gap-6">
+          <!-- Navigation -->
+          <div class="flex flex-wrap gap-x-6 gap-y-2">
             <router-link to="/grants" class="text-sm text-navy-600 hover:text-amber-600 transition-colors">{{ $t('nav.grants') }}</router-link>
+            <router-link to="/saved" class="text-sm text-navy-600 hover:text-amber-600 transition-colors">{{ $t('nav.saved') }}</router-link>
+            <router-link to="/matches" class="text-sm text-navy-600 hover:text-amber-600 transition-colors">{{ $t('nav.matches') }}</router-link>
             <router-link to="/settings" class="text-sm text-navy-600 hover:text-amber-600 transition-colors">{{ $t('nav.settings') }}</router-link>
-            <a href="mailto:support@aitema.de" class="text-sm text-navy-600 hover:text-amber-600 transition-colors">Support</a>
+          </div>
+          <!-- Legal & Contact -->
+          <div class="flex flex-wrap gap-x-6 gap-y-2 md:justify-end">
+            <a href="mailto:support@aitema.de" class="text-sm text-navy-600 hover:text-amber-600 transition-colors">{{ $t('footer.support') }}</a>
+            <span class="text-sm text-navy-600">{{ $t('footer.privacy') }}</span>
+            <span class="text-sm text-navy-600">{{ $t('footer.terms') }}</span>
           </div>
         </div>
       </div>

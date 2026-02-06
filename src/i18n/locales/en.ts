@@ -636,7 +636,13 @@ export default {
         accountRoadmap: 'Account management features like password changes and data export are being developed.',
         notifGrantMatches: 'Email notifications for new grant matches',
         notifWeeklyDigest: 'Weekly digest of saved grants',
-        notifDeadlineReminders: 'Deadline reminders'
+        notifDeadlineReminders: 'Deadline reminders',
+        dataManagement: 'Data Management',
+        dataManagementDesc: 'Manage your locally stored data',
+        savedData: 'Saved grants, notes & reminders',
+        savedDataDesc: 'Clear all locally stored data including saved grants, notes, and reminders',
+        clearData: 'Clear All',
+        dataCleared: 'All local data has been cleared',
     },
 
     // Profile
@@ -651,7 +657,12 @@ export default {
         editSettings: 'Edit Settings',
         logout: 'Logout',
         notLoggedIn: 'Not logged in',
-        pleaseLogin: 'Please log in to view your profile'
+        pleaseLogin: 'Please log in to view your profile',
+        savedGrants: 'Saved Grants',
+        reminders: 'Reminders',
+        notes: 'Notes',
+        searches: 'Searches',
+        quickLinks: 'Quick Links',
     },
 
     // Feedback
@@ -703,10 +714,19 @@ export default {
         },
     },
 
+    // Footer
+    footer: {
+        tagline: 'Supporting Ukrainian Civil Society with AI-powered grant discovery.',
+        support: 'Support',
+        privacy: 'Privacy Policy',
+        terms: 'Terms of Use',
+    },
+
     // Errors
     errors: {
         generic: 'Something went wrong. Please try again.',
         network: 'Network error. Please check your connection.',
+        retryDesc: 'Check your internet connection and try again.',
         notFound: 'Page not found',
         unauthorized: 'Please login to continue',
         forbidden: 'You do not have permission to access this',

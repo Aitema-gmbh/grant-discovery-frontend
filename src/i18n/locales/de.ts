@@ -634,7 +634,13 @@ export default {
         accountRoadmap: 'Kontoverwaltungsfunktionen wie Passwortänderung und Datenexport werden entwickelt.',
         notifGrantMatches: 'E-Mail-Benachrichtigungen bei neuen Förderübereinstimmungen',
         notifWeeklyDigest: 'Wöchentliche Zusammenfassung gespeicherter Förderungen',
-        notifDeadlineReminders: 'Fristerinnerungen'
+        notifDeadlineReminders: 'Fristerinnerungen',
+        dataManagement: 'Datenverwaltung',
+        dataManagementDesc: 'Verwalten Sie Ihre lokal gespeicherten Daten',
+        savedData: 'Gespeicherte Förderungen, Notizen & Erinnerungen',
+        savedDataDesc: 'Alle lokal gespeicherten Daten löschen, einschließlich gespeicherter Förderungen, Notizen und Erinnerungen',
+        clearData: 'Alles löschen',
+        dataCleared: 'Alle lokalen Daten wurden gelöscht',
     },
 
     // Profile
@@ -649,7 +655,12 @@ export default {
         editSettings: 'Einstellungen bearbeiten',
         logout: 'Abmelden',
         notLoggedIn: 'Nicht angemeldet',
-        pleaseLogin: 'Bitte melden Sie sich an, um Ihr Profil zu sehen'
+        pleaseLogin: 'Bitte melden Sie sich an, um Ihr Profil zu sehen',
+        savedGrants: 'Gespeicherte Förderungen',
+        reminders: 'Erinnerungen',
+        notes: 'Notizen',
+        searches: 'Suchen',
+        quickLinks: 'Schnellzugriff',
     },
 
     // Feedback
@@ -706,10 +717,19 @@ export default {
         },
     },
 
+    // Footer
+    footer: {
+        tagline: 'Unterstützung der ukrainischen Zivilgesellschaft mit KI-gestützter Förderungssuche.',
+        support: 'Support',
+        privacy: 'Datenschutz',
+        terms: 'Nutzungsbedingungen',
+    },
+
     // Errors
     errors: {
         generic: 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.',
         network: 'Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.',
+        retryDesc: 'Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.',
         notFound: 'Seite nicht gefunden',
         unauthorized: 'Bitte melden Sie sich an, um fortzufahren',
         forbidden: 'Sie haben keine Berechtigung, darauf zuzugreifen',

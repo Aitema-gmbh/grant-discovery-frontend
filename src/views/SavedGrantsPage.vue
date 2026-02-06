@@ -44,6 +44,25 @@
       </button>
     </div>
 
+    <!-- Error Retry Banner -->
+    <div v-if="loadError && !loading" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-4 animate-fade-in">
+      <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <p class="text-sm font-semibold text-red-800">{{ $t('errors.network') }}</p>
+        <p class="text-xs text-red-600 mt-0.5">{{ $t('errors.retryDesc') }}</p>
+      </div>
+      <button @click="loadSavedGrants" class="btn btn-sm bg-red-600 text-white hover:bg-red-700 flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        {{ $t('common.tryAgain') }}
+      </button>
+    </div>
+
     <!-- Loading -->
     <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div v-for="i in 3" :key="i" class="card animate-pulse">
@@ -136,6 +155,7 @@ usePageTitle(t('savedGrants.title'))
 const loading = ref(true)
 const allGrants = ref<any[]>([])
 const activeStatusFilter = ref<string | null>(null)
+const loadError = ref(false)
 
 // Workflow statuses
 const workflowStatuses = computed(() => [
@@ -235,6 +255,7 @@ function exportSavedCsv() {
 
 async function loadSavedGrants() {
   loading.value = true
+  loadError.value = false
   try {
     const savedIds: string[] = JSON.parse(localStorage.getItem('savedGrants') || '[]')
     if (savedIds.length === 0) {
@@ -246,6 +267,7 @@ async function loadSavedGrants() {
     const all = response.data.grants || []
     allGrants.value = all.filter((g: any) => savedIds.includes(g.id))
   } catch {
+    loadError.value = true
     toast.error(t('errors.network'))
   } finally {
     loading.value = false

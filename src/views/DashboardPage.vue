@@ -103,6 +103,25 @@
       </div>
     </div>
 
+    <!-- Error Retry Banner -->
+    <div v-if="loadError" class="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-4 animate-fade-in">
+      <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <p class="text-sm font-semibold text-red-800">{{ $t('errors.network') }}</p>
+        <p class="text-xs text-red-600 mt-0.5">{{ $t('errors.retryDesc') }}</p>
+      </div>
+      <button @click="fetchDashboardData" class="btn btn-sm bg-red-600 text-white hover:bg-red-700 flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        {{ $t('common.tryAgain') }}
+      </button>
+    </div>
+
     <!-- Smart Insights -->
     <div v-if="insights.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12 animate-fade-in" style="animation-delay: 0.15s">
       <div
@@ -363,6 +382,9 @@ const upcomingDeadlinesList = ref<any[]>([])
 // All grants for charts
 const allGrantsForCharts = ref<any[]>([])
 
+// Error state for retry
+const loadError = ref(false)
+
 // Display name
 const displayName = computed(() => {
   return authStore.user?.user_metadata?.full_name || authStore.user?.email?.split('@')[0] || 'User'
@@ -514,6 +536,7 @@ function deadlineBorderClass(daysLeft: number) {
 
 // Fetch dashboard data
 async function fetchDashboardData() {
+  loadError.value = false
   try {
     // Fetch grants count
     const grantsResponse = await api.get('/api/grants?limit=1')
@@ -566,6 +589,7 @@ async function fetchDashboardData() {
 
   } catch (error) {
     console.error('Error fetching dashboard data:', error)
+    loadError.value = true
     toast.error(t('errors.network'))
     stats.value.activeGrants = 0
     stats.value.matchedGrants = 0
