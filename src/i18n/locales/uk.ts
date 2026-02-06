@@ -144,7 +144,16 @@ export default {
             notReady: 'Не готово',
             inProgress: 'В процесі',
             ready: 'Готово',
-        }
+        },
+        activityFeed: {
+            title: 'Остання активність',
+            saved: 'Збережено грант',
+            removed: 'Видалено грант',
+            statusChanged: 'Статус змінено',
+            noteAdded: 'Додано нотатку',
+            proposalStarted: 'Розпочато заявку',
+            outcomeRecorded: 'Записано результат',
+        },
     },
 
     // Grants
@@ -281,6 +290,12 @@ export default {
             selectAll: 'Вибрати всі',
             savedAll: 'Всі вибрані гранти збережено',
         },
+        batchSelected: 'обрано',
+        batchFunding: 'Загальне фінансування',
+        batchDeadlines: 'Дедлайни',
+        batchSaveAll: 'Зберегти все',
+        batchSaved: '{count} грантів збережено!',
+        batchAlreadySaved: 'Усі гранти вже збережені',
     },
 
     // Grant Detail
@@ -567,7 +582,11 @@ export default {
         aiGenerate: 'ШІ-генерація',
         view: 'Переглянути',
         noProposalsDesc: 'Почніть заявку, знайшовши відповідний грант та натиснувши "Створити заявку".',
-        browseGrants: 'Переглянути гранти'
+        browseGrants: 'Переглянути гранти',
+        templates: {
+            title: 'Мої шаблони',
+            use: 'Використати',
+        },
     },
 
     // Onboarding
@@ -1035,6 +1054,10 @@ export default {
         saving: 'Зберігається...',
         savedLocally: 'Збережено локально о {time}',
         prefilledFromProfile: 'Попередньо заповнено з профілю вашої ОГС. Ви можете редагувати будь-яке поле.',
+        saveAsTemplate: 'Зберегти як шаблон',
+        templateName: 'Введіть назву шаблону:',
+        templateSaved: 'Шаблон успішно збережено!',
+        templateLoaded: 'Шаблон завантажено — ви можете редагувати всі поля.',
     },
 
     // Proposal Detail

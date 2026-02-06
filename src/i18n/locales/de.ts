@@ -144,7 +144,16 @@ export default {
             notReady: 'Nicht bereit',
             inProgress: 'In Bearbeitung',
             ready: 'Bereit',
-        }
+        },
+        activityFeed: {
+            title: 'Letzte Aktivität',
+            saved: 'Förderung gespeichert',
+            removed: 'Förderung entfernt',
+            statusChanged: 'Status geändert',
+            noteAdded: 'Notiz hinzugefügt',
+            proposalStarted: 'Antrag gestartet',
+            outcomeRecorded: 'Ergebnis erfasst',
+        },
     },
 
     // Grants
@@ -281,6 +290,12 @@ export default {
             selectAll: 'Alle auswählen',
             savedAll: 'Alle ausgewählten Förderungen gespeichert',
         },
+        batchSelected: 'ausgewählt',
+        batchFunding: 'Gesamtförderung',
+        batchDeadlines: 'Fristen',
+        batchSaveAll: 'Alle speichern',
+        batchSaved: '{count} Förderungen gespeichert!',
+        batchAlreadySaved: 'Alle Förderungen bereits gespeichert',
     },
 
     // Grant Detail
@@ -567,7 +582,11 @@ export default {
         aiGenerate: 'KI-Generierung',
         view: 'Ansehen',
         noProposalsDesc: 'Starten Sie einen Antrag, indem Sie eine passende Förderung finden und auf "Antrag erstellen" klicken.',
-        browseGrants: 'Förderungen durchsuchen'
+        browseGrants: 'Förderungen durchsuchen',
+        templates: {
+            title: 'Meine Vorlagen',
+            use: 'Verwenden',
+        },
     },
 
     // Onboarding
@@ -1023,6 +1042,10 @@ export default {
         saving: 'Wird gespeichert...',
         savedLocally: 'Lokal gespeichert um {time}',
         prefilledFromProfile: 'Vorausgefüllt aus Ihrem CSO-Profil. Sie können jedes Feld bearbeiten.',
+        saveAsTemplate: 'Als Vorlage speichern',
+        templateName: 'Vorlagenname eingeben:',
+        templateSaved: 'Vorlage erfolgreich gespeichert!',
+        templateLoaded: 'Vorlage geladen — Sie können alle Felder bearbeiten.',
     },
 
     // Proposal Detail

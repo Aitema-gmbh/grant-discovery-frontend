@@ -144,7 +144,16 @@ export default {
             notReady: 'Not Ready',
             inProgress: 'In Progress',
             ready: 'Ready',
-        }
+        },
+        activityFeed: {
+            title: 'Recent Activity',
+            saved: 'Saved grant',
+            removed: 'Removed grant',
+            statusChanged: 'Status changed',
+            noteAdded: 'Note added',
+            proposalStarted: 'Proposal started',
+            outcomeRecorded: 'Outcome recorded',
+        },
     },
 
     // Grants
@@ -282,6 +291,12 @@ export default {
             selectAll: 'Select all',
             savedAll: 'All selected grants saved',
         },
+        batchSelected: 'selected',
+        batchFunding: 'Total funding',
+        batchDeadlines: 'Deadlines',
+        batchSaveAll: 'Save All',
+        batchSaved: '{count} grants saved!',
+        batchAlreadySaved: 'All grants already saved',
     },
 
     // Grant Detail
@@ -568,7 +583,11 @@ export default {
         aiGenerate: 'AI Generate',
         view: 'View',
         noProposalsDesc: 'Start a proposal by finding a matching grant and clicking "Create Proposal".',
-        browseGrants: 'Browse grants'
+        browseGrants: 'Browse grants',
+        templates: {
+            title: 'My Templates',
+            use: 'Use',
+        },
     },
 
     // Onboarding
@@ -1020,6 +1039,10 @@ export default {
         saving: 'Saving...',
         savedLocally: 'Saved locally at {time}',
         prefilledFromProfile: 'Pre-filled from your CSO profile. You can edit any field.',
+        saveAsTemplate: 'Save as Template',
+        templateName: 'Enter template name:',
+        templateSaved: 'Template saved successfully!',
+        templateLoaded: 'Template loaded — you can edit all fields.',
     },
 
     // Proposal Detail

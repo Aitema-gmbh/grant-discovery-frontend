@@ -9,6 +9,28 @@
       </div>
     </div>
 
+    <!-- Templates Section -->
+    <div v-if="templates.length > 0" class="mb-8 animate-fade-in">
+      <h3 class="text-lg font-display font-semibold text-navy-800 mb-3 flex items-center gap-2">
+        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+        {{ $t('proposals.templates.title') }}
+      </h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div v-for="tmpl in templates" :key="tmpl.id" class="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between gap-3 hover:shadow-soft transition-all">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-navy-800 truncate">{{ tmpl.name }}</p>
+            <p class="text-[10px] text-navy-500">{{ new Date(tmpl.createdAt).toLocaleDateString() }}</p>
+          </div>
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            <router-link :to="`/proposals/new?template=${tmpl.id}`" class="btn btn-sm btn-primary text-xs px-2 py-1">{{ $t('proposals.templates.use') }}</router-link>
+            <button @click="deleteTemplate(tmpl.id)" class="p-1 text-navy-400 hover:text-red-500 transition-colors">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Loading state -->
     <div v-if="loading" class="space-y-4">
       <div v-for="i in 4" :key="i" class="card-premium animate-pulse">
@@ -110,6 +132,20 @@ const toast = useToast()
 const loading = ref(true)
 const proposals = ref<any[]>([])
 
+// Template system
+const templates = ref<Array<{ id: string; name: string; csoId: string; sections: any; createdAt: string }>>([])
+
+function loadTemplates() {
+  try {
+    templates.value = JSON.parse(localStorage.getItem('proposalTemplates') || '[]')
+  } catch { templates.value = [] }
+}
+
+function deleteTemplate(id: string) {
+  templates.value = templates.value.filter(t => t.id !== id)
+  localStorage.setItem('proposalTemplates', JSON.stringify(templates.value))
+}
+
 async function loadProposals() {
   loading.value = true
   try {
@@ -155,5 +191,6 @@ function statusBadge(status: string) {
 
 onMounted(() => {
   loadProposals()
+  loadTemplates()
 })
 </script>

@@ -263,9 +263,15 @@
               <h3 class="text-lg font-semibold text-gray-900">{{ $t('proposalWizard.step3.generationComplete') }}</h3>
               <p class="text-gray-600">{{ $t('proposalWizard.step3.generationCompleteDesc') }}</p>
             </div>
-            <button @click="viewProposal" class="btn btn-primary">
-              {{ $t('proposalWizard.step3.viewProposal') }}
-            </button>
+            <div class="flex flex-col items-end gap-2">
+              <button @click="viewProposal" class="btn btn-primary">
+                {{ $t('proposalWizard.step3.viewProposal') }}
+              </button>
+              <button @click="saveAsTemplate" class="btn btn-outline btn-sm flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+                {{ $t('proposalWizard.saveAsTemplate') }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -522,6 +528,45 @@ function viewProposal() {
   router.push(`/proposals/${proposalId.value}`)
 }
 
+// Template system
+function loadTemplate() {
+  const templateId = route.query.template as string
+  if (!templateId) return
+  try {
+    const templates = JSON.parse(localStorage.getItem('proposalTemplates') || '[]')
+    const tmpl = templates.find((t: any) => t.id === templateId)
+    if (tmpl) {
+      if (tmpl.csoId) selectedCsoId.value = tmpl.csoId
+      if (tmpl.sections) {
+        // Store template sections to apply after generation
+        Object.keys(tmpl.sections).forEach(key => {
+          generatedContent.value[key] = tmpl.sections[key]
+        })
+      }
+      toast.info(t('proposalWizard.templateLoaded'))
+    }
+  } catch { /* ignore */ }
+}
+
+function saveAsTemplate() {
+  const name = prompt(t('proposalWizard.templateName'))
+  if (!name) return
+  const sections: Record<string, string> = {}
+  Object.keys(generatedContent.value).forEach(key => {
+    if (generatedContent.value[key]) sections[key] = generatedContent.value[key]
+  })
+  const templates = JSON.parse(localStorage.getItem('proposalTemplates') || '[]')
+  templates.push({
+    id: Date.now().toString(),
+    name,
+    csoId: selectedCsoId.value || '',
+    sections,
+    createdAt: new Date().toISOString()
+  })
+  localStorage.setItem('proposalTemplates', JSON.stringify(templates))
+  toast.success(t('proposalWizard.templateSaved'))
+}
+
 onMounted(async () => {
   window.addEventListener('beforeunload', beforeUnloadHandler)
   window.addEventListener('online', handleOnline)
@@ -576,6 +621,9 @@ onMounted(async () => {
 
   // Pre-fill from CSO profile if available
   await prefillFromProfile()
+
+  // Load template if specified in URL
+  loadTemplate()
 })
 
 onUnmounted(() => {

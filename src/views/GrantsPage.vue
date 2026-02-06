@@ -722,37 +722,54 @@
         leave-from-class="translate-y-0 opacity-100"
         leave-to-class="translate-y-full opacity-0"
       >
-        <div v-if="compareGrants.length > 0" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-navy-900 text-white rounded-2xl shadow-2xl px-5 py-3 flex items-center gap-4 max-w-2xl">
-          <!-- Mini grant cards -->
-          <div class="hidden sm:flex items-center gap-2">
-            <div v-for="cg in compareGrants" :key="cg.id" class="flex items-center gap-2 bg-white/10 rounded-lg px-2.5 py-1.5 max-w-[160px]">
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-medium truncate">{{ cg.title }}</p>
-                <p v-if="cg.deadline" class="text-[10px] text-white/60">{{ new Date(cg.deadline).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) }}</p>
+        <div v-if="compareGrants.length > 0" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-navy-900 text-white rounded-2xl shadow-2xl px-5 py-3 max-w-2xl">
+          <!-- Batch Stats Row -->
+          <div v-if="compareBatchStats" class="flex flex-wrap items-center gap-3 sm:gap-5 text-xs mb-2">
+            <span class="font-semibold text-amber-400">{{ compareBatchStats.count }} {{ $t('grants.batchSelected') }}</span>
+            <span v-if="compareBatchStats.totalMax > 0" class="text-amber-300 font-semibold">
+              {{ $t('grants.batchFunding') }}: {{ formatCurrency(compareBatchStats.totalMax, compareBatchStats.currency) }}
+            </span>
+            <span v-if="compareBatchStats.earliestDeadline" class="text-white/70">
+              {{ $t('grants.batchDeadlines') }}: {{ new Date(compareBatchStats.earliestDeadline).toLocaleDateString(undefined, {day:'numeric',month:'short'}) }} – {{ new Date(compareBatchStats.latestDeadline).toLocaleDateString(undefined, {day:'numeric',month:'short'}) }}
+            </span>
+            <button @click="saveAllCompared" class="px-3 py-1 bg-sage-600 text-white rounded-lg text-xs font-medium hover:bg-sage-700 transition-colors flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+              {{ $t('grants.batchSaveAll') }}
+            </button>
+          </div>
+          <!-- Grant cards and actions -->
+          <div class="flex items-center gap-4">
+            <!-- Mini grant cards -->
+            <div class="hidden sm:flex items-center gap-2">
+              <div v-for="cg in compareGrants" :key="cg.id" class="flex items-center gap-2 bg-white/10 rounded-lg px-2.5 py-1.5 max-w-[160px]">
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs font-medium truncate">{{ cg.title }}</p>
+                  <p v-if="cg.deadline" class="text-[10px] text-white/60">{{ new Date(cg.deadline).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) }}</p>
+                </div>
+                <button @click="toggleCompareGrant(cg)" class="text-white/40 hover:text-white flex-shrink-0">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                </button>
               </div>
-              <button @click="toggleCompareGrant(cg)" class="text-white/40 hover:text-white flex-shrink-0">
-                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-              </button>
             </div>
+            <!-- Mobile: just count -->
+            <div class="flex sm:hidden items-center gap-2">
+              <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+              <span class="text-sm font-medium">{{ compareGrants.length }}/3</span>
+            </div>
+            <button
+              @click="showCompareModal = true"
+              :disabled="compareGrants.length < 2"
+              class="btn btn-secondary btn-sm whitespace-nowrap"
+              :class="compareGrants.length < 2 ? 'opacity-50 cursor-not-allowed' : ''"
+            >
+              {{ $t('grants.compareNow') }}
+            </button>
+            <button @click="compareGrants = []" class="text-white/60 hover:text-white text-sm whitespace-nowrap">
+              {{ $t('common.clear') }}
+            </button>
           </div>
-          <!-- Mobile: just count -->
-          <div class="flex sm:hidden items-center gap-2">
-            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-            </svg>
-            <span class="text-sm font-medium">{{ compareGrants.length }}/3</span>
-          </div>
-          <button
-            @click="showCompareModal = true"
-            :disabled="compareGrants.length < 2"
-            class="btn btn-secondary btn-sm whitespace-nowrap"
-            :class="compareGrants.length < 2 ? 'opacity-50 cursor-not-allowed' : ''"
-          >
-            {{ $t('grants.compareNow') }}
-          </button>
-          <button @click="compareGrants = []" class="text-white/60 hover:text-white text-sm whitespace-nowrap">
-            {{ $t('common.clear') }}
-          </button>
         </div>
       </Transition>
 
@@ -1390,6 +1407,48 @@ function toggleCompareGrant(grant: any) {
   } else {
     toast.warning(t('grants.maxCompare'))
   }
+}
+
+// Batch stats for compare footer
+const compareBatchStats = computed(() => {
+  if (compareGrants.value.length === 0) return null
+  let totalMin = 0, totalMax = 0
+  let earliestDeadline = '', latestDeadline = ''
+  const currencies = new Set<string>()
+
+  compareGrants.value.forEach((g: any) => {
+    if (g.amount_min) totalMin += g.amount_min
+    if (g.amount_max) totalMax += g.amount_max
+    if (g.currency) currencies.add(g.currency)
+    if (g.deadline) {
+      if (!earliestDeadline || g.deadline < earliestDeadline) earliestDeadline = g.deadline
+      if (!latestDeadline || g.deadline > latestDeadline) latestDeadline = g.deadline
+    }
+  })
+
+  return {
+    count: compareGrants.value.length,
+    totalMin,
+    totalMax,
+    currency: currencies.size === 1 ? [...currencies][0] : 'EUR',
+    earliestDeadline,
+    latestDeadline
+  }
+})
+
+function saveAllCompared() {
+  const savedIds: string[] = JSON.parse(localStorage.getItem('savedGrants') || '[]')
+  let added = 0
+  compareGrants.value.forEach((g: any) => {
+    const id = String(g.id)
+    if (!savedIds.includes(id)) {
+      savedIds.push(id)
+      added++
+    }
+  })
+  localStorage.setItem('savedGrants', JSON.stringify(savedIds))
+  if (added > 0) toast.success(t('grants.batchSaved', { count: added }))
+  else toast.info(t('grants.batchAlreadySaved'))
 }
 
 // CSV Export

@@ -303,6 +303,22 @@
       </div>
     </div>
 
+    <!-- Activity Feed (localStorage) -->
+    <div v-if="activityFeed.length > 0" class="mt-8 animate-fade-in" style="animation-delay: 0.32s">
+      <div class="card">
+        <h3 class="section-title mb-4">{{ $t('dashboard.activityFeed.title') }}</h3>
+        <div class="space-y-2.5">
+          <div v-for="(item, i) in activityFeed.slice(0, 8)" :key="i" class="flex items-start gap-3 text-xs">
+            <span class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-sm" :class="item.iconBg">{{ item.icon }}</span>
+            <div class="flex-1 min-w-0">
+              <p class="text-navy-700"><strong class="font-medium">{{ item.action }}</strong> <span class="text-navy-500 truncate">{{ item.detail }}</span></p>
+              <p class="text-[10px] text-navy-400 mt-0.5">{{ item.timeAgo }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Application Pipeline -->
     <div v-if="pipelineCounts.total > 0" class="mt-12 animate-fade-in" style="animation-delay: 0.35s">
       <div class="card-premium">
@@ -558,6 +574,38 @@ const readinessData = computed(() => {
 
     return { id, title, score, colorClass }
   }).sort((a, b) => a.score - b.score)
+})
+
+// Activity feed from localStorage
+const activityFeed = computed(() => {
+  try {
+    const log: Array<{ type: string; grantTitle?: string; detail?: string; timestamp: string }> = JSON.parse(localStorage.getItem('activityLog') || '[]')
+    const now = Date.now()
+
+    return log
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, 8)
+      .map(entry => {
+        const ms = now - new Date(entry.timestamp).getTime()
+        const mins = Math.floor(ms / 60000)
+        const hours = Math.floor(ms / 3600000)
+        const days = Math.floor(ms / 86400000)
+        const timeAgo = days > 0 ? `${days}d ago` : hours > 0 ? `${hours}h ago` : mins > 0 ? `${mins}m ago` : 'just now'
+
+        let icon = '\u{1F4CC}', iconBg = 'bg-navy-100', action = ''
+        switch (entry.type) {
+          case 'save': icon = '\u2B50'; iconBg = 'bg-amber-100'; action = t('dashboard.activityFeed.saved'); break
+          case 'unsave': icon = '\u{1F5D1}\uFE0F'; iconBg = 'bg-red-50'; action = t('dashboard.activityFeed.removed'); break
+          case 'status': icon = '\u{1F4CB}'; iconBg = 'bg-blue-50'; action = t('dashboard.activityFeed.statusChanged'); break
+          case 'note': icon = '\u{1F4DD}'; iconBg = 'bg-sage-50'; action = t('dashboard.activityFeed.noteAdded'); break
+          case 'proposal': icon = '\u270D\uFE0F'; iconBg = 'bg-purple-50'; action = t('dashboard.activityFeed.proposalStarted'); break
+          case 'outcome': icon = '\u{1F3C6}'; iconBg = 'bg-green-50'; action = t('dashboard.activityFeed.outcomeRecorded'); break
+          default: action = entry.type
+        }
+
+        return { icon, iconBg, action, detail: entry.grantTitle || entry.detail || '', timeAgo }
+      })
+  } catch { return [] }
 })
 
 // Display name
@@ -847,6 +895,28 @@ async function fetchDashboardData() {
 
 onMounted(async () => {
   await fetchDashboardData()
+
+  // Seed activity log from existing saved grants if empty
+  try {
+    const log = JSON.parse(localStorage.getItem('activityLog') || '[]')
+    if (log.length === 0) {
+      const saved: string[] = JSON.parse(localStorage.getItem('savedGrants') || '[]')
+      const seedLog: Array<{ type: string; grantTitle: string; timestamp: string }> = []
+      saved.forEach((id, i) => {
+        const grant = allGrantsForCharts.value.find((g: any) => String(g.id) === id || g.id === id)
+        if (grant) {
+          seedLog.push({
+            type: 'save',
+            grantTitle: grant.title,
+            timestamp: new Date(Date.now() - (i + 1) * 3600000 * 6).toISOString()
+          })
+        }
+      })
+      if (seedLog.length > 0) {
+        localStorage.setItem('activityLog', JSON.stringify(seedLog.slice(0, 10)))
+      }
+    }
+  } catch { /* ignore */ }
 
   // Check if user just completed onboarding
   const urlParams = new URLSearchParams(window.location.search)
