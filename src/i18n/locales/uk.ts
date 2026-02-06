@@ -127,6 +127,14 @@ export default {
             matchesAvailable: '{count} AI-збіг(ів) знайдено',
             matchesAvailableDesc: 'Наш AI знайшов гранти, що відповідають профілю вашої організації',
             viewMatches: 'Переглянути збіги'
+        },
+        pipeline: {
+            title: 'Конвеєр заявок',
+            interested: 'Цікаво',
+            researching: 'Дослідження',
+            applying: 'Подання',
+            submitted: 'Подано',
+            outcome: 'Результат'
         }
     },
 
@@ -376,6 +384,15 @@ export default {
             likelyIneligibleDesc: 'Ваша організація може не відповідати кільком ключовим вимогам цього гранту.'
         },
         viewFullMatch: 'Переглянути повний аналіз відповідності',
+        deadlineChecklist: {
+            title: 'Підготовка заявки',
+            saveGrant: 'Зберегти цей грант у вашу воронку',
+            setReminder: 'Встановити нагадування про дедлайн',
+            checkEligibility: 'Перевірити відповідність вимогам',
+            startProposal: 'Розпочати підготовку заявки',
+            continue: 'Продовжити',
+            start: 'Почати',
+        },
         copySection: 'Копіювати в буфер обміну',
         copiedToClipboard: '{section} скопійовано в буфер обміну'
     },

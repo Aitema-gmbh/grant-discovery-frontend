@@ -127,6 +127,14 @@ export default {
             matchesAvailable: '{count} AI match(es) found',
             matchesAvailableDesc: 'Our AI found grants matching your organization profile',
             viewMatches: 'View matches'
+        },
+        pipeline: {
+            title: 'Application Pipeline',
+            interested: 'Interested',
+            researching: 'Researching',
+            applying: 'Applying',
+            submitted: 'Submitted',
+            outcome: 'Outcome'
         }
     },
 
@@ -378,7 +386,16 @@ export default {
             likelyIneligible: 'Likely Ineligible',
             likelyIneligibleDesc: 'Your organization may not meet several key requirements for this grant.'
         },
-        viewFullMatch: 'View Full Match Analysis'
+        viewFullMatch: 'View Full Match Analysis',
+        deadlineChecklist: {
+            title: 'Application Preparation',
+            saveGrant: 'Save this grant to your pipeline',
+            setReminder: 'Set a deadline reminder',
+            checkEligibility: 'Check your eligibility',
+            startProposal: 'Start your proposal',
+            continue: 'Continue',
+            start: 'Start',
+        },
     },
 
     // Matches

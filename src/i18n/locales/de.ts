@@ -127,6 +127,14 @@ export default {
             matchesAvailable: '{count} KI-Treffer gefunden',
             matchesAvailableDesc: 'Unsere KI hat Förderungen gefunden, die zu Ihrem Organisationsprofil passen',
             viewMatches: 'Treffer ansehen'
+        },
+        pipeline: {
+            title: 'Bewerbungspipeline',
+            interested: 'Interessiert',
+            researching: 'Recherche',
+            applying: 'Bewerbung',
+            submitted: 'Eingereicht',
+            outcome: 'Ergebnis'
         }
     },
 
@@ -375,7 +383,16 @@ export default {
             likelyIneligible: 'Wahrscheinlich nicht förderfähig',
             likelyIneligibleDesc: 'Ihre Organisation erfüllt möglicherweise mehrere wesentliche Anforderungen dieser Förderung nicht.'
         },
-        viewFullMatch: 'Vollständige Übereinstimmungsanalyse anzeigen',
+        viewFullMatch: 'Vollständige Übereinstimmungsanalyse ansehen',
+        deadlineChecklist: {
+            title: 'Antragsvorbereitung',
+            saveGrant: 'Förderung in Ihre Pipeline speichern',
+            setReminder: 'Fristerinnerung setzen',
+            checkEligibility: 'Förderfähigkeit prüfen',
+            startProposal: 'Antrag beginnen',
+            continue: 'Fortsetzen',
+            start: 'Starten',
+        },
         copySection: 'In Zwischenablage kopieren',
         copiedToClipboard: '{section} in die Zwischenablage kopiert'
     },

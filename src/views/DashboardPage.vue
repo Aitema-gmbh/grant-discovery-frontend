@@ -303,6 +303,41 @@
       </div>
     </div>
 
+    <!-- Application Pipeline -->
+    <div v-if="pipelineCounts.total > 0" class="mt-12 animate-fade-in" style="animation-delay: 0.35s">
+      <div class="card-premium">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="section-title">{{ $t('dashboard.pipeline.title') }}</h3>
+          <router-link to="/saved" class="text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors">
+            {{ $t('common.viewAll') }} →
+          </router-link>
+        </div>
+        <div class="grid grid-cols-5 gap-3">
+          <router-link
+            v-for="stage in pipelineStages"
+            :key="stage.id"
+            :to="`/saved`"
+            class="text-center p-3 rounded-xl transition-all hover:shadow-soft group"
+            :class="(pipelineCounts[stage.id] ?? 0) > 0 ? stage.bgHover : 'bg-stone-50 opacity-50'"
+          >
+            <span class="text-lg">{{ stage.icon }}</span>
+            <div class="text-2xl font-bold font-display mt-1" :class="stage.textColor">
+              {{ pipelineCounts[stage.id] || 0 }}
+            </div>
+            <div class="text-[10px] font-medium text-navy-600 mt-1 leading-tight">{{ stage.label }}</div>
+          </router-link>
+        </div>
+        <!-- Pipeline progress bar -->
+        <div class="mt-4 flex rounded-full h-2.5 overflow-hidden bg-navy-100">
+          <div v-for="stage in pipelineStages" :key="'bar-'+stage.id"
+            class="transition-all duration-500"
+            :class="stage.barColor"
+            :style="`width: ${pipelineCounts.total > 0 ? (pipelineCounts[stage.id] || 0) / pipelineCounts.total * 100 : 0}%`"
+          ></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Charts Section -->
     <div v-if="allGrantsForCharts.length > 0" class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in" style="animation-delay: 0.4s">
       <!-- Deadline Timeline -->
@@ -384,6 +419,28 @@ const allGrantsForCharts = ref<any[]>([])
 
 // Error state for retry
 const loadError = ref(false)
+
+// Application Pipeline
+const pipelineStages = computed(() => [
+  { id: 'interested', icon: '💡', label: t('dashboard.pipeline.interested'), bgHover: 'bg-amber-50 hover:bg-amber-100', textColor: 'text-amber-700', barColor: 'bg-amber-400' },
+  { id: 'researching', icon: '🔍', label: t('dashboard.pipeline.researching'), bgHover: 'bg-blue-50 hover:bg-blue-100', textColor: 'text-blue-700', barColor: 'bg-blue-400' },
+  { id: 'applying', icon: '📝', label: t('dashboard.pipeline.applying'), bgHover: 'bg-indigo-50 hover:bg-indigo-100', textColor: 'text-indigo-700', barColor: 'bg-indigo-400' },
+  { id: 'submitted', icon: '📨', label: t('dashboard.pipeline.submitted'), bgHover: 'bg-sage-50 hover:bg-sage-100', textColor: 'text-sage-700', barColor: 'bg-sage-400' },
+  { id: 'outcome', icon: '🏆', label: t('dashboard.pipeline.outcome'), bgHover: 'bg-green-50 hover:bg-green-100', textColor: 'text-green-700', barColor: 'bg-green-400' },
+])
+
+const pipelineCounts = computed((): { interested: number; researching: number; applying: number; submitted: number; outcome: number; total: number; [key: string]: number } => {
+  const saved: string[] = JSON.parse(localStorage.getItem('savedGrants') || '[]')
+  const workflow: Record<string, string> = JSON.parse(localStorage.getItem('grantWorkflow') || '{}')
+  const counts = { interested: 0, researching: 0, applying: 0, submitted: 0, outcome: 0, total: 0 }
+  saved.forEach(id => {
+    const status: string = workflow[id] ?? 'interested'
+    if (status in counts) (counts as any)[status]++
+    else counts.interested++
+    counts.total++
+  })
+  return counts
+})
 
 // Display name
 const displayName = computed(() => {

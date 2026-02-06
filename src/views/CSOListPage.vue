@@ -68,7 +68,7 @@
           <span
             v-for="area in parseFocusAreas(cso.focus_areas).slice(0, 3)"
             :key="area"
-            class="px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium"
+            class="px-2 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-medium"
           >
             {{ area }}
           </span>

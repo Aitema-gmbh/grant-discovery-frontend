@@ -114,6 +114,91 @@
         </div>
       </div>
 
+      <!-- Deadline Preparation Checklist -->
+      <div
+        v-if="grant.deadline && daysUntilDeadline > 0 && daysUntilDeadline <= 30"
+        class="mb-8 p-5 rounded-xl border-2 animate-fade-in"
+        :class="daysUntilDeadline <= 7 ? 'bg-red-50 border-red-200' : daysUntilDeadline <= 14 ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-200'"
+      >
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-display font-semibold text-navy-900 flex items-center gap-2">
+            <svg class="w-5 h-5" :class="daysUntilDeadline <= 7 ? 'text-red-500' : daysUntilDeadline <= 14 ? 'text-amber-500' : 'text-blue-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            {{ $t('grantDetail.deadlineChecklist.title') }}
+          </h3>
+          <span class="px-3 py-1 rounded-full text-sm font-bold"
+            :class="daysUntilDeadline <= 7 ? 'bg-red-200 text-red-800' : daysUntilDeadline <= 14 ? 'bg-amber-200 text-amber-800' : 'bg-blue-200 text-blue-800'"
+          >
+            {{ daysUntilDeadline }} {{ $t('common.days') }}
+          </span>
+        </div>
+
+        <div class="space-y-3">
+          <!-- Step 1: Save grant -->
+          <div class="flex items-center gap-3 p-3 bg-white/70 rounded-lg">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" :class="isSaved ? 'bg-sage-100 text-sage-600' : 'bg-navy-100 text-navy-400'">
+              <svg v-if="isSaved" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              <span v-else class="text-xs font-bold">1</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium" :class="isSaved ? 'text-sage-700 line-through' : 'text-navy-800'">{{ $t('grantDetail.deadlineChecklist.saveGrant') }}</p>
+            </div>
+            <button v-if="!isSaved" @click="toggleSave" class="text-xs font-medium text-amber-600 hover:text-amber-700">{{ $t('grantDetail.save') }}</button>
+          </div>
+
+          <!-- Step 2: Set reminder -->
+          <div class="flex items-center gap-3 p-3 bg-white/70 rounded-lg">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" :class="isReminderSet ? 'bg-sage-100 text-sage-600' : 'bg-navy-100 text-navy-400'">
+              <svg v-if="isReminderSet" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              <span v-else class="text-xs font-bold">2</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium" :class="isReminderSet ? 'text-sage-700 line-through' : 'text-navy-800'">{{ $t('grantDetail.deadlineChecklist.setReminder') }}</p>
+            </div>
+            <button v-if="!isReminderSet" @click="toggleReminder" class="text-xs font-medium text-amber-600 hover:text-amber-700">{{ $t('grantDetail.setReminder') }}</button>
+          </div>
+
+          <!-- Step 3: Check eligibility -->
+          <div class="flex items-center gap-3 p-3 bg-white/70 rounded-lg">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" :class="eligibilityResult ? 'bg-sage-100 text-sage-600' : 'bg-navy-100 text-navy-400'">
+              <svg v-if="eligibilityResult" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              <span v-else class="text-xs font-bold">3</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium" :class="eligibilityResult ? 'text-sage-700 line-through' : 'text-navy-800'">{{ $t('grantDetail.deadlineChecklist.checkEligibility') }}</p>
+            </div>
+            <button v-if="!eligibilityResult && authStore.isAuthenticated" @click="runEligibilityCheck" class="text-xs font-medium text-amber-600 hover:text-amber-700">{{ $t('grantDetail.runCheck') }}</button>
+          </div>
+
+          <!-- Step 4: Start proposal -->
+          <div class="flex items-center gap-3 p-3 bg-white/70 rounded-lg">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" :class="grantProposal ? 'bg-sage-100 text-sage-600' : 'bg-navy-100 text-navy-400'">
+              <svg v-if="grantProposal" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              <span v-else class="text-xs font-bold">4</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium" :class="grantProposal ? 'text-sage-700 line-through' : 'text-navy-800'">{{ $t('grantDetail.deadlineChecklist.startProposal') }}</p>
+              <p v-if="grantProposal" class="text-xs text-navy-500 mt-0.5">{{ $t('grantDetail.proposalStatus.' + (grantProposal.status || 'draft')) }}</p>
+            </div>
+            <router-link v-if="grantProposal" :to="`/proposals/${grantProposal.id}`" class="text-xs font-medium text-amber-600 hover:text-amber-700">{{ $t('grantDetail.deadlineChecklist.continue') }}</router-link>
+            <button v-else-if="authStore.isAuthenticated" @click="startApplication" class="text-xs font-medium text-amber-600 hover:text-amber-700">{{ $t('grantDetail.deadlineChecklist.start') }}</button>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="mt-4 flex items-center gap-3">
+          <div class="flex-1 bg-white/50 rounded-full h-2 overflow-hidden">
+            <div
+              class="h-full rounded-full transition-all duration-500"
+              :class="daysUntilDeadline <= 7 ? 'bg-red-500' : daysUntilDeadline <= 14 ? 'bg-amber-500' : 'bg-blue-500'"
+              :style="`width: ${checklistProgress}%`"
+            ></div>
+          </div>
+          <span class="text-xs font-semibold text-navy-600">{{ checklistProgress }}%</span>
+        </div>
+      </div>
+
       <!-- Main Content Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Left Column: Grant Details -->
@@ -603,6 +688,15 @@ const daysUntilDeadline = computed(() => {
   const date = new Date(grant.value.deadline)
   const now = new Date()
   return Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+})
+
+const checklistProgress = computed(() => {
+  let done = 0
+  if (isSaved.value) done++
+  if (isReminderSet.value) done++
+  if (eligibilityResult.value) done++
+  if (grantProposal.value) done++
+  return Math.round((done / 4) * 100)
 })
 
 // Methods

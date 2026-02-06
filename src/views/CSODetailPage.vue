@@ -62,7 +62,7 @@
               <span
                 v-for="area in focusAreas"
                 :key="area"
-                class="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-medium"
+                class="px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full text-sm font-medium"
               >
                 {{ area }}
               </span>
