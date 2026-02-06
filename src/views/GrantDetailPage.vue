@@ -472,6 +472,54 @@
             </div>
           </div>
 
+          <!-- Budget Planner -->
+          <div v-if="grant.amount_max || grant.amount_min" class="card">
+            <button @click="showBudgetPlanner = !showBudgetPlanner" class="w-full flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-navy-900 flex items-center gap-2">
+                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                </svg>
+                {{ $t('grantDetail.budgetPlanner.title') }}
+              </h3>
+              <svg class="w-4 h-4 text-navy-400 transition-transform" :class="showBudgetPlanner ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div v-if="showBudgetPlanner" class="mt-4 space-y-3">
+              <div>
+                <label class="text-xs font-medium text-navy-500">{{ $t('grantDetail.budgetPlanner.requestedAmount') }}</label>
+                <input v-model.number="budgetRequested" type="number" class="input text-sm py-1.5 w-full mt-1" :placeholder="String(grant.amount_max || grant.amount_min || 0)" @input="saveBudgetPlan" />
+              </div>
+              <div>
+                <label class="text-xs font-medium text-navy-500">{{ $t('grantDetail.budgetPlanner.fundingRate') }} (%)</label>
+                <input v-model.number="budgetFundingRate" type="number" min="1" max="100" class="input text-sm py-1.5 w-full mt-1" placeholder="80" @input="saveBudgetPlan" />
+              </div>
+              <div class="p-3 bg-stone-50 rounded-lg space-y-2">
+                <div class="flex justify-between text-xs">
+                  <span class="text-navy-500">{{ $t('grantDetail.budgetPlanner.totalProject') }}</span>
+                  <span class="font-bold text-navy-900">€{{ budgetTotalProject.toLocaleString() }}</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                  <span class="text-navy-500">{{ $t('grantDetail.budgetPlanner.grantCovers') }}</span>
+                  <span class="font-semibold text-sage-600">€{{ budgetRequested.toLocaleString() }}</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                  <span class="text-navy-500">{{ $t('grantDetail.budgetPlanner.coFinancing') }}</span>
+                  <span class="font-semibold text-amber-600">€{{ budgetCoFinancing.toLocaleString() }}</span>
+                </div>
+                <!-- Visual bar -->
+                <div class="flex rounded-full h-2 overflow-hidden bg-navy-100 mt-1">
+                  <div class="bg-sage-400 transition-all" :style="`width: ${budgetFundingRate}%`"></div>
+                  <div class="bg-amber-400 transition-all" :style="`width: ${100 - budgetFundingRate}%`"></div>
+                </div>
+                <div class="flex justify-between text-[10px] text-navy-400">
+                  <span>{{ $t('grantDetail.budgetPlanner.grant') }} {{ budgetFundingRate }}%</span>
+                  <span>{{ $t('grantDetail.budgetPlanner.own') }} {{ 100 - budgetFundingRate }}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Source Information -->
           <div class="card bg-gray-50">
             <h3 class="text-sm font-medium text-gray-600 mb-3">{{ $t('grantDetail.sourceInfo') }}</h3>
@@ -704,6 +752,28 @@ function debounceSaveNote() {
   if (noteSaveTimeout) clearTimeout(noteSaveTimeout)
   noteSaveTimeout = setTimeout(saveNote, 1000)
 }
+// Budget planner
+const showBudgetPlanner = ref(false)
+const budgetRequested = ref(0)
+const budgetFundingRate = ref(80)
+const BUDGET_KEY = computed(() => `grantBudget_${route.params.id}`)
+const budgetTotalProject = computed(() => budgetFundingRate.value > 0 ? Math.round(budgetRequested.value / (budgetFundingRate.value / 100)) : 0)
+const budgetCoFinancing = computed(() => Math.max(0, budgetTotalProject.value - budgetRequested.value))
+
+function loadBudgetPlan() {
+  try {
+    const data = JSON.parse(localStorage.getItem(BUDGET_KEY.value) || '{}')
+    if (data.requested) budgetRequested.value = data.requested
+    if (data.fundingRate) budgetFundingRate.value = data.fundingRate
+  } catch { /* ignore */ }
+}
+
+function saveBudgetPlan() {
+  try {
+    localStorage.setItem(BUDGET_KEY.value, JSON.stringify({ requested: budgetRequested.value, fundingRate: budgetFundingRate.value }))
+  } catch { /* storage full */ }
+}
+
 // Preparation checklist
 interface PrepItem { text: string; checked: boolean }
 const prepItems = ref<PrepItem[]>([])
@@ -1045,9 +1115,15 @@ async function fetchGrantDetails() {
     const reminders = JSON.parse(localStorage.getItem('grantReminders') || '[]')
     isReminderSet.value = reminders.some((r: any) => r.grantId === grantId)
 
-    // Load notes and prep checklist
+    // Load notes, prep checklist, and budget plan
     loadNote(grantId)
     loadPrepItems()
+    loadBudgetPlan()
+    // Pre-fill budget from grant data
+    if (!budgetRequested.value && grant.value) {
+      budgetRequested.value = grant.value.amount_max || grant.value.amount_min || 0
+      if (grant.value.funding_rate) budgetFundingRate.value = grant.value.funding_rate
+    }
 
     // Check for existing proposals for this grant
     if (authStore.isAuthenticated) {

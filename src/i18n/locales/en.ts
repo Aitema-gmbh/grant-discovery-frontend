@@ -105,6 +105,9 @@ export default {
             next3Months: '1-3 months',
             later: 'Later',
         },
+        calendar: {
+            title: 'Deadline Calendar',
+        },
         trackProgress: 'Track your grant discovery progress over time',
         help: {
             live: 'Real-time count of currently open grants from all sources',
@@ -399,6 +402,16 @@ export default {
         prepChecklist: {
             title: 'Preparation Checklist',
             addPlaceholder: 'Add task (e.g. "Prepare budget narrative")',
+        },
+        budgetPlanner: {
+            title: 'Budget Planner',
+            requestedAmount: 'Requested Amount (€)',
+            fundingRate: 'Funding Rate',
+            totalProject: 'Total Project Cost',
+            grantCovers: 'Grant Covers',
+            coFinancing: 'Co-Financing Required',
+            grant: 'Grant',
+            own: 'Own',
         },
     },
 
@@ -744,6 +757,8 @@ export default {
         kanban: {
             dropHere: 'Drag grants here',
         },
+        noDeadlines: 'No grants with deadlines to export',
+        icalExported: 'Calendar file exported successfully',
     },
 
     // Footer

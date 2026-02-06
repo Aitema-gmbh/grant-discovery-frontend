@@ -25,6 +25,12 @@
           </svg>
           CSV
         </button>
+        <button v-if="allGrants.length > 0" @click="exportIcal" class="btn btn-outline btn-sm flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          iCal
+        </button>
         <router-link to="/grants" class="btn btn-primary btn-sm">
           {{ $t('savedGrants.browseMore') }}
         </router-link>
@@ -419,6 +425,49 @@ function exportSavedCsv() {
   a.click()
   URL.revokeObjectURL(url)
   toast.success(t('grants.csvExported'))
+}
+
+function exportIcal() {
+  const grantsWithDeadlines = allGrants.value.filter((g: any) => g.deadline)
+  if (grantsWithDeadlines.length === 0) {
+    toast.info(t('savedGrants.noDeadlines'))
+    return
+  }
+  const lines: string[] = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Grants Bridge Ukraine//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH'
+  ]
+  grantsWithDeadlines.forEach((g: any) => {
+    const d = new Date(g.deadline)
+    const dateStr = d.toISOString().replace(/[-:]/g, '').split('T')[0]
+    const nextDay = new Date(d)
+    nextDay.setDate(nextDay.getDate() + 1)
+    const nextDateStr = nextDay.toISOString().replace(/[-:]/g, '').split('T')[0]
+    const desc = [g.category, formatAmount(g.amount_min, g.amount_max, g.currency)].filter(Boolean).join(' — ')
+    lines.push(
+      'BEGIN:VEVENT',
+      `UID:grant-${g.id}@grantsbridgeukraine`,
+      `DTSTART;VALUE=DATE:${dateStr}`,
+      `DTEND;VALUE=DATE:${nextDateStr}`,
+      `SUMMARY:${(g.title || 'Grant Deadline').replace(/[,;\\]/g, ' ')}`,
+      `DESCRIPTION:${desc.replace(/[,;\\]/g, ' ')}`,
+      'STATUS:CONFIRMED',
+      'TRANSP:TRANSPARENT',
+      'END:VEVENT'
+    )
+  })
+  lines.push('END:VCALENDAR')
+  const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `grant-deadlines-${new Date().toISOString().split('T')[0]}.ics`
+  a.click()
+  URL.revokeObjectURL(url)
+  toast.success(t('savedGrants.icalExported'))
 }
 
 async function loadSavedGrants() {

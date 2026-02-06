@@ -105,6 +105,9 @@ export default {
             next3Months: '1-3 місяці',
             later: 'Пізніше',
         },
+        calendar: {
+            title: 'Календар дедлайнів',
+        },
         trackProgress: 'Відстежуйте свій прогрес у пошуку грантів з часом',
         help: {
             live: 'Кількість відкритих грантів з усіх джерел у реальному часі',
@@ -396,6 +399,16 @@ export default {
         prepChecklist: {
             title: 'Контрольний список підготовки',
             addPlaceholder: 'Додати завдання (напр. "Підготувати бюджетний опис")',
+        },
+        budgetPlanner: {
+            title: 'Планувальник бюджету',
+            requestedAmount: 'Запитувана сума (€)',
+            fundingRate: 'Ставка фінансування',
+            totalProject: 'Загальна вартість проєкту',
+            grantCovers: 'Грант покриває',
+            coFinancing: 'Необхідне співфінансування',
+            grant: 'Грант',
+            own: 'Власні',
         },
         copySection: 'Копіювати в буфер обміну',
         copiedToClipboard: '{section} скопійовано в буфер обміну'
@@ -759,6 +772,8 @@ export default {
         kanban: {
             dropHere: 'Перетягніть гранти сюди',
         },
+        noDeadlines: 'Немає грантів з дедлайнами для експорту',
+        icalExported: 'Файл календаря успішно експортовано',
     },
 
     // Footer

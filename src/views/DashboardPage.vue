@@ -376,6 +376,51 @@
         </div>
       </div>
     </div>
+
+    <!-- Month Calendar Widget -->
+    <div v-if="allGrantsForCharts.length > 0" class="mt-8 max-w-md animate-fade-in" style="animation-delay: 0.45s">
+      <div class="card-premium">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="section-title">{{ $t('dashboard.calendar.title') }}</h3>
+          <div class="flex items-center gap-2">
+            <button @click="calendarMonth--" class="p-1 rounded hover:bg-navy-100 transition-colors">
+              <svg class="w-4 h-4 text-navy-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <span class="text-sm font-semibold text-navy-800 min-w-[120px] text-center">{{ calendarMonthLabel }}</span>
+            <button @click="calendarMonth++" class="p-1 rounded hover:bg-navy-100 transition-colors">
+              <svg class="w-4 h-4 text-navy-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-7 gap-px text-center text-[10px] font-medium text-navy-400 mb-1">
+          <div v-for="d in ['Mo','Tu','We','Th','Fr','Sa','Su']" :key="d">{{ d }}</div>
+        </div>
+        <div class="grid grid-cols-7 gap-px">
+          <div v-for="(cell, i) in calendarDays" :key="i"
+            class="aspect-square flex flex-col items-center justify-center rounded-lg text-xs transition-all cursor-default"
+            :class="[
+              cell.isCurrentMonth ? 'text-navy-800' : 'text-navy-300',
+              cell.isToday ? 'bg-amber-100 font-bold ring-1 ring-amber-400' : '',
+              cell.deadlineCount > 0 ? 'hover:bg-navy-50 cursor-pointer' : ''
+            ]"
+            @click="cell.deadlineCount > 0 ? selectedCalendarDate = cell.dateStr : null"
+          >
+            <span>{{ cell.day }}</span>
+            <div v-if="cell.deadlineCount > 0" class="flex gap-0.5 mt-0.5">
+              <span v-for="n in Math.min(cell.deadlineCount, 3)" :key="n" class="w-1 h-1 rounded-full" :class="cell.isUrgent ? 'bg-red-500' : 'bg-amber-500'"></span>
+            </div>
+          </div>
+        </div>
+        <!-- Selected date deadlines -->
+        <div v-if="selectedCalendarDate && selectedDateGrants.length > 0" class="mt-3 pt-3 border-t border-navy-100 space-y-2">
+          <p class="text-xs font-semibold text-navy-600">{{ selectedCalendarDate }}</p>
+          <router-link v-for="g in selectedDateGrants" :key="g.id" :to="`/grants/${g.id}`" class="block p-2 rounded-lg hover:bg-navy-50 transition-colors">
+            <p class="text-xs font-medium text-navy-900 truncate">{{ g.title }}</p>
+            <p class="text-[10px] text-navy-500">{{ g.organization || g.category }}</p>
+          </router-link>
+        </div>
+      </div>
+    </div>
     <!-- Onboarding Tour (auto-starts for new users) -->
     <OnboardingTour />
   </AppLayout>
@@ -590,6 +635,78 @@ function deadlineBorderClass(daysLeft: number) {
   if (daysLeft <= 14) return 'border-amber-500 bg-amber-50'
   return 'border-navy-300 bg-navy-50'
 }
+
+// Calendar widget
+const calendarMonth = ref(0) // offset from current month
+const selectedCalendarDate = ref('')
+
+const calendarMonthLabel = computed(() => {
+  const d = new Date()
+  d.setMonth(d.getMonth() + calendarMonth.value)
+  return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+})
+
+const calendarDays = computed(() => {
+  const now = new Date()
+  const target = new Date(now.getFullYear(), now.getMonth() + calendarMonth.value, 1)
+  const year = target.getFullYear()
+  const month = target.getMonth()
+  const firstDay = new Date(year, month, 1)
+  const lastDay = new Date(year, month + 1, 0)
+
+  // Start from Monday
+  let startOffset = firstDay.getDay() - 1
+  if (startOffset < 0) startOffset = 6
+
+  const days: Array<{ day: number; isCurrentMonth: boolean; isToday: boolean; deadlineCount: number; isUrgent: boolean; dateStr: string }> = []
+
+  // Build deadline map for this month
+  const deadlineMap: Record<string, any[]> = {}
+  allGrantsForCharts.value.forEach((g: any) => {
+    if (!g.deadline) return
+    const dd = new Date(g.deadline)
+    const key = `${dd.getFullYear()}-${String(dd.getMonth() + 1).padStart(2, '0')}-${String(dd.getDate()).padStart(2, '0')}`
+    if (!deadlineMap[key]) deadlineMap[key] = []
+    deadlineMap[key].push(g)
+  })
+
+  const today = new Date()
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+
+  // Previous month padding
+  for (let i = startOffset - 1; i >= 0; i--) {
+    const d = new Date(year, month, -i)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    days.push({ day: d.getDate(), isCurrentMonth: false, isToday: false, deadlineCount: (deadlineMap[key] || []).length, isUrgent: false, dateStr: key })
+  }
+
+  // Current month
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+    const daysUntil = Math.ceil((new Date(year, month, d).getTime() - today.getTime()) / (24 * 60 * 60 * 1000))
+    days.push({ day: d, isCurrentMonth: true, isToday: key === todayStr, deadlineCount: (deadlineMap[key] || []).length, isUrgent: daysUntil >= 0 && daysUntil <= 7, dateStr: key })
+  }
+
+  // Next month padding to fill 6 rows
+  const remaining = 42 - days.length
+  for (let d = 1; d <= remaining; d++) {
+    const nd = new Date(year, month + 1, d)
+    const key = `${nd.getFullYear()}-${String(nd.getMonth() + 1).padStart(2, '0')}-${String(nd.getDate()).padStart(2, '0')}`
+    days.push({ day: d, isCurrentMonth: false, isToday: false, deadlineCount: (deadlineMap[key] || []).length, isUrgent: false, dateStr: key })
+  }
+
+  return days
+})
+
+const selectedDateGrants = computed(() => {
+  if (!selectedCalendarDate.value) return []
+  return allGrantsForCharts.value.filter((g: any) => {
+    if (!g.deadline) return false
+    const dd = new Date(g.deadline)
+    const key = `${dd.getFullYear()}-${String(dd.getMonth() + 1).padStart(2, '0')}-${String(dd.getDate()).padStart(2, '0')}`
+    return key === selectedCalendarDate.value
+  })
+})
 
 // Fetch dashboard data
 async function fetchDashboardData() {

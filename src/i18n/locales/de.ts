@@ -105,6 +105,9 @@ export default {
             next3Months: '1-3 Monate',
             later: 'Später',
         },
+        calendar: {
+            title: 'Fristenkalender',
+        },
         trackProgress: 'Verfolgen Sie Ihren Fortschritt bei der Fördersuche',
         help: {
             live: 'Echtzeit-Anzahl der aktuell offenen Fördermittel aus allen Quellen',
@@ -396,6 +399,16 @@ export default {
         prepChecklist: {
             title: 'Vorbereitungscheckliste',
             addPlaceholder: 'Aufgabe hinzufügen (z.B. "Budget-Beschreibung erstellen")',
+        },
+        budgetPlanner: {
+            title: 'Budgetplaner',
+            requestedAmount: 'Beantragter Betrag (€)',
+            fundingRate: 'Förderquote',
+            totalProject: 'Gesamtprojektkosten',
+            grantCovers: 'Förderung deckt',
+            coFinancing: 'Kofinanzierung erforderlich',
+            grant: 'Förderung',
+            own: 'Eigen',
         },
         copySection: 'In Zwischenablage kopieren',
         copiedToClipboard: '{section} in die Zwischenablage kopiert'
@@ -747,6 +760,8 @@ export default {
         kanban: {
             dropHere: 'Förderungen hierher ziehen',
         },
+        noDeadlines: 'Keine Förderungen mit Fristen zum Exportieren',
+        icalExported: 'Kalenderdatei erfolgreich exportiert',
     },
 
     // Footer
