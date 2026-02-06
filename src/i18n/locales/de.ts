@@ -154,6 +154,17 @@ export default {
             proposalStarted: 'Antrag gestartet',
             outcomeRecorded: 'Ergebnis erfasst',
         },
+        portfolio: {
+            title: 'Förderportfolio',
+            totalPotential: 'Gesamtes potenzielles Fördervolumen',
+            inProgress: 'Anträge in Bearbeitung',
+            avgPerGrant: 'Durchschnitt pro Förderung',
+            totalGrants: 'Gespeicherte Förderungen gesamt',
+            fundingByStage: 'Fördervolumen nach Pipeline-Phase',
+            workload: 'Deadline-Belastung nach Monat',
+            fundingGap: 'Finanzierungslücken-Analyse',
+            vsAnnualBudget: 'vom Jahresbudget',
+        },
     },
 
     // Grants
@@ -440,7 +451,40 @@ export default {
             own: 'Eigen',
         },
         copySection: 'In Zwischenablage kopieren',
-        copiedToClipboard: '{section} in die Zwischenablage kopiert'
+        copiedToClipboard: '{section} in die Zwischenablage kopiert',
+        handoffNotes: {
+            title: 'Notizen & Übergabe',
+            placeholder: 'Notiz für Ihr Team hinzufügen...',
+            add: 'Hinzufügen',
+            types: {
+                general: 'Allgemein',
+                question: 'Frage',
+                action: 'Aufgabe',
+                blocker: 'Blocker',
+                decision: 'Entscheidung',
+            },
+            pin: 'Anheften',
+            unpin: 'Loslösen',
+            delete: 'Löschen',
+            empty: 'Noch keine Notizen. Fügen Sie die erste Notiz für Ihr Team hinzu.',
+        },
+        requirements: {
+            title: 'Antragsanforderungen',
+            generate: 'Anforderungen analysieren',
+            generating: 'Anforderungen werden analysiert...',
+            description: 'Analysieren Sie diese Förderung, um die erforderlichen Dokumente und Vorbereitungsschritte zu ermitteln.',
+            progress: '{checked} von {total} vorbereitet',
+            exportChecklist: 'Checkliste kopieren',
+            regenerate: 'Erneut analysieren',
+            categories: {
+                documents: 'Erforderliche Dokumente',
+                partners: 'Partneranforderungen',
+                financial: 'Finanzielle Anforderungen',
+                administrative: 'Verwaltung',
+            },
+            addNote: 'Notiz hinzufügen...',
+            fallbackNote: 'Basierend auf typischen Anforderungen für diesen Fördertyp',
+        },
     },
 
     // Matches

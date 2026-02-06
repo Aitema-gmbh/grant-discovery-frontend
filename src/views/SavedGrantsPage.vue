@@ -189,6 +189,11 @@
         <router-link :to="`/grants/${grant.id}`" class="flex-1 min-w-0">
           <h3 class="font-semibold text-navy-900 truncate font-display hover:text-amber-600 transition-colors">
             {{ grant.title }}
+            <span v-if="getHandoffNoteCount(grant.id).count > 0"
+              class="inline-flex items-center gap-0.5 ml-2 text-xs px-1.5 py-0.5 rounded-full"
+              :class="getHandoffNoteCount(grant.id).hasUrgent ? 'bg-red-100 text-red-600' : 'bg-stone-100 text-stone-500'">
+              &#x1F4DD; {{ getHandoffNoteCount(grant.id).count }}
+            </span>
           </h3>
           <p class="text-sm text-navy-600 mt-0.5">{{ grant.program_name || grant.source_id || '' }}</p>
         </router-link>
@@ -489,6 +494,16 @@ const outcomeStats = computed(() => {
 
 function grantsForStatus(statusId: string): any[] {
   return allGrants.value.filter(g => getGrantStatus(g.id) === statusId)
+}
+
+function getHandoffNoteCount(grantId: string | number): { count: number; hasUrgent: boolean } {
+  const stored = localStorage.getItem(`grantHandoffNotes_${grantId}`)
+  if (!stored) return { count: 0, hasUrgent: false }
+  const notes = JSON.parse(stored) as { type: string }[]
+  return {
+    count: notes.length,
+    hasUrgent: notes.some(n => n.type === 'blocker' || n.type === 'action')
+  }
 }
 
 function getReadinessScore(grantId: string): number {

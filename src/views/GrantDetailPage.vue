@@ -321,6 +321,76 @@
             </div>
           </div>
 
+          <!-- Application Requirements Checklist -->
+          <div class="card mt-6">
+            <div class="p-5">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-navy-900">{{ t('grantDetail.requirements.title') }}</h3>
+                <div class="flex gap-2">
+                  <button v-if="requirementsGenerated" @click="exportRequirementsChecklist"
+                    class="text-xs px-3 py-1.5 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors">
+                    {{ t('grantDetail.requirements.exportChecklist') }}
+                  </button>
+                  <button v-if="requirementsGenerated" @click="requirementsGenerated = false; requirementCategories = []"
+                    class="text-xs px-3 py-1.5 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors">
+                    {{ t('grantDetail.requirements.regenerate') }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Before generation -->
+              <div v-if="!requirementsGenerated && !requirementsLoading" class="text-center py-6">
+                <p class="text-sm text-stone-500 mb-4">{{ t('grantDetail.requirements.description') }}</p>
+                <button @click="generateRequirements"
+                  class="px-5 py-2.5 bg-navy-800 text-white rounded-lg text-sm font-medium hover:bg-navy-700 transition-colors">
+                  {{ t('grantDetail.requirements.generate') }}
+                </button>
+              </div>
+
+              <!-- Loading -->
+              <div v-if="requirementsLoading" class="py-6">
+                <div class="flex items-center justify-center gap-3 text-sm text-stone-500">
+                  <div class="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+                  {{ t('grantDetail.requirements.generating') }}
+                </div>
+              </div>
+
+              <!-- Generated checklist -->
+              <div v-if="requirementsGenerated && !requirementsLoading">
+                <!-- Progress bar -->
+                <div class="mb-5">
+                  <div class="flex justify-between text-xs text-stone-500 mb-1">
+                    <span>{{ t('grantDetail.requirements.progress', { checked: requirementsProgress.checked, total: requirementsProgress.total }) }}</span>
+                    <span>{{ requirementsProgress.pct }}%</span>
+                  </div>
+                  <div class="h-2 bg-stone-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-green-500 rounded-full transition-all duration-300" :style="{ width: requirementsProgress.pct + '%' }"></div>
+                  </div>
+                </div>
+
+                <!-- Categories -->
+                <div v-for="(cat, catIdx) in requirementCategories" :key="cat.category" class="mb-5 last:mb-0">
+                  <h4 class="text-sm font-semibold text-navy-800 mb-2">{{ t(cat.labelKey) }}</h4>
+                  <div class="space-y-2">
+                    <div v-for="(item, itemIdx) in cat.items" :key="item.id"
+                      class="flex items-start gap-3 p-2.5 rounded-lg hover:bg-stone-50 transition-colors group">
+                      <input type="checkbox" :checked="item.checked" @change="toggleRequirement(catIdx, itemIdx)"
+                        class="mt-0.5 w-4 h-4 rounded border-stone-300 text-green-600 focus:ring-green-500" />
+                      <div class="flex-1 min-w-0">
+                        <span class="text-sm" :class="item.checked ? 'text-stone-400 line-through' : 'text-navy-800'">{{ item.text }}</span>
+                        <input v-model="item.note" @blur="updateRequirementNote(catIdx, itemIdx, item.note)"
+                          :placeholder="t('grantDetail.requirements.addNote')"
+                          class="mt-1 w-full text-xs px-2 py-1 border-0 border-b border-transparent hover:border-stone-200 focus:border-amber-400 bg-transparent text-stone-500 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="text-[11px] text-stone-400 mt-4 text-center italic">{{ t('grantDetail.requirements.fallbackNote') }}</p>
+              </div>
+            </div>
+          </div>
+
           <!-- Similar Grants -->
           <div v-if="similarGrants.length > 0" class="card">
             <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ $t('grantDetail.similarGrants') }}</h2>
@@ -569,24 +639,64 @@
         </div>
       </div>
 
-      <!-- Personal Notes -->
+      <!-- Handoff Notes -->
       <div class="card mt-6">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-lg font-semibold text-navy-900 flex items-center gap-2">
-            <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-            </svg>
-            {{ $t('grantDetail.notes') }}
-          </h2>
-          <span v-if="noteLastSaved" class="text-xs text-navy-400">{{ noteLastSaved }}</span>
+        <div class="p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-navy-900">{{ t('grantDetail.handoffNotes.title') }}</h3>
+            <span v-if="handoffNotes.length" class="text-xs bg-navy-100 text-navy-600 px-2 py-0.5 rounded-full">{{ handoffNotes.length }}</span>
+          </div>
+
+          <!-- Composer -->
+          <div class="flex gap-2 mb-4">
+            <input v-model="newNoteText" @keyup.enter="addHandoffNote"
+              :placeholder="t('grantDetail.handoffNotes.placeholder')"
+              class="flex-1 px-3 py-2 border border-stone-200 rounded-lg text-sm focus:ring-2 focus:ring-amber-400 focus:border-transparent" />
+            <select v-model="newNoteType" class="px-2 py-2 border border-stone-200 rounded-lg text-sm bg-white">
+              <option value="general">&#x1F4DD; {{ t('grantDetail.handoffNotes.types.general') }}</option>
+              <option value="question">&#x2753; {{ t('grantDetail.handoffNotes.types.question') }}</option>
+              <option value="action">&#x26A1; {{ t('grantDetail.handoffNotes.types.action') }}</option>
+              <option value="blocker">&#x1F6AB; {{ t('grantDetail.handoffNotes.types.blocker') }}</option>
+              <option value="decision">&#x2705; {{ t('grantDetail.handoffNotes.types.decision') }}</option>
+            </select>
+            <button @click="addHandoffNote" class="px-4 py-2 bg-navy-800 text-white rounded-lg text-sm font-medium hover:bg-navy-700 transition-colors">
+              {{ t('grantDetail.handoffNotes.add') }}
+            </button>
+          </div>
+
+          <!-- Notes Feed -->
+          <div v-if="sortedNotes.length" class="space-y-3">
+            <div v-for="note in sortedNotes" :key="note.id"
+              class="border-l-4 rounded-r-lg bg-stone-50 p-3 relative group"
+              :class="noteTypeConfig[note.type]?.border || 'border-l-stone-300'">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-sm">{{ noteTypeConfig[note.type]?.icon }}</span>
+                  <span class="text-xs font-medium" :class="noteTypeConfig[note.type]?.color">
+                    {{ t(`grantDetail.handoffNotes.types.${note.type}`) }}
+                  </span>
+                  <span v-if="note.pinned" class="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">&#x1F4CC;</span>
+                </div>
+                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button @click="togglePinNote(note.id)" class="p-1 rounded hover:bg-stone-200 text-xs" :title="note.pinned ? t('grantDetail.handoffNotes.unpin') : t('grantDetail.handoffNotes.pin')">
+                    &#x1F4CC;
+                  </button>
+                  <button @click="deleteHandoffNote(note.id)" class="p-1 rounded hover:bg-red-100 text-xs text-red-500" :title="t('grantDetail.handoffNotes.delete')">
+                    &#x2715;
+                  </button>
+                </div>
+              </div>
+              <p class="text-sm text-navy-800 mt-1">{{ note.text }}</p>
+              <div class="flex items-center gap-2 mt-2 text-[11px] text-stone-400">
+                <span>{{ note.author }}</span>
+                <span>&middot;</span>
+                <span>{{ timeAgo(note.createdAt) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <p v-else class="text-sm text-stone-400 text-center py-4">{{ t('grantDetail.handoffNotes.empty') }}</p>
         </div>
-        <textarea
-          v-model="grantNote"
-          @input="debounceSaveNote"
-          :placeholder="$t('grantDetail.notesPlaceholder')"
-          class="input w-full min-h-[100px] text-sm resize-y"
-          rows="4"
-        ></textarea>
       </div>
 
       <!-- Preparation Checklist -->
@@ -722,35 +832,103 @@ const descExpanded = ref(false)
 const descNeedsExpand = ref(false)
 const isReminderSet = ref(false)
 
-// Grant notes
-const grantNote = ref('')
-const noteLastSaved = ref('')
-let noteSaveTimeout: ReturnType<typeof setTimeout> | null = null
 
-function loadNote(grantId: string) {
-  try {
-    const notes = JSON.parse(localStorage.getItem('grantNotes') || '{}')
-    grantNote.value = notes[grantId] || ''
-  } catch { grantNote.value = '' }
+
+
+// Handoff Notes System
+interface HandoffNote {
+  id: string
+  text: string
+  type: 'general' | 'question' | 'action' | 'blocker' | 'decision'
+  author: string
+  createdAt: string
+  pinned: boolean
 }
 
-function saveNote() {
-  const id = route.params.id as string
-  try {
-    const notes = JSON.parse(localStorage.getItem('grantNotes') || '{}')
-    if (grantNote.value.trim()) {
-      notes[id] = grantNote.value
-    } else {
-      delete notes[id]
+const handoffNotes = ref<HandoffNote[]>([])
+const newNoteText = ref('')
+const newNoteType = ref<HandoffNote['type']>('general')
+
+const noteTypeConfig: Record<string, { icon: string; color: string; border: string }> = {
+  general: { icon: '\u{1F4DD}', color: 'text-stone-600', border: 'border-l-stone-300' },
+  question: { icon: '\u{2753}', color: 'text-blue-600', border: 'border-l-blue-400' },
+  action: { icon: '\u{26A1}', color: 'text-amber-600', border: 'border-l-amber-400' },
+  blocker: { icon: '\u{1F6AB}', color: 'text-red-600', border: 'border-l-red-400' },
+  decision: { icon: '\u{2705}', color: 'text-green-600', border: 'border-l-green-400' }
+}
+
+function loadHandoffNotes() {
+  const grantId = route.params.id as string
+  const stored = localStorage.getItem(`grantHandoffNotes_${grantId}`)
+  if (stored) {
+    handoffNotes.value = JSON.parse(stored)
+  } else {
+    // Migrate old notes
+    const oldNotes = JSON.parse(localStorage.getItem('grantNotes') || '{}')
+    const oldNote = oldNotes[grantId]
+    if (oldNote) {
+      handoffNotes.value = [{
+        id: Date.now().toString(),
+        text: oldNote,
+        type: 'general',
+        author: 'Me',
+        createdAt: new Date().toISOString(),
+        pinned: false
+      }]
+      saveHandoffNotes()
     }
-    localStorage.setItem('grantNotes', JSON.stringify(notes))
-    noteLastSaved.value = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  } catch { /* storage full */ }
+  }
 }
 
-function debounceSaveNote() {
-  if (noteSaveTimeout) clearTimeout(noteSaveTimeout)
-  noteSaveTimeout = setTimeout(saveNote, 1000)
+function saveHandoffNotes() {
+  const grantId = route.params.id as string
+  localStorage.setItem(`grantHandoffNotes_${grantId}`, JSON.stringify(handoffNotes.value))
+}
+
+function addHandoffNote() {
+  if (!newNoteText.value.trim()) return
+  handoffNotes.value.push({
+    id: Date.now().toString(),
+    text: newNoteText.value.trim(),
+    type: newNoteType.value,
+    author: 'Me',
+    createdAt: new Date().toISOString(),
+    pinned: false
+  })
+  newNoteText.value = ''
+  newNoteType.value = 'general'
+  saveHandoffNotes()
+}
+
+function deleteHandoffNote(id: string) {
+  handoffNotes.value = handoffNotes.value.filter(n => n.id !== id)
+  saveHandoffNotes()
+}
+
+function togglePinNote(id: string) {
+  const note = handoffNotes.value.find(n => n.id === id)
+  if (note) {
+    note.pinned = !note.pinned
+    saveHandoffNotes()
+  }
+}
+
+const sortedNotes = computed(() => {
+  return [...handoffNotes.value].sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1
+    if (!a.pinned && b.pinned) return 1
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  })
+})
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 60) return `${mins}m ago`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  return `${days}d ago`
 }
 // Budget planner
 const showBudgetPlanner = ref(false)
@@ -813,6 +991,163 @@ function removePrepItem(index: number) {
 
 const prepCheckedCount = computed(() => prepItems.value.filter(i => i.checked).length)
 const prepProgress = computed(() => prepItems.value.length === 0 ? 0 : Math.round((prepCheckedCount.value / prepItems.value.length) * 100))
+
+// Requirement Checklist
+interface RequirementItem {
+  id: string
+  text: string
+  checked: boolean
+  note: string
+}
+
+interface RequirementCategory {
+  category: string
+  labelKey: string
+  items: RequirementItem[]
+}
+
+const requirementCategories = ref<RequirementCategory[]>([])
+const requirementsLoading = ref(false)
+const requirementsGenerated = ref(false)
+
+function loadRequirements() {
+  const grantId = route.params.id as string
+  const stored = localStorage.getItem(`grantRequirements_${grantId}`)
+  if (stored) {
+    requirementCategories.value = JSON.parse(stored)
+    requirementsGenerated.value = true
+  }
+}
+
+function saveRequirements() {
+  const grantId = route.params.id as string
+  localStorage.setItem(`grantRequirements_${grantId}`, JSON.stringify(requirementCategories.value))
+}
+
+function toggleRequirement(catIdx: number, itemIdx: number) {
+  const cat = requirementCategories.value[catIdx]
+  if (cat && cat.items[itemIdx]) {
+    cat.items[itemIdx]!.checked = !cat.items[itemIdx]!.checked
+    saveRequirements()
+  }
+}
+
+function updateRequirementNote(catIdx: number, itemIdx: number, note: string) {
+  const cat = requirementCategories.value[catIdx]
+  if (cat && cat.items[itemIdx]) {
+    cat.items[itemIdx]!.note = note
+    saveRequirements()
+  }
+}
+
+const requirementsProgress = computed(() => {
+  let checked = 0, total = 0
+  requirementCategories.value.forEach(cat => {
+    cat.items.forEach(item => {
+      total++
+      if (item.checked) checked++
+    })
+  })
+  return { checked, total, pct: total > 0 ? Math.round(checked / total * 100) : 0 }
+})
+
+function generateRequirements() {
+  requirementsLoading.value = true
+
+  // Client-side heuristic extraction
+  setTimeout(() => {
+    const g = grant.value
+    const desc = (g?.description || '').toLowerCase()
+    const category = g?.category || ''
+
+    const documents: RequirementItem[] = []
+    const partners: RequirementItem[] = []
+    const financial: RequirementItem[] = []
+    const administrative: RequirementItem[] = []
+
+    // Document requirements
+    documents.push({ id: 'd1', text: 'Organization registration certificate', checked: false, note: '' })
+    documents.push({ id: 'd2', text: 'Project proposal / concept note', checked: false, note: '' })
+
+    if (desc.includes('annual report') || desc.includes('financial statement')) {
+      documents.push({ id: 'd3', text: 'Annual report / financial statements', checked: false, note: '' })
+    }
+    if (desc.includes('audit') || (g?.amount_max && g.amount_max > 100000)) {
+      documents.push({ id: 'd4', text: 'External audit report', checked: false, note: '' })
+    }
+    if (desc.includes('cv') || desc.includes('team') || desc.includes('staff')) {
+      documents.push({ id: 'd5', text: 'Team CVs / key personnel qualifications', checked: false, note: '' })
+    }
+    if (desc.includes('budget') || desc.includes('financial plan')) {
+      documents.push({ id: 'd6', text: 'Detailed budget breakdown', checked: false, note: '' })
+    }
+    documents.push({ id: 'd7', text: 'Logical framework / results matrix', checked: false, note: '' })
+
+    // Partner requirements
+    if (desc.includes('partner') || desc.includes('consortium') || desc.includes('collaboration')) {
+      partners.push({ id: 'p1', text: 'Partnership agreement / MoU', checked: false, note: '' })
+      partners.push({ id: 'p2', text: 'Partner organization profiles', checked: false, note: '' })
+    }
+    if (desc.includes('letter of support') || desc.includes('endorsement')) {
+      partners.push({ id: 'p3', text: 'Letters of support from stakeholders', checked: false, note: '' })
+    }
+    if (desc.includes('local') || desc.includes('community')) {
+      partners.push({ id: 'p4', text: 'Local community endorsement / needs assessment', checked: false, note: '' })
+    }
+    if (partners.length === 0) {
+      partners.push({ id: 'p0', text: 'Check if partnership/consortium is required', checked: false, note: '' })
+    }
+
+    // Financial requirements
+    if (g?.co_financing_rate && g.co_financing_rate > 0) {
+      financial.push({ id: 'f1', text: `Co-financing proof (${g.co_financing_rate}% required)`, checked: false, note: '' })
+    }
+    financial.push({ id: 'f2', text: 'Bank account details / financial identification form', checked: false, note: '' })
+    if (desc.includes('pre-financing') || desc.includes('advance payment')) {
+      financial.push({ id: 'f3', text: 'Pre-financing guarantee (if required)', checked: false, note: '' })
+    }
+    financial.push({ id: 'f4', text: 'VAT status declaration', checked: false, note: '' })
+
+    // Administrative requirements
+    administrative.push({ id: 'a1', text: 'Legal entity registration in donor portal', checked: false, note: '' })
+    if (desc.includes('eu') || desc.includes('european') || category.toLowerCase().includes('eu')) {
+      administrative.push({ id: 'a2', text: 'PIC number (EU Participant Identification Code)', checked: false, note: '' })
+      administrative.push({ id: 'a3', text: 'Legal Entity Form + supporting documents', checked: false, note: '' })
+    }
+    administrative.push({ id: 'a4', text: 'Declaration of honour / no conflict of interest', checked: false, note: '' })
+    if (desc.includes('anti-terror') || desc.includes('sanctions') || desc.includes('compliance')) {
+      administrative.push({ id: 'a5', text: 'Anti-terrorism / sanctions compliance declaration', checked: false, note: '' })
+    }
+    administrative.push({ id: 'a6', text: 'GDPR / data protection policy', checked: false, note: '' })
+
+    requirementCategories.value = [
+      { category: 'documents', labelKey: 'grantDetail.requirements.categories.documents', items: documents },
+      { category: 'partners', labelKey: 'grantDetail.requirements.categories.partners', items: partners },
+      { category: 'financial', labelKey: 'grantDetail.requirements.categories.financial', items: financial },
+      { category: 'administrative', labelKey: 'grantDetail.requirements.categories.administrative', items: administrative }
+    ]
+
+    requirementsGenerated.value = true
+    requirementsLoading.value = false
+    saveRequirements()
+  }, 1500) // Simulate analysis time
+}
+
+function exportRequirementsChecklist() {
+  let text = 'APPLICATION REQUIREMENTS CHECKLIST\n'
+  text += '='.repeat(40) + '\n\n'
+  requirementCategories.value.forEach(cat => {
+    text += `## ${t(cat.labelKey)}\n`
+    cat.items.forEach(item => {
+      text += `${item.checked ? '[x]' : '[ ]'} ${item.text}`
+      if (item.note) text += ` — ${item.note}`
+      text += '\n'
+    })
+    text += '\n'
+  })
+  text += `Progress: ${requirementsProgress.value.checked}/${requirementsProgress.value.total} (${requirementsProgress.value.pct}%)`
+  navigator.clipboard.writeText(text)
+}
 
 const descriptionEl = ref<HTMLElement | null>(null)
 
@@ -1115,10 +1450,11 @@ async function fetchGrantDetails() {
     const reminders = JSON.parse(localStorage.getItem('grantReminders') || '[]')
     isReminderSet.value = reminders.some((r: any) => r.grantId === grantId)
 
-    // Load notes, prep checklist, and budget plan
-    loadNote(grantId)
+    // Load handoff notes, prep checklist, budget plan, and requirements
+    loadHandoffNotes()
     loadPrepItems()
     loadBudgetPlan()
+    loadRequirements()
     // Pre-fill budget from grant data
     if (!budgetRequested.value && grant.value) {
       budgetRequested.value = grant.value.amount_max || grant.value.amount_min || 0

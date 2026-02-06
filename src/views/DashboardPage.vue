@@ -354,6 +354,79 @@
       </div>
     </div>
 
+    <!-- Funding Portfolio Planner -->
+    <div class="mt-12 animate-fade-in" v-if="portfolioStats.totalGrants > 0">
+      <h2 class="text-xl font-bold text-navy-900 mb-6">{{ t('dashboard.portfolio.title') }}</h2>
+
+      <!-- Summary Stats Row -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="card p-4 text-center">
+          <div class="text-2xl font-bold text-navy-900">{{ formatCurrency(portfolioStats.totalPotential) }}</div>
+          <div class="text-xs text-stone-500 mt-1">{{ t('dashboard.portfolio.totalPotential') }}</div>
+        </div>
+        <div class="card p-4 text-center">
+          <div class="text-2xl font-bold text-indigo-600">{{ portfolioStats.inProgressCount }}</div>
+          <div class="text-xs text-stone-500 mt-1">{{ t('dashboard.portfolio.inProgress') }}</div>
+        </div>
+        <div class="card p-4 text-center">
+          <div class="text-2xl font-bold text-amber-600">{{ formatCurrency(portfolioStats.avgFunding) }}</div>
+          <div class="text-xs text-stone-500 mt-1">{{ t('dashboard.portfolio.avgPerGrant') }}</div>
+        </div>
+        <div class="card p-4 text-center">
+          <div class="text-2xl font-bold text-sage-600">{{ portfolioStats.totalGrants }}</div>
+          <div class="text-xs text-stone-500 mt-1">{{ t('dashboard.portfolio.totalGrants') }}</div>
+        </div>
+      </div>
+
+      <!-- Funding by Stage Bar -->
+      <div class="card p-5 mb-6">
+        <h3 class="text-sm font-semibold text-navy-800 mb-3">{{ t('dashboard.portfolio.fundingByStage') }}</h3>
+        <div class="h-6 rounded-full overflow-hidden flex bg-stone-100" v-if="totalFundingAllStages > 0">
+          <div v-for="(amount, stage) in portfolioStats.fundingByStage" :key="stage"
+            :class="stageColors[stage] || 'bg-stone-300'"
+            :style="{ width: (amount / totalFundingAllStages * 100) + '%' }"
+            :title="`${stage}: ${formatCurrency(amount)}`"
+            class="h-full transition-all duration-500 first:rounded-l-full last:rounded-r-full"></div>
+        </div>
+        <div class="flex flex-wrap gap-3 mt-3">
+          <div v-for="(amount, stage) in portfolioStats.fundingByStage" :key="stage" class="flex items-center gap-1.5 text-xs text-stone-600">
+            <span class="w-2.5 h-2.5 rounded-full" :class="stageColors[stage] || 'bg-stone-300'"></span>
+            {{ stage }}: {{ formatCurrency(amount) }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Workload Concentration -->
+      <div class="card p-5 mb-6">
+        <h3 class="text-sm font-semibold text-navy-800 mb-3">{{ t('dashboard.portfolio.workload') }}</h3>
+        <div class="flex gap-1">
+          <div v-for="m in portfolioStats.monthStrip" :key="m.key" class="flex-1 text-center">
+            <div class="h-8 rounded-md flex items-center justify-center text-xs font-medium"
+              :class="m.count === 0 ? 'bg-stone-100 text-stone-400' : m.count <= 2 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'">
+              {{ m.count || '' }}
+            </div>
+            <div class="text-[10px] text-stone-400 mt-1">{{ m.label }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Funding Gap Analysis -->
+      <div v-if="fundingGap" class="card p-5">
+        <h3 class="text-sm font-semibold text-navy-800 mb-2">{{ t('dashboard.portfolio.fundingGap') }}</h3>
+        <div class="flex items-center gap-3">
+          <span class="text-lg font-bold" :class="fundingGap.isSurplus ? 'text-green-600' : 'text-red-600'">
+            {{ fundingGap.isSurplus ? '+' : '' }}{{ formatCurrency(fundingGap.diff) }}
+          </span>
+          <span class="text-sm text-stone-500">{{ t('dashboard.portfolio.vsAnnualBudget') }} ({{ formatCurrency(fundingGap.annualBudget) }})</span>
+        </div>
+        <div class="mt-2 h-2 rounded-full bg-stone-100 overflow-hidden">
+          <div class="h-full rounded-full transition-all duration-500"
+            :class="fundingGap.isSurplus ? 'bg-green-400' : 'bg-red-400'"
+            :style="{ width: Math.min(100, (portfolioStats.totalPotential / fundingGap.annualBudget * 100)) + '%' }"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Grant Readiness Overview -->
     <div v-if="readinessData.length > 0" class="mt-8 animate-fade-in" style="animation-delay: 0.38s">
       <div class="card">
@@ -530,6 +603,77 @@ const pipelineCounts = computed((): { interested: number; researching: number; a
     counts.total++
   })
   return counts
+})
+
+// Funding Portfolio
+const portfolioStats = computed(() => {
+  const savedIds = JSON.parse(localStorage.getItem('savedGrants') || '[]') as string[]
+  const workflows = JSON.parse(localStorage.getItem('grantWorkflow') || '{}') as Record<string, string>
+  const activeStages = ['applying', 'submitted']
+  const grants = allGrantsForCharts.value.filter((g: any) => savedIds.includes(String(g.id)))
+
+  let totalPotential = 0
+  let inProgressCount = 0
+  const fundingByStage: Record<string, number> = {}
+  const monthlyDeadlines: Record<string, number> = {}
+
+  grants.forEach((g: any) => {
+    const stage = workflows[String(g.id)] || 'interested'
+    const maxAmt = g.amount_max || g.amount_min || 0
+
+    if (!fundingByStage[stage]) fundingByStage[stage] = 0
+    fundingByStage[stage] += maxAmt
+
+    if (activeStages.includes(stage)) {
+      totalPotential += maxAmt
+      inProgressCount++
+    }
+
+    if (g.deadline) {
+      const month = g.deadline.substring(0, 7)
+      monthlyDeadlines[month] = (monthlyDeadlines[month] || 0) + 1
+    }
+  })
+
+  const avgFunding = inProgressCount > 0 ? Math.round(totalPotential / inProgressCount) : 0
+
+  // Generate 12-month strip
+  const now = new Date()
+  const monthStrip = Array.from({ length: 12 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1)
+    const key = d.toISOString().substring(0, 7)
+    const label = d.toLocaleDateString(undefined, { month: 'short' })
+    return { key, label, count: monthlyDeadlines[key] || 0 }
+  })
+
+  return { totalPotential, inProgressCount, avgFunding, fundingByStage, monthStrip, totalGrants: grants.length }
+})
+
+const fundingGap = computed(() => {
+  const profile = JSON.parse(localStorage.getItem('csoProfile') || '{}')
+  const annualBudget = profile.annual_budget_eur || 0
+  if (!annualBudget) return null
+  const diff = portfolioStats.value.totalPotential - annualBudget
+  return { diff, annualBudget, isSurplus: diff >= 0 }
+})
+
+const stageColors: Record<string, string> = {
+  interested: 'bg-amber-400',
+  researching: 'bg-blue-400',
+  applying: 'bg-indigo-500',
+  submitted: 'bg-sage-500',
+  won: 'bg-green-500',
+  lost: 'bg-stone-400'
+}
+
+function formatCurrency(amount: number): string {
+  if (amount >= 1000000) return `€${(amount / 1000000).toFixed(1)}M`
+  if (amount >= 1000) return `€${(amount / 1000).toFixed(0)}K`
+  return `€${amount}`
+}
+
+const totalFundingAllStages = computed(() => {
+  return Object.values(portfolioStats.value.fundingByStage).reduce((a, b) => a + b, 0)
 })
 
 // Grant readiness heatmap

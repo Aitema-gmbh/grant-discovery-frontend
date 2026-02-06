@@ -154,6 +154,17 @@ export default {
             proposalStarted: 'Розпочато заявку',
             outcomeRecorded: 'Записано результат',
         },
+        portfolio: {
+            title: 'Портфоліо фінансування',
+            totalPotential: 'Загальне потенційне фінансування',
+            inProgress: 'Заявки в процесі',
+            avgPerGrant: 'Середнє на грант',
+            totalGrants: 'Всього збережених грантів',
+            fundingByStage: 'Фінансування за етапами',
+            workload: 'Навантаження дедлайнів по місяцях',
+            fundingGap: 'Аналіз дефіциту фінансування',
+            vsAnnualBudget: 'від річного бюджету',
+        },
     },
 
     // Grants
@@ -440,7 +451,40 @@ export default {
             own: 'Власні',
         },
         copySection: 'Копіювати в буфер обміну',
-        copiedToClipboard: '{section} скопійовано в буфер обміну'
+        copiedToClipboard: '{section} скопійовано в буфер обміну',
+        handoffNotes: {
+            title: 'Нотатки та передача',
+            placeholder: 'Додайте нотатку для команди...',
+            add: 'Додати',
+            types: {
+                general: 'Загальне',
+                question: 'Питання',
+                action: 'Дія',
+                blocker: 'Блокер',
+                decision: 'Рішення',
+            },
+            pin: 'Закріпити',
+            unpin: 'Відкріпити',
+            delete: 'Видалити',
+            empty: 'Ще немає нотаток. Додайте першу нотатку для команди.',
+        },
+        requirements: {
+            title: 'Вимоги до заявки',
+            generate: 'Аналізувати вимоги',
+            generating: 'Аналіз вимог гранту...',
+            description: 'Аналізуйте цей грант, щоб визначити конкретні документи та кроки для підготовки.',
+            progress: '{checked} з {total} підготовлено',
+            exportChecklist: 'Копіювати чек-лист',
+            regenerate: 'Повторний аналіз',
+            categories: {
+                documents: 'Необхідні документи',
+                partners: 'Вимоги до партнерів',
+                financial: 'Фінансові вимоги',
+                administrative: 'Адміністративне',
+            },
+            addNote: 'Додати примітку...',
+            fallbackNote: 'На основі типових вимог для цього типу гранту',
+        },
     },
 
     // Matches
