@@ -119,6 +119,42 @@
 
         <!-- Right Column - Quick Facts -->
         <div class="space-y-6">
+          <!-- Profile Completeness -->
+          <div class="card">
+            <h3 class="text-lg font-semibold text-navy-900 font-display mb-4">{{ $t('csoDetail.completeness.title') }}</h3>
+            <div class="flex items-center gap-4 mb-4">
+              <div class="relative w-20 h-20 flex-shrink-0">
+                <svg class="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
+                  <circle cx="40" cy="40" r="36" fill="none" stroke="#e2e8f0" stroke-width="6"/>
+                  <circle cx="40" cy="40" r="36" fill="none" :stroke="completenessColor" stroke-width="6" stroke-linecap="round"
+                    :stroke-dasharray="completenessStrokeDash.dasharray"
+                    :stroke-dashoffset="completenessStrokeDash.dashoffset"
+                    class="transition-all duration-700"
+                  />
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <span class="text-lg font-bold" :style="`color: ${completenessColor}`">{{ profileCompleteness.score }}%</span>
+                </div>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-medium text-navy-700">
+                  {{ profileCompleteness.score >= 80 ? $t('csoDetail.completeness.excellent') : profileCompleteness.score >= 50 ? $t('csoDetail.completeness.good') : $t('csoDetail.completeness.needsWork') }}
+                </p>
+                <p class="text-xs text-navy-500 mt-1">{{ $t('csoDetail.completeness.hint') }}</p>
+              </div>
+            </div>
+            <div v-if="profileCompleteness.missing.length > 0" class="space-y-1.5">
+              <p class="text-xs font-medium text-navy-500 uppercase tracking-wide">{{ $t('csoDetail.completeness.missingFields') }}</p>
+              <div v-for="field in profileCompleteness.missing.slice(0, 4)" :key="field" class="flex items-center gap-2 text-xs text-navy-600">
+                <div class="w-1.5 h-1.5 bg-amber-400 rounded-full"></div>
+                {{ field }}
+              </div>
+              <p v-if="profileCompleteness.missing.length > 4" class="text-xs text-navy-400">
+                +{{ profileCompleteness.missing.length - 4 }} {{ $t('common.more') }}
+              </p>
+            </div>
+          </div>
+
           <!-- Quick Facts Card -->
           <div class="card">
             <h3 class="text-lg font-semibold text-navy-900 font-display mb-4">{{ $t('csoDetail.quickFacts') }}</h3>
@@ -242,6 +278,42 @@ function parseArray(value: string | string[] | null): string[] {
     return []
   }
 }
+
+// Profile completeness scoring
+const profileCompleteness = computed(() => {
+  if (!profile.value) return { score: 0, missing: [] as string[], total: 0 }
+  const p = profile.value
+  const fields = [
+    { key: 'name', weight: 10, label: t('csoDetail.completeness.name'), filled: !!p.name },
+    { key: 'headquarters_country', weight: 10, label: t('csoDetail.completeness.country'), filled: !!p.headquarters_country },
+    { key: 'mission_statement', weight: 15, label: t('csoDetail.completeness.mission'), filled: !!p.mission_statement },
+    { key: 'focus_areas', weight: 15, label: t('csoDetail.completeness.focusAreas'), filled: parseArray(p.focus_areas).length > 0 },
+    { key: 'annual_budget_eur', weight: 10, label: t('csoDetail.completeness.budget'), filled: !!p.annual_budget_eur },
+    { key: 'org_type', weight: 10, label: t('csoDetail.completeness.orgType'), filled: !!p.org_type },
+    { key: 'staff_count', weight: 5, label: t('csoDetail.completeness.teamSize'), filled: !!p.staff_count },
+    { key: 'grant_experience_level', weight: 5, label: t('csoDetail.completeness.experience'), filled: !!p.grant_experience_level },
+    { key: 'operating_countries', weight: 5, label: t('csoDetail.completeness.operatingCountries'), filled: parseArray(p.operating_countries).length > 0 },
+    { key: 'target_groups', weight: 5, label: t('csoDetail.completeness.targetGroups'), filled: parseArray(p.target_groups).length > 0 },
+    { key: 'languages', weight: 5, label: t('csoDetail.completeness.languages'), filled: parseArray(p.languages).length > 0 },
+    { key: 'website', weight: 5, label: t('csoDetail.completeness.website'), filled: !!p.website },
+  ]
+  const score = fields.reduce((sum, f) => sum + (f.filled ? f.weight : 0), 0)
+  const missing = fields.filter(f => !f.filled).map(f => f.label)
+  return { score, missing, total: 100 }
+})
+
+const completenessColor = computed(() => {
+  const s = profileCompleteness.value.score
+  if (s >= 80) return '#10b981'
+  if (s >= 50) return '#f59e0b'
+  return '#ef4444'
+})
+
+const completenessStrokeDash = computed(() => {
+  const circumference = 2 * Math.PI * 36
+  const offset = circumference - (profileCompleteness.value.score / 100) * circumference
+  return { dasharray: circumference, dashoffset: offset }
+})
 
 const focusAreas = computed(() => parseArray(profile.value?.focus_areas))
 const operatingCountries = computed(() => parseArray(profile.value?.operating_countries))

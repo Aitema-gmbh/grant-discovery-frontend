@@ -44,6 +44,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: false }, // Public page
   },
   {
+    path: '/saved',
+    name: 'saved-grants',
+    component: () => import('@/views/SavedGrantsPage.vue'),
+    meta: { requiresAuth: false },
+  },
+  {
     path: '/dashboard',
     name: 'dashboard',
     component: () => import('@/views/DashboardPage.vue'),

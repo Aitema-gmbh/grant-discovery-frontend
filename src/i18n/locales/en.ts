@@ -35,13 +35,15 @@ export default {
         saved: 'Saved successfully',
         tryAgain: 'Try again',
         unsavedChanges: 'You have unsaved changes. Are you sure you want to leave?',
-        generationInProgress: 'AI generation is in progress. Are you sure you want to leave? Progress will be lost.'
+        generationInProgress: 'AI generation is in progress. Are you sure you want to leave? Progress will be lost.',
+        more: 'more',
     },
 
     // Navigation
     nav: {
         dashboard: 'Dashboard',
         grants: 'Browse Grants',
+        saved: 'Saved',
         matches: 'My Matches',
         organizations: 'Organizations',
         proposals: 'Proposals',
@@ -471,7 +473,27 @@ export default {
         memberSince: 'Member Since',
         notFound: 'Organization not found',
         notFoundDesc: 'This organization profile doesn\'t exist or has been removed.',
-        backToOrgs: 'Back to Organizations'
+        backToOrgs: 'Back to Organizations',
+        completeness: {
+            title: 'Profile Strength',
+            excellent: 'Excellent! Your profile is well-optimized for matching.',
+            good: 'Good progress! A few more details will improve your matches.',
+            needsWork: 'Add more details to get better grant matches.',
+            hint: 'Complete profiles get up to 3x more relevant matches.',
+            missingFields: 'Add these to improve matching',
+            name: 'Organization name',
+            country: 'Headquarters country',
+            mission: 'Mission statement',
+            focusAreas: 'Focus areas',
+            budget: 'Annual budget',
+            orgType: 'Organization type',
+            teamSize: 'Team size',
+            experience: 'Grant experience level',
+            operatingCountries: 'Operating countries',
+            targetGroups: 'Target groups',
+            languages: 'Languages',
+            website: 'Website',
+        },
     },
 
     // CSO Create
@@ -658,6 +680,25 @@ export default {
         matchScore: 'How well this grant matches your organization profile',
         fundingRate: 'Percentage of project costs covered by this grant',
         deadline: 'Last date to submit your application'
+    },
+
+    // Saved Grants
+    savedGrants: {
+        title: 'Saved Grants',
+        subtitle: 'Track your grant applications and manage your pipeline',
+        browseMore: 'Browse More',
+        browseGrants: 'Browse Grants',
+        allStatuses: 'All',
+        remove: 'Remove from saved',
+        emptyTitle: 'No saved grants yet',
+        emptyDesc: 'Start browsing grants and save the ones that interest your organization. You can track their application status here.',
+        status: {
+            interested: 'Interested',
+            researching: 'Researching',
+            applying: 'Applying',
+            submitted: 'Submitted',
+            outcome: 'Outcome',
+        },
     },
 
     // Errors

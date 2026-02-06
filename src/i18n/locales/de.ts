@@ -35,13 +35,15 @@ export default {
         saved: 'Erfolgreich gespeichert',
         tryAgain: 'Erneut versuchen',
         unsavedChanges: 'Sie haben ungespeicherte Änderungen. Sind Sie sicher, dass Sie die Seite verlassen möchten?',
-        generationInProgress: 'Die KI-Generierung läuft noch. Sind Sie sicher, dass Sie die Seite verlassen möchten? Der Fortschritt geht verloren.'
+        generationInProgress: 'Die KI-Generierung läuft noch. Sind Sie sicher, dass Sie die Seite verlassen möchten? Der Fortschritt geht verloren.',
+        more: 'weitere'
     },
 
     // Navigation
     nav: {
         dashboard: 'Dashboard',
         grants: 'Förderprogramme',
+        saved: 'Gespeichert',
         matches: 'Meine Matches',
         organizations: 'Organisationen',
         proposals: 'Anträge',
@@ -470,7 +472,27 @@ export default {
         memberSince: 'Mitglied seit',
         notFound: 'Organisation nicht gefunden',
         notFoundDesc: 'Dieses Organisationsprofil existiert nicht oder wurde entfernt.',
-        backToOrgs: 'Zurück zu Organisationen'
+        backToOrgs: 'Zurück zu Organisationen',
+        completeness: {
+            title: 'Profilstärke',
+            excellent: 'Ausgezeichnet! Ihr Profil ist gut für das Matching optimiert.',
+            good: 'Guter Fortschritt! Noch ein paar Details verbessern Ihre Ergebnisse.',
+            needsWork: 'Fügen Sie mehr Details hinzu, um bessere Förderungen zu finden.',
+            hint: 'Vollständige Profile erhalten bis zu 3x mehr relevante Treffer.',
+            missingFields: 'Hinzufügen um Matching zu verbessern',
+            name: 'Organisationsname',
+            country: 'Hauptsitzland',
+            mission: 'Leitbild',
+            focusAreas: 'Schwerpunktbereiche',
+            budget: 'Jahresbudget',
+            orgType: 'Organisationstyp',
+            teamSize: 'Teamgröße',
+            experience: 'Fördererfahrung',
+            operatingCountries: 'Tätigkeitsländer',
+            targetGroups: 'Zielgruppen',
+            languages: 'Sprachen',
+            website: 'Webseite'
+        }
     },
 
     // CSO Create
@@ -661,6 +683,25 @@ export default {
     // Offline
     offline: {
         banner: 'Sie sind offline. Einige Funktionen sind möglicherweise nicht verfügbar.'
+    },
+
+    // Saved Grants
+    savedGrants: {
+        title: 'Gespeicherte Förderungen',
+        subtitle: 'Verfolgen Sie Ihre Anträge und verwalten Sie Ihre Pipeline',
+        browseMore: 'Mehr suchen',
+        browseGrants: 'Förderungen durchsuchen',
+        allStatuses: 'Alle',
+        remove: 'Aus Gespeicherten entfernen',
+        emptyTitle: 'Keine gespeicherten Förderungen',
+        emptyDesc: 'Durchsuchen Sie Förderungen und speichern Sie die, die Ihre Organisation interessieren. Hier können Sie den Antragsstatus verfolgen.',
+        status: {
+            interested: 'Interessiert',
+            researching: 'Recherchierend',
+            applying: 'Beantragend',
+            submitted: 'Eingereicht',
+            outcome: 'Ergebnis',
+        },
     },
 
     // Errors

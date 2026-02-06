@@ -36,6 +36,13 @@
               {{ $t('nav.grants') }}
             </router-link>
             <router-link
+              to="/saved"
+              class="nav-link"
+              active-class="nav-link-active"
+            >
+              {{ $t('nav.saved') }}
+            </router-link>
+            <router-link
               to="/matches"
               class="nav-link"
               active-class="nav-link-active"
@@ -68,7 +75,9 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
-                <span v-if="hasNotifications" class="absolute top-1 right-1 w-2 h-2 bg-amber-500 rounded-full shadow-glow-amber"></span>
+                <span v-if="hasNotifications" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-sm">
+                  {{ unreadCount > 9 ? '9+' : unreadCount }}
+                </span>
               </button>
 
               <!-- Notifications Dropdown -->
@@ -86,14 +95,23 @@
                   <p class="text-sm">{{ $t('nav.noNotifications') }}</p>
                 </div>
                 <div v-else class="max-h-64 overflow-y-auto">
-                  <div
+                  <router-link
                     v-for="(notif, index) in notifications"
                     :key="index"
-                    class="px-4 py-3 hover:bg-navy-50 cursor-pointer border-b border-navy-50 last:border-0"
+                    :to="notif.grantId ? `/grants/${notif.grantId}` : '/saved'"
+                    class="block px-4 py-3 hover:bg-navy-50 cursor-pointer border-b border-navy-50 last:border-0 transition-colors"
+                    :class="!notif.read ? 'bg-amber-50/50' : ''"
+                    @click="showNotifications = false"
                   >
-                    <p class="text-sm text-navy-700">{{ notif.message }}</p>
-                    <p class="text-xs text-navy-400 mt-1">{{ notif.time }}</p>
-                  </div>
+                    <div class="flex items-start gap-2">
+                      <span v-if="notif.urgent" class="mt-0.5 flex-shrink-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                      <span v-else-if="!notif.read" class="mt-0.5 flex-shrink-0 w-2 h-2 bg-amber-500 rounded-full"></span>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm text-navy-700" :class="!notif.read ? 'font-medium' : ''">{{ notif.message }}</p>
+                        <p class="text-xs text-navy-400 mt-1">{{ notif.time }}</p>
+                      </div>
+                    </div>
+                  </router-link>
                 </div>
                 <div class="px-4 py-2 border-t border-navy-100">
                   <button
@@ -222,6 +240,17 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
               {{ $t('nav.grants') }}
+            </router-link>
+            <router-link
+              to="/saved"
+              class="mobile-nav-link"
+              active-class="mobile-nav-link-active"
+              @click="showMobileMenu = false"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+              </svg>
+              {{ $t('nav.saved') }}
             </router-link>
             <router-link
               to="/matches"
@@ -381,40 +410,47 @@ watch(() => route.fullPath, () => {
   showNotifications.value = false
 })
 
-// Notifications state (placeholder - can be connected to real backend later)
+// Notifications state
 interface Notification {
   message: string
   time: string
   read: boolean
+  grantId?: string
+  urgent?: boolean
 }
 
+// Trigger re-computation on route change (grants may be saved on other pages)
+const notificationTrigger = ref(0)
+watch(() => route.fullPath, () => { notificationTrigger.value++ })
+
 const notifications = computed<Notification[]>(() => {
+  void notificationTrigger.value
   const items: Notification[] = []
+  const now = new Date()
+
   // Check deadline reminders from localStorage
   try {
     const reminders = JSON.parse(localStorage.getItem('grantReminders') || '[]')
-    const now = new Date()
     for (const r of reminders) {
       if (!r.deadline) continue
       const deadline = new Date(r.deadline)
       const daysLeft = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-      if (daysLeft <= 0) continue
-      if (daysLeft <= 7) {
-        items.push({
-          message: `${r.title} — ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left`,
-          time: deadline.toLocaleDateString(),
-          read: daysLeft > 3
-        })
-      }
+      if (daysLeft <= 0 || daysLeft > 14) continue
+      items.push({
+        message: `${r.title} — ${daysLeft}d left`,
+        time: deadline.toLocaleDateString(),
+        read: daysLeft > 7,
+        grantId: r.grantId,
+        urgent: daysLeft <= 3,
+      })
     }
   } catch { /* ignore */ }
-  if (items.length === 0) {
-    items.push({ message: 'Welcome to Grants Bridge Ukraine! Start by creating your organization profile.', time: '', read: true })
-  }
-  return items
+
+  return items.sort((a, b) => (a.read === b.read ? 0 : a.read ? 1 : -1))
 })
 
 const hasNotifications = computed(() => notifications.value.some(n => !n.read))
+const unreadCount = computed(() => notifications.value.filter(n => !n.read).length)
 
 function clearNotifications() {
   showNotifications.value = false
