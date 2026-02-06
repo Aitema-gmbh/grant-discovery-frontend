@@ -38,6 +38,12 @@
           </svg>
           iCal
         </button>
+        <button v-if="allGrants.length > 0" @click="shareGrantList" class="btn btn-outline btn-sm flex items-center gap-1.5" :title="$t('savedGrants.shareList')">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+          </svg>
+          <span class="hidden sm:inline">{{ $t('savedGrants.shareList') }}</span>
+        </button>
         <router-link to="/grants" class="btn btn-primary btn-sm">
           {{ $t('savedGrants.browseMore') }}
         </router-link>
@@ -67,6 +73,54 @@
         <span>{{ status.icon }}</span>
         {{ status.label }} ({{ grantsForStatus(status.id).length }})
       </button>
+    </div>
+
+    <!-- Tag Filters -->
+    <div v-if="allTags.length > 0 || allGrants.length > 0" class="flex flex-wrap items-center gap-2 mb-4">
+      <button
+        v-for="tag in allTags"
+        :key="tag"
+        @click="activeTagFilter = activeTagFilter === tag ? null : tag"
+        class="group px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1"
+        :class="activeTagFilter === tag ? 'bg-navy-800 text-white' : 'bg-navy-100 text-navy-600 hover:bg-navy-200'"
+      >
+        {{ tag }}
+        <span @click.stop="removeTag(tag)" class="ml-0.5 opacity-0 group-hover:opacity-100 hover:text-red-300 transition-opacity">&times;</span>
+      </button>
+      <button v-if="!showTagInput" @click="showTagInput = true" class="px-3 py-1 rounded-full text-xs font-medium text-navy-400 border border-dashed border-navy-300 hover:border-amber-400 hover:text-amber-600 transition-all">
+        + {{ $t('savedGrants.tags.addTag') }}
+      </button>
+      <div v-if="showTagInput" class="flex items-center gap-1">
+        <input v-model="newTagName" @keyup.enter="addTag" :placeholder="$t('savedGrants.tags.tagName')" class="input text-xs py-1 px-2 w-28" autofocus />
+        <button @click="addTag" class="text-xs text-amber-600 font-medium">{{ $t('common.save') }}</button>
+        <button @click="showTagInput = false; newTagName = ''" class="text-xs text-navy-400">&times;</button>
+      </div>
+    </div>
+
+    <!-- Outcome Analytics -->
+    <div v-if="outcomeStats.won + outcomeStats.lost > 0" class="mb-6 p-4 bg-gradient-to-r from-purple-50 to-amber-50 border border-purple-100 rounded-xl animate-fade-in">
+      <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">📊</span>
+          <span class="font-semibold text-navy-800">{{ $t('savedGrants.outcomes.analytics') }}</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-green-500"></span>
+          <span class="text-navy-600">{{ $t('savedGrants.outcomes.won') }}: <strong class="text-green-700">{{ outcomeStats.won }}</strong></span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-red-400"></span>
+          <span class="text-navy-600">{{ $t('savedGrants.outcomes.lost') }}: <strong class="text-red-600">{{ outcomeStats.lost }}</strong></span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="font-semibold text-purple-700">{{ outcomeStats.winRate }}%</span>
+          <span class="text-navy-500">{{ $t('savedGrants.outcomes.winRate') }}</span>
+        </div>
+        <div v-if="outcomeStats.totalAwarded > 0" class="flex items-center gap-1.5">
+          <span class="font-semibold text-amber-700">€{{ outcomeStats.totalAwarded.toLocaleString() }}</span>
+          <span class="text-navy-500">{{ $t('savedGrants.outcomes.totalAwarded') }}</span>
+        </div>
+      </div>
     </div>
 
     <!-- Error Retry Banner -->
@@ -118,6 +172,19 @@
           </select>
         </div>
 
+        <!-- Outcome Result -->
+        <div v-if="getGrantStatus(grant.id) === 'outcome'" class="flex-shrink-0 flex items-center gap-1.5">
+          <button
+            v-for="oc in [{ id: 'won', icon: '✅', class: 'bg-green-100 text-green-700 border-green-300' }, { id: 'lost', icon: '❌', class: 'bg-red-50 text-red-600 border-red-200' }, { id: 'pending', icon: '⏳', class: 'bg-amber-50 text-amber-600 border-amber-200' }]"
+            :key="oc.id"
+            @click.stop="setGrantOutcome(grant.id, oc.id)"
+            class="px-2 py-1 text-xs rounded-md border transition-all"
+            :class="getGrantOutcome(grant.id)?.result === oc.id ? oc.class + ' ring-1 ring-offset-1' : 'bg-white text-navy-400 border-navy-200 hover:border-navy-300'"
+          >
+            {{ oc.icon }}
+          </button>
+        </div>
+
         <!-- Grant Info -->
         <router-link :to="`/grants/${grant.id}`" class="flex-1 min-w-0">
           <h3 class="font-semibold text-navy-900 truncate font-display hover:text-amber-600 transition-colors">
@@ -134,6 +201,34 @@
           <span v-if="grant.deadline" :class="deadlineColor(grant.deadline)" class="whitespace-nowrap">
             {{ formatDeadline(grant.deadline) }}
           </span>
+        </div>
+
+        <!-- Tags -->
+        <div class="flex-shrink-0 flex flex-wrap gap-1">
+          <span
+            v-for="tag in getGrantTags(grant.id)"
+            :key="tag"
+            class="px-1.5 py-0.5 text-[10px] bg-navy-100 text-navy-600 rounded font-medium"
+          >{{ tag }}</span>
+          <div class="relative group">
+            <button @click.stop class="p-1 text-navy-300 hover:text-amber-500 transition-colors">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+            </button>
+            <div class="hidden group-focus-within:block absolute right-0 top-full mt-1 z-10 bg-white border border-navy-200 rounded-lg shadow-lg p-2 min-w-[120px]">
+              <button
+                v-for="tag in allTags"
+                :key="tag"
+                @click.stop="toggleGrantTag(grant.id, tag)"
+                class="flex items-center gap-1.5 w-full px-2 py-1 text-xs text-navy-700 hover:bg-navy-50 rounded transition-colors"
+              >
+                <span class="w-3 h-3 rounded border flex items-center justify-center" :class="getGrantTags(grant.id).includes(tag) ? 'bg-amber-500 border-amber-500 text-white' : 'border-navy-300'">
+                  <svg v-if="getGrantTags(grant.id).includes(tag)" class="w-2 h-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                </span>
+                {{ tag }}
+              </button>
+              <p v-if="allTags.length === 0" class="text-[10px] text-navy-400 px-2 py-1">{{ $t('savedGrants.tags.noTags') }}</p>
+            </div>
+          </div>
         </div>
 
         <!-- Remove -->
@@ -283,6 +378,60 @@ const loadError = ref(false)
 const viewMode = ref<'cards' | 'timeline' | 'kanban'>('cards')
 const sortMode = ref('default')
 
+// Tagging system
+const allTags = ref<string[]>([])
+const activeTagFilter = ref<string | null>(null)
+const showTagInput = ref(false)
+const newTagName = ref('')
+
+function loadTags() {
+  try {
+    allTags.value = JSON.parse(localStorage.getItem('grantTags') || '[]')
+  } catch { allTags.value = [] }
+}
+
+function getGrantTags(grantId: string): string[] {
+  try {
+    const map = JSON.parse(localStorage.getItem('grantTagMap') || '{}')
+    return map[grantId] || []
+  } catch { return [] }
+}
+
+function toggleGrantTag(grantId: string, tag: string) {
+  try {
+    const map = JSON.parse(localStorage.getItem('grantTagMap') || '{}')
+    const tags: string[] = map[grantId] || []
+    const idx = tags.indexOf(tag)
+    if (idx >= 0) tags.splice(idx, 1)
+    else tags.push(tag)
+    map[grantId] = tags
+    localStorage.setItem('grantTagMap', JSON.stringify(map))
+  } catch { /* storage full */ }
+}
+
+function addTag() {
+  const name = newTagName.value.trim()
+  if (!name || allTags.value.includes(name)) return
+  allTags.value.push(name)
+  localStorage.setItem('grantTags', JSON.stringify(allTags.value))
+  newTagName.value = ''
+  showTagInput.value = false
+}
+
+function removeTag(tag: string) {
+  allTags.value = allTags.value.filter(t => t !== tag)
+  localStorage.setItem('grantTags', JSON.stringify(allTags.value))
+  // Clean up tag map
+  try {
+    const map = JSON.parse(localStorage.getItem('grantTagMap') || '{}')
+    Object.keys(map).forEach(id => {
+      map[id] = (map[id] || []).filter((t: string) => t !== tag)
+    })
+    localStorage.setItem('grantTagMap', JSON.stringify(map))
+  } catch { /* */ }
+  if (activeTagFilter.value === tag) activeTagFilter.value = null
+}
+
 // Workflow statuses
 const workflowStatuses = computed(() => [
   { id: 'interested', icon: '⭐', label: t('savedGrants.status.interested'), activeBg: 'bg-amber-500' },
@@ -307,6 +456,36 @@ function setGrantStatus(grantId: string, status: string) {
     localStorage.setItem('grantWorkflow', JSON.stringify(workflow))
   } catch { /* storage full */ }
 }
+
+// Outcome tracking
+function getGrantOutcome(grantId: string): { result: string; amountAwarded: number } | null {
+  try {
+    const outcomes = JSON.parse(localStorage.getItem('grantOutcomes') || '{}')
+    return outcomes[grantId] || null
+  } catch { return null }
+}
+
+function setGrantOutcome(grantId: string, result: string, amountAwarded: number = 0) {
+  try {
+    const outcomes = JSON.parse(localStorage.getItem('grantOutcomes') || '{}')
+    outcomes[grantId] = { result, amountAwarded }
+    localStorage.setItem('grantOutcomes', JSON.stringify(outcomes))
+  } catch { /* storage full */ }
+}
+
+// Outcome analytics
+const outcomeStats = computed(() => {
+  const outcomes = JSON.parse(localStorage.getItem('grantOutcomes') || '{}')
+  let won = 0, lost = 0, pending = 0, totalAwarded = 0
+  Object.values(outcomes).forEach((o: any) => {
+    if (o.result === 'won') { won++; totalAwarded += (o.amountAwarded || 0) }
+    else if (o.result === 'lost') lost++
+    else if (o.result === 'pending') pending++
+  })
+  const total = won + lost
+  const winRate = total > 0 ? Math.round((won / total) * 100) : 0
+  return { won, lost, pending, totalAwarded, winRate }
+})
 
 function grantsForStatus(statusId: string): any[] {
   return allGrants.value.filter(g => getGrantStatus(g.id) === statusId)
@@ -343,6 +522,11 @@ const filteredGrants = computed(() => {
   let grants = activeStatusFilter.value
     ? allGrants.value.filter(g => getGrantStatus(g.id) === activeStatusFilter.value)
     : [...allGrants.value]
+
+  // Apply tag filter
+  if (activeTagFilter.value) {
+    grants = grants.filter(g => getGrantTags(g.id).includes(activeTagFilter.value!))
+  }
 
   if (sortMode.value === 'urgent') {
     grants.sort((a, b) => {
@@ -525,6 +709,25 @@ function exportIcal() {
   toast.success(t('savedGrants.icalExported'))
 }
 
+function shareGrantList() {
+  if (allGrants.value.length === 0) return
+  const ids = allGrants.value.map((g: any) => g.id).join(',')
+  const encoded = btoa(ids)
+  const shareUrl = `${window.location.origin}/grants?shared=${encoded}`
+  navigator.clipboard.writeText(shareUrl).then(() => {
+    toast.success(t('savedGrants.shareCopied'))
+  }).catch(() => {
+    // Fallback
+    const input = document.createElement('input')
+    input.value = shareUrl
+    document.body.appendChild(input)
+    input.select()
+    document.execCommand('copy')
+    document.body.removeChild(input)
+    toast.success(t('savedGrants.shareCopied'))
+  })
+}
+
 async function loadSavedGrants() {
   loading.value = true
   loadError.value = false
@@ -546,5 +749,8 @@ async function loadSavedGrants() {
   }
 }
 
-onMounted(loadSavedGrants)
+onMounted(() => {
+  loadSavedGrants()
+  loadTags()
+})
 </script>

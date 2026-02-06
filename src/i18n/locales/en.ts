@@ -763,14 +763,28 @@ export default {
         kanban: {
             dropHere: 'Drag grants here',
         },
+        outcomes: {
+            analytics: 'Outcomes',
+            won: 'Won',
+            lost: 'Lost',
+            winRate: 'Win Rate',
+            totalAwarded: 'Total Awarded',
+        },
         noDeadlines: 'No grants with deadlines to export',
         icalExported: 'Calendar file exported successfully',
+        shareList: 'Share List',
+        shareCopied: 'Share link copied to clipboard!',
         sort: {
             default: 'Sort: Default',
             urgent: 'Sort: Most Urgent',
             budget: 'Sort: Highest Budget',
             readiness: 'Sort: Most Ready',
             newest: 'Sort: Newest First',
+        },
+        tags: {
+            addTag: 'Add Tag',
+            tagName: 'Tag name...',
+            noTags: 'Create tags first',
         },
     },
 

@@ -766,14 +766,28 @@ export default {
         kanban: {
             dropHere: 'Förderungen hierher ziehen',
         },
+        outcomes: {
+            analytics: 'Ergebnisse',
+            won: 'Gewonnen',
+            lost: 'Verloren',
+            winRate: 'Erfolgsquote',
+            totalAwarded: 'Gesamtbewilligt',
+        },
         noDeadlines: 'Keine Förderungen mit Fristen zum Exportieren',
         icalExported: 'Kalenderdatei erfolgreich exportiert',
+        shareList: 'Liste teilen',
+        shareCopied: 'Freigabelink in die Zwischenablage kopiert!',
         sort: {
             default: 'Sortierung: Standard',
             urgent: 'Sortierung: Dringendste',
             budget: 'Sortierung: Höchstes Budget',
             readiness: 'Sortierung: Am besten vorbereitet',
             newest: 'Sortierung: Neueste zuerst',
+        },
+        tags: {
+            addTag: 'Tag hinzufügen',
+            tagName: 'Tag-Name...',
+            noTags: 'Erstellen Sie zuerst Tags',
         },
     },
 
