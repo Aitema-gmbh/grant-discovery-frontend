@@ -695,6 +695,16 @@ export default {
             title: 'Мої шаблони',
             use: 'Використати',
         },
+        portfolio: {
+            title: 'Портфоліо заявок',
+            totalProposals: 'Всього заявок',
+            winRate: 'Відсоток успіху',
+            applying: 'В процесі',
+            submitted: 'Подано',
+            outcomes: 'Розподіл результатів',
+            won: 'Виграно',
+            lost: 'Програно',
+        },
     },
 
     // Onboarding
@@ -807,7 +817,30 @@ export default {
         savedData: 'Збережені гранти, нотатки та нагадування',
         savedDataDesc: 'Очистити всі локально збережені дані, включаючи збережені гранти, нотатки та нагадування',
         clearData: 'Очистити все',
-        dataCleared: 'Всі локальні дані очищено'
+        dataCleared: 'Всі локальні дані очищено',
+        dataPortability: {
+            title: 'Портативність даних',
+            subtitle: 'Експорт, імпорт та управління даними грантів',
+            statistics: {
+                title: 'Ваші дані',
+                savedGrants: 'Збережені гранти',
+                proposals: 'Заявки',
+                handoffNotes: 'Нотатки передачі',
+                reminders: 'Нагадування',
+            },
+            export: {
+                title: 'Експорт даних',
+                description: 'Завантажте повну резервну копію вашої роботи',
+                exportButton: 'Експортувати всі дані',
+            },
+            import: {
+                title: 'Імпорт даних',
+                description: 'Відновіть з попереднього файлу експорту',
+                uploadButton: 'Завантажити файл',
+                importSuccess: 'Дані успішно імпортовано!',
+                importError: 'Невалідний файл експорту. Використовуйте файл Grants Bridge.',
+            },
+        },
     },
 
     // Profile
@@ -1179,6 +1212,16 @@ export default {
             strengths: 'Сильні сторони',
             suggestions: 'Рекомендації',
             dismiss: 'Закрити відгук',
+        },
+        comments: {
+            add: 'Додати коментар',
+            count: '{count} коментарів',
+            open: 'відкритих',
+            placeholder: 'Написати коментар...',
+            post: 'Надіслати',
+            resolve: 'Вирішити',
+            resolved: 'Вирішено',
+            unresolve: 'Відкрити знову',
         },
     },
 

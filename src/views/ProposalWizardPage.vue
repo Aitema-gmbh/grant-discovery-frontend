@@ -289,6 +289,59 @@
               </button>
             </div>
           </div>
+
+          <!-- Section Comments -->
+          <div class="mt-3 pt-3 border-t border-stone-100">
+            <button @click="toggleCommentSection(sectionType)"
+              class="flex items-center gap-2 text-xs text-stone-500 hover:text-navy-600 transition-colors">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+              <span v-if="getCommentCount(sectionType).total > 0">
+                {{ t('proposalWizard.comments.count', { count: getCommentCount(sectionType).total }) }}
+                <span v-if="getCommentCount(sectionType).unresolved > 0" class="text-amber-600 font-medium ml-1">
+                  ({{ getCommentCount(sectionType).unresolved }} {{ t('proposalWizard.comments.open') }})
+                </span>
+              </span>
+              <span v-else>{{ t('proposalWizard.comments.add') }}</span>
+            </button>
+
+            <div v-if="expandedComments.has(sectionType)" class="mt-3 space-y-2">
+              <!-- Comment List -->
+              <div v-for="comment in (sectionComments[sectionType] || [])" :key="comment.id"
+                class="flex gap-2 p-2 rounded-lg text-xs group"
+                :class="comment.resolved ? 'bg-stone-50 opacity-60' : 'bg-amber-50'">
+                <div class="w-6 h-6 rounded-full bg-navy-200 text-navy-700 flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+                  {{ comment.author.charAt(0) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium text-navy-800">{{ comment.author }}</span>
+                    <span class="text-stone-400">{{ commentTimeAgo(comment.createdAt) }}</span>
+                    <span v-if="comment.resolved" class="text-green-600 text-[10px]">{{ t('proposalWizard.comments.resolved') }}</span>
+                  </div>
+                  <p class="mt-0.5" :class="comment.resolved ? 'line-through text-stone-400' : 'text-navy-700'">{{ comment.text }}</p>
+                </div>
+                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button @click="toggleResolveComment(sectionType, comment.id)"
+                    class="p-1 rounded hover:bg-stone-200 text-[10px]" :title="comment.resolved ? t('proposalWizard.comments.unresolve') : t('proposalWizard.comments.resolve')">
+                    {{ comment.resolved ? '&#8617;' : '&#10003;' }}
+                  </button>
+                  <button @click="deleteComment(sectionType, comment.id)"
+                    class="p-1 rounded hover:bg-red-100 text-[10px] text-red-400">&#10005;</button>
+                </div>
+              </div>
+
+              <!-- Add Comment Input -->
+              <div class="flex gap-2">
+                <input v-model="commentInputs[sectionType]" @keyup.enter="addComment(sectionType)"
+                  :placeholder="t('proposalWizard.comments.placeholder')"
+                  class="flex-1 px-3 py-1.5 border border-stone-200 rounded-lg text-xs focus:ring-1 focus:ring-amber-400 focus:border-transparent" />
+                <button @click="addComment(sectionType)"
+                  class="px-3 py-1.5 bg-navy-800 text-white rounded-lg text-xs hover:bg-navy-700 transition-colors">
+                  {{ t('proposalWizard.comments.post') }}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Completion Actions -->
@@ -471,6 +524,89 @@ function getScoreColor(score: number): string {
 
 function clearReview(sectionKey: string) {
   delete sectionReviews.value[sectionKey]
+}
+
+// Proposal Section Comments
+interface ProposalComment {
+  id: string
+  text: string
+  author: string
+  createdAt: string
+  resolved: boolean
+}
+
+const sectionComments = ref<Record<string, ProposalComment[]>>({})
+const commentInputs = ref<Record<string, string>>({})
+const expandedComments = ref<Set<string>>(new Set())
+
+function loadComments() {
+  const pid = route.query.proposalId as string || 'draft'
+  const stored = localStorage.getItem(`proposalComments_${pid}`)
+  if (stored) sectionComments.value = JSON.parse(stored)
+}
+
+function saveComments() {
+  const pid = route.query.proposalId as string || 'draft'
+  localStorage.setItem(`proposalComments_${pid}`, JSON.stringify(sectionComments.value))
+}
+
+function addComment(sectionKey: string) {
+  const text = (commentInputs.value[sectionKey] || '').trim()
+  if (!text) return
+
+  if (!sectionComments.value[sectionKey]) {
+    sectionComments.value[sectionKey] = []
+  }
+
+  sectionComments.value[sectionKey].push({
+    id: Date.now().toString(),
+    text,
+    author: 'Me',
+    createdAt: new Date().toISOString(),
+    resolved: false,
+  })
+
+  commentInputs.value[sectionKey] = ''
+  saveComments()
+}
+
+function toggleResolveComment(sectionKey: string, commentId: string) {
+  const comments = sectionComments.value[sectionKey] || []
+  const comment = comments.find(c => c.id === commentId)
+  if (comment) {
+    comment.resolved = !comment.resolved
+    saveComments()
+  }
+}
+
+function deleteComment(sectionKey: string, commentId: string) {
+  sectionComments.value[sectionKey] = (sectionComments.value[sectionKey] || []).filter(c => c.id !== commentId)
+  saveComments()
+}
+
+function toggleCommentSection(sectionKey: string) {
+  if (expandedComments.value.has(sectionKey)) {
+    expandedComments.value.delete(sectionKey)
+  } else {
+    expandedComments.value.add(sectionKey)
+  }
+}
+
+function getCommentCount(sectionKey: string): { total: number; unresolved: number } {
+  const comments = sectionComments.value[sectionKey] || []
+  return {
+    total: comments.length,
+    unresolved: comments.filter(c => !c.resolved).length,
+  }
+}
+
+function commentTimeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 60) return `${mins}m ago`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h ago`
+  return `${Math.floor(hours / 24)}d ago`
 }
 
 // Offline detection
@@ -797,6 +933,9 @@ onMounted(async () => {
 
   // Load template if specified in URL
   loadTemplate()
+
+  // Load section comments
+  loadComments()
 })
 
 onUnmounted(() => {

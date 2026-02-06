@@ -696,6 +696,16 @@ export default {
             title: 'My Templates',
             use: 'Use',
         },
+        portfolio: {
+            title: 'Proposal Portfolio',
+            totalProposals: 'Total Proposals',
+            winRate: 'Win Rate',
+            applying: 'In Progress',
+            submitted: 'Submitted',
+            outcomes: 'Outcome Distribution',
+            won: 'Won',
+            lost: 'Lost',
+        },
     },
 
     // Onboarding
@@ -810,6 +820,29 @@ export default {
         savedDataDesc: 'Clear all locally stored data including saved grants, notes, and reminders',
         clearData: 'Clear All',
         dataCleared: 'All local data has been cleared',
+        dataPortability: {
+            title: 'Data Portability',
+            subtitle: 'Export, import, and manage your grant data',
+            statistics: {
+                title: 'Your Data',
+                savedGrants: 'Saved Grants',
+                proposals: 'Proposals',
+                handoffNotes: 'Handoff Notes',
+                reminders: 'Reminders',
+            },
+            export: {
+                title: 'Export Data',
+                description: 'Download a complete backup of all your work',
+                exportButton: 'Export All Data',
+            },
+            import: {
+                title: 'Import Data',
+                description: 'Restore from a previous export file',
+                uploadButton: 'Upload File',
+                importSuccess: 'Data imported successfully!',
+                importError: 'Invalid export file. Please use a valid Grants Bridge export.',
+            },
+        },
     },
 
     // Profile
@@ -1164,6 +1197,16 @@ export default {
             strengths: 'Strengths',
             suggestions: 'Suggestions',
             dismiss: 'Dismiss feedback',
+        },
+        comments: {
+            add: 'Add comment',
+            count: '{count} comments',
+            open: 'open',
+            placeholder: 'Write a comment...',
+            post: 'Post',
+            resolve: 'Resolve',
+            resolved: 'Resolved',
+            unresolve: 'Reopen',
         },
     },
 

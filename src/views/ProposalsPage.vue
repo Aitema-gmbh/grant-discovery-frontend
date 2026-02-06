@@ -9,6 +9,49 @@
       </div>
     </div>
 
+    <!-- Portfolio Metrics -->
+    <div v-if="portfolioMetrics.total > 0 || portfolioMetrics.submittedCount > 0" class="mb-8 animate-fade-in">
+      <h2 class="text-lg font-display font-bold text-navy-900 mb-4">{{ $t('proposals.portfolio.title') }}</h2>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="card p-4 text-center">
+          <div class="text-2xl font-bold text-navy-900">{{ portfolioMetrics.total }}</div>
+          <div class="text-xs text-stone-500 mt-1">{{ $t('proposals.portfolio.totalProposals') }}</div>
+        </div>
+        <div class="card p-4 text-center">
+          <div class="text-2xl font-bold" :class="portfolioMetrics.winRate >= 50 ? 'text-green-600' : portfolioMetrics.winRate > 0 ? 'text-amber-600' : 'text-stone-400'">
+            {{ portfolioMetrics.winRate }}%
+          </div>
+          <div class="text-xs text-stone-500 mt-1">{{ $t('proposals.portfolio.winRate') }}</div>
+        </div>
+        <div class="card p-4 text-center">
+          <div class="text-2xl font-bold text-indigo-600">{{ portfolioMetrics.applyingCount }}</div>
+          <div class="text-xs text-stone-500 mt-1">{{ $t('proposals.portfolio.applying') }}</div>
+        </div>
+        <div class="card p-4 text-center">
+          <div class="text-2xl font-bold text-sage-600">{{ portfolioMetrics.submittedCount }}</div>
+          <div class="text-xs text-stone-500 mt-1">{{ $t('proposals.portfolio.submitted') }}</div>
+        </div>
+      </div>
+
+      <!-- Win/Loss Bar -->
+      <div v-if="portfolioMetrics.wonCount > 0 || portfolioMetrics.lostCount > 0" class="card p-4 mt-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold text-stone-600">{{ $t('proposals.portfolio.outcomes') }}</span>
+          <span class="text-xs text-stone-400">{{ portfolioMetrics.wonCount }}W / {{ portfolioMetrics.lostCount }}L</span>
+        </div>
+        <div class="h-4 rounded-full overflow-hidden flex bg-stone-100">
+          <div class="h-full bg-green-500 transition-all"
+            :style="{ width: (portfolioMetrics.wonCount / (portfolioMetrics.wonCount + portfolioMetrics.lostCount) * 100) + '%' }"></div>
+          <div class="h-full bg-red-400 transition-all"
+            :style="{ width: (portfolioMetrics.lostCount / (portfolioMetrics.wonCount + portfolioMetrics.lostCount) * 100) + '%' }"></div>
+        </div>
+        <div class="flex justify-between mt-1">
+          <span class="text-[10px] text-green-600">{{ $t('proposals.portfolio.won') }}</span>
+          <span class="text-[10px] text-red-500">{{ $t('proposals.portfolio.lost') }}</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Templates Section -->
     <div v-if="templates.length > 0" class="mb-8 animate-fade-in">
       <h3 class="text-lg font-display font-semibold text-navy-800 mb-3 flex items-center gap-2">
@@ -119,7 +162,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/AppLayout.vue'
@@ -134,6 +177,27 @@ const proposals = ref<any[]>([])
 
 // Template system
 const templates = ref<Array<{ id: string; name: string; csoId: string; sections: any; createdAt: string }>>([])
+
+// Portfolio Analytics
+const portfolioMetrics = computed(() => {
+  const allProposals = JSON.parse(localStorage.getItem('proposalTemplates') || '[]') as any[]
+  const outcomes = JSON.parse(localStorage.getItem('grantOutcomes') || '{}') as Record<string, string>
+
+  const total = allProposals.length
+  const wonCount = Object.values(outcomes).filter(o => o === 'won').length
+  const lostCount = Object.values(outcomes).filter(o => o === 'lost').length
+  const decidedCount = wonCount + lostCount
+  const winRate = decidedCount > 0 ? Math.round(wonCount / decidedCount * 100) : 0
+
+  // Workflow counts
+  const workflows = JSON.parse(localStorage.getItem('grantWorkflow') || '{}') as Record<string, string>
+  const submittedCount = Object.values(workflows).filter(s => s === 'submitted').length
+  const applyingCount = Object.values(workflows).filter(s => s === 'applying').length
+
+  const savedGrants = JSON.parse(localStorage.getItem('savedGrants') || '[]') as string[]
+
+  return { total, wonCount, lostCount, winRate, submittedCount, applyingCount, savedGrants: savedGrants.length }
+})
 
 function loadTemplates() {
   try {

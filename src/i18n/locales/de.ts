@@ -695,6 +695,16 @@ export default {
             title: 'Meine Vorlagen',
             use: 'Verwenden',
         },
+        portfolio: {
+            title: 'Antrags-Portfolio',
+            totalProposals: 'Anträge gesamt',
+            winRate: 'Erfolgsquote',
+            applying: 'In Bearbeitung',
+            submitted: 'Eingereicht',
+            outcomes: 'Ergebnisverteilung',
+            won: 'Gewonnen',
+            lost: 'Verloren',
+        },
     },
 
     // Onboarding
@@ -808,6 +818,29 @@ export default {
         savedDataDesc: 'Alle lokal gespeicherten Daten löschen, einschließlich gespeicherter Förderungen, Notizen und Erinnerungen',
         clearData: 'Alles löschen',
         dataCleared: 'Alle lokalen Daten wurden gelöscht',
+        dataPortability: {
+            title: 'Datenportabilität',
+            subtitle: 'Exportieren, importieren und verwalten Sie Ihre Förderdaten',
+            statistics: {
+                title: 'Ihre Daten',
+                savedGrants: 'Gespeicherte Förderungen',
+                proposals: 'Anträge',
+                handoffNotes: 'Übergabe-Notizen',
+                reminders: 'Erinnerungen',
+            },
+            export: {
+                title: 'Daten exportieren',
+                description: 'Laden Sie eine vollständige Sicherung Ihrer Arbeit herunter',
+                exportButton: 'Alle Daten exportieren',
+            },
+            import: {
+                title: 'Daten importieren',
+                description: 'Aus einer vorherigen Exportdatei wiederherstellen',
+                uploadButton: 'Datei hochladen',
+                importSuccess: 'Daten erfolgreich importiert!',
+                importError: 'Ungültige Exportdatei. Verwenden Sie eine Grants Bridge Exportdatei.',
+            },
+        },
     },
 
     // Profile
@@ -1167,6 +1200,16 @@ export default {
             strengths: 'Stärken',
             suggestions: 'Vorschläge',
             dismiss: 'Feedback schließen',
+        },
+        comments: {
+            add: 'Kommentar hinzufügen',
+            count: '{count} Kommentare',
+            open: 'offen',
+            placeholder: 'Kommentar schreiben...',
+            post: 'Posten',
+            resolve: 'Erledigen',
+            resolved: 'Erledigt',
+            unresolve: 'Wieder öffnen',
         },
     },
 
