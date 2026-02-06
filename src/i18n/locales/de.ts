@@ -27,6 +27,7 @@ export default {
         of: 'von',
         days: 'Tage',
         scrollToTop: 'Nach oben scrollen',
+        scrollProgress: 'Lesefortschritt',
         day: 'Tag',
         thisMonth: 'diesen Monat',
         noResults: 'Keine Ergebnisse gefunden',
@@ -295,6 +296,10 @@ export default {
             approved: 'Genehmigt',
             rejected: 'Antrag ansehen'
         },
+        setReminder: 'Erinnern',
+        reminderSet: 'Erinnerung gesetzt',
+        reminderAdded: 'Fristerinnerung gesetzt! Sie sehen sie in Ihren Benachrichtigungen.',
+        reminderRemoved: 'Fristerinnerung entfernt.',
         exportDetails: 'Details exportieren',
         sourceInfo: 'Quellinformationen',
         source: 'Quelle:',

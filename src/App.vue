@@ -1,6 +1,10 @@
 <template>
   <div id="app" class="min-h-screen">
-    <router-view />
+    <router-view v-slot="{ Component }">
+      <Transition name="page" mode="out-in">
+        <component :is="Component" />
+      </Transition>
+    </router-view>
     <OnboardingTour ref="tourRef" />
     <FeedbackButton />
   </div>
@@ -30,5 +34,18 @@ onMounted(async () => {
 </script>
 
 <style>
-/* Global styles are in style.css */
+/* Route transition animations */
+.page-enter-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.page-leave-active {
+  transition: opacity 0.15s ease;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-leave-to {
+  opacity: 0;
+}
 </style>

@@ -385,14 +385,35 @@ interface Notification {
   read: boolean
 }
 
-const notifications = ref<Notification[]>([
-  { message: 'Welcome to Grants Bridge Ukraine! Start by creating your organization profile.', time: 'Just now', read: false }
-])
+const notifications = computed<Notification[]>(() => {
+  const items: Notification[] = []
+  // Check deadline reminders from localStorage
+  try {
+    const reminders = JSON.parse(localStorage.getItem('grantReminders') || '[]')
+    const now = new Date()
+    for (const r of reminders) {
+      if (!r.deadline) continue
+      const deadline = new Date(r.deadline)
+      const daysLeft = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+      if (daysLeft <= 0) continue
+      if (daysLeft <= 7) {
+        items.push({
+          message: `${r.title} — ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left`,
+          time: deadline.toLocaleDateString(),
+          read: daysLeft > 3
+        })
+      }
+    }
+  } catch { /* ignore */ }
+  if (items.length === 0) {
+    items.push({ message: 'Welcome to Grants Bridge Ukraine! Start by creating your organization profile.', time: '', read: true })
+  }
+  return items
+})
 
 const hasNotifications = computed(() => notifications.value.some(n => !n.read))
 
 function clearNotifications() {
-  notifications.value = notifications.value.map(n => ({ ...n, read: true }))
   showNotifications.value = false
 }
 

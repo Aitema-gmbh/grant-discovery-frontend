@@ -49,6 +49,29 @@
             </button>
 
             <button
+              v-if="grant.deadline && !isReminderSet"
+              @click="toggleReminder"
+              class="flex items-center gap-2 px-4 py-2 bg-white text-navy-700 border border-gray-300 rounded-lg hover:shadow transition-all"
+              :aria-label="$t('grantDetail.setReminder')"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              {{ $t('grantDetail.setReminder') }}
+            </button>
+            <button
+              v-else-if="grant.deadline && isReminderSet"
+              @click="toggleReminder"
+              class="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-600 border border-amber-300 rounded-lg hover:shadow transition-all"
+              :aria-label="$t('grantDetail.reminderSet')"
+            >
+              <svg class="w-5 h-5 fill-current" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              {{ $t('grantDetail.reminderSet') }}
+            </button>
+
+            <button
               @click="shareGrant"
               class="flex items-center gap-2 px-4 py-2 bg-white text-navy-700 border border-gray-300 rounded-lg hover:shadow transition-all"
               :aria-label="$t('grantDetail.share')"
@@ -449,6 +472,7 @@ const eligibilityResult = ref<any>(null)
 const checkingEligibility = ref(false)
 const descExpanded = ref(false)
 const descNeedsExpand = ref(false)
+const isReminderSet = ref(false)
 const descriptionEl = ref<HTMLElement | null>(null)
 
 // Computed properties
@@ -681,6 +705,27 @@ async function runEligibilityCheck() {
   }
 }
 
+function toggleReminder() {
+  const grantId = route.params.id as string
+  const reminders = JSON.parse(localStorage.getItem('grantReminders') || '[]')
+  const idx = reminders.findIndex((r: any) => r.grantId === grantId)
+  if (idx > -1) {
+    reminders.splice(idx, 1)
+    isReminderSet.value = false
+    toast.info(t('grantDetail.reminderRemoved'))
+  } else {
+    reminders.push({
+      grantId,
+      title: grant.value.title,
+      deadline: grant.value.deadline,
+      createdAt: new Date().toISOString()
+    })
+    isReminderSet.value = true
+    toast.success(t('grantDetail.reminderAdded'))
+  }
+  localStorage.setItem('grantReminders', JSON.stringify(reminders))
+}
+
 function printGrantDetails() {
   window.print()
 }
@@ -706,6 +751,10 @@ async function fetchGrantDetails() {
     // Check if saved
     const saved = JSON.parse(localStorage.getItem('savedGrants') || '[]')
     isSaved.value = saved.includes(grantId)
+
+    // Check if reminder is set
+    const reminders = JSON.parse(localStorage.getItem('grantReminders') || '[]')
+    isReminderSet.value = reminders.some((r: any) => r.grantId === grantId)
 
     // Check for existing proposals for this grant
     if (authStore.isAuthenticated) {

@@ -409,6 +409,13 @@
       </div>
     </div>
 
+    <!-- Screen reader announcement for search results -->
+    <div class="sr-only" aria-live="polite" aria-atomic="true">
+      <span v-if="loading">{{ $t('common.loading') }}</span>
+      <span v-else-if="grants.length > 0">{{ $t('grants.showingResults', { from: (currentPage - 1) * pageSize + 1, to: Math.min(currentPage * pageSize, totalGrants), total: totalGrants }) }}</span>
+      <span v-else-if="searchQuery">{{ $t('grants.emptySearch.title') }}</span>
+    </div>
+
     <!-- Loading State -->
     <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <SkeletonCard v-for="i in 6" :key="i" />

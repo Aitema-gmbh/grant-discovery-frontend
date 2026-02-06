@@ -1,4 +1,17 @@
 <template>
+  <!-- Scroll Progress Bar -->
+  <div
+    v-if="scrollProgress > 0"
+    class="fixed top-0 left-0 h-0.5 bg-amber-500 z-50 transition-[width] duration-100"
+    :style="{ width: scrollProgress + '%' }"
+    role="progressbar"
+    :aria-valuenow="Math.round(scrollProgress)"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    :aria-label="$t('common.scrollProgress')"
+  ></div>
+
+  <!-- Scroll To Top Button -->
   <Transition name="fade">
     <button
       v-if="isVisible"
@@ -17,9 +30,14 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 
 const isVisible = ref(false)
+const scrollProgress = ref(0)
 
 function handleScroll() {
   isVisible.value = window.scrollY > 300
+
+  const scrollTop = window.scrollY
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight
+  scrollProgress.value = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0
 }
 
 function scrollToTop() {

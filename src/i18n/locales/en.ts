@@ -27,6 +27,7 @@ export default {
         of: 'of',
         days: 'days',
         scrollToTop: 'Scroll to top',
+        scrollProgress: 'Reading progress',
         day: 'day',
         thisMonth: 'this month',
         noResults: 'No results found',
@@ -296,6 +297,10 @@ export default {
             approved: 'Approved',
             rejected: 'View Proposal'
         },
+        setReminder: 'Remind Me',
+        reminderSet: 'Reminder Set',
+        reminderAdded: 'Deadline reminder set! You will see it in your notifications.',
+        reminderRemoved: 'Deadline reminder removed.',
         exportDetails: 'Export Details',
         sourceInfo: 'Source Information',
         source: 'Source:',

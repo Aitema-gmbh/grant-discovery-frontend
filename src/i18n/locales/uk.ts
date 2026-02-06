@@ -27,6 +27,7 @@ export default {
         of: 'з',
         days: 'днів',
         scrollToTop: 'Прокрутити вгору',
+        scrollProgress: 'Прогрес читання',
         day: 'день',
         thisMonth: 'цього місяця',
         noResults: 'Результатів не знайдено',
@@ -295,6 +296,10 @@ export default {
             approved: 'Затверджено',
             rejected: 'Переглянути заявку'
         },
+        setReminder: 'Нагадати',
+        reminderSet: 'Нагадування встановлено',
+        reminderAdded: 'Нагадування про дедлайн встановлено! Ви побачите його у сповіщеннях.',
+        reminderRemoved: 'Нагадування про дедлайн видалено.',
         exportDetails: 'Експортувати деталі',
         sourceInfo: 'Інформація про джерело',
         source: 'Джерело:',
