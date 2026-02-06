@@ -297,6 +297,8 @@ export default {
             approved: 'Approved',
             rejected: 'View Proposal'
         },
+        copySection: 'Copy to clipboard',
+        copiedToClipboard: '{section} copied to clipboard',
         setReminder: 'Remind Me',
         reminderSet: 'Reminder Set',
         reminderAdded: 'Deadline reminder set! You will see it in your notifications.',

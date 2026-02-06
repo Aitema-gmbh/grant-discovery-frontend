@@ -341,7 +341,9 @@ export default {
             likelyIneligible: 'Wahrscheinlich nicht förderfähig',
             likelyIneligibleDesc: 'Ihre Organisation erfüllt möglicherweise mehrere wesentliche Anforderungen dieser Förderung nicht.'
         },
-        viewFullMatch: 'Vollständige Übereinstimmungsanalyse anzeigen'
+        viewFullMatch: 'Vollständige Übereinstimmungsanalyse anzeigen',
+        copySection: 'In Zwischenablage kopieren',
+        copiedToClipboard: '{section} in die Zwischenablage kopiert'
     },
 
     // Matches

@@ -471,7 +471,7 @@
               </button>
               <button
                 @click.stop="toggleSaveGrant(grant.id)"
-                class="text-navy-400 hover:text-amber-500 transition-colors"
+                class="btn-save text-navy-400 hover:text-amber-500 transition-colors"
                 :aria-label="savedGrants.includes(grant.id) ? $t('grants.unsaveGrant') : $t('grants.saveGrant')"
                 :aria-pressed="savedGrants.includes(grant.id)"
               >
@@ -750,12 +750,14 @@ import SkeletonCard from '@/components/SkeletonCard.vue'
 import api from '@/services/api'
 import { useToast } from '@/lib/useToast'
 import { useFeedback } from '@/lib/useFeedback'
+import { usePageTitle } from '@/lib/usePageTitle'
 
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
 const { trackPageView, trackGrantAction } = useFeedback()
 const toast = useToast()
+usePageTitle(t('nav.grants'))
 
 // Search input ref
 const searchInput = ref<HTMLInputElement | null>(null)

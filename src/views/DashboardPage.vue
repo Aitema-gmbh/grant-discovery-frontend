@@ -316,8 +316,11 @@ import { useToast } from '@/lib/useToast'
 
 const toast = useToast()
 
+import { usePageTitle } from '@/lib/usePageTitle'
+
 const authStore = useAuthStore()
 const { t } = useI18n()
+usePageTitle(t('nav.dashboard'))
 
 // Stats
 const stats = ref({

@@ -38,7 +38,7 @@
             <button
               @click="toggleSave"
               :class="isSaved ? 'bg-yellow-50 text-yellow-600 border-yellow-300' : 'bg-white text-navy-700 border-gray-300'"
-              class="flex items-center gap-2 px-4 py-2 border rounded-lg hover:shadow transition-all"
+              class="btn-save flex items-center gap-2 px-4 py-2 border rounded-lg hover:shadow transition-all"
               :aria-label="isSaved ? $t('grantDetail.saved') : $t('grantDetail.save')"
               :aria-pressed="isSaved"
             >
@@ -120,7 +120,18 @@
         <div class="lg:col-span-2 space-y-6">
           <!-- Description -->
           <div class="card">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ $t('grantDetail.description') }}</h2>
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-xl font-semibold text-gray-900">{{ $t('grantDetail.description') }}</h2>
+              <button
+                @click="copyToClipboard(grant.description, $t('grantDetail.description'))"
+                class="text-navy-400 hover:text-navy-600 transition-colors p-1"
+                :aria-label="$t('grantDetail.copySection')"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+              </button>
+            </div>
             <div class="prose max-w-none relative">
               <p
                 class="text-gray-700 leading-relaxed transition-all duration-300 overflow-hidden"
@@ -454,12 +465,16 @@ import ScrollToTop from '@/components/ScrollToTop.vue'
 import HelpTooltip from '@/components/HelpTooltip.vue'
 import api from '@/services/api'
 import { useToast } from '@/lib/useToast'
+import { usePageTitle } from '@/lib/usePageTitle'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const authStore = useAuthStore()
 const toast = useToast()
+
+const pageTitle = computed(() => grant.value?.title || t('nav.grants'))
+usePageTitle(pageTitle)
 
 const loading = ref(true)
 const grant = ref<any>(null)
@@ -702,6 +717,15 @@ async function runEligibilityCheck() {
     toast.error(t('errors.network'))
   } finally {
     checkingEligibility.value = false
+  }
+}
+
+async function copyToClipboard(text: string, label: string) {
+  try {
+    await navigator.clipboard.writeText(text)
+    toast.success(t('grantDetail.copiedToClipboard', { section: label }))
+  } catch {
+    toast.error(t('errors.generic'))
   }
 }
 

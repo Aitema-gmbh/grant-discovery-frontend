@@ -341,7 +341,9 @@ export default {
             likelyIneligible: 'Ймовірно не відповідає',
             likelyIneligibleDesc: 'Ваша організація може не відповідати кільком ключовим вимогам цього гранту.'
         },
-        viewFullMatch: 'Переглянути повний аналіз відповідності'
+        viewFullMatch: 'Переглянути повний аналіз відповідності',
+        copySection: 'Копіювати в буфер обміну',
+        copiedToClipboard: '{section} скопійовано в буфер обміну'
     },
 
     // Matches

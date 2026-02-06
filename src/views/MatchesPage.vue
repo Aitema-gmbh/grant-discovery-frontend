@@ -202,6 +202,7 @@ import ScrollToTop from '@/components/ScrollToTop.vue'
 import HelpTooltip from '@/components/HelpTooltip.vue'
 import api from '@/services/api'
 import { useFeedback } from '@/lib/useFeedback'
+import { usePageTitle } from '@/lib/usePageTitle'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/lib/useToast'
 
@@ -211,6 +212,7 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const { trackPageView, trackGrantAction } = useFeedback()
 const toast = useToast()
+usePageTitle(t('nav.matches'))
 
 const loading = ref(false)
 const csoProfiles = ref<any[]>([])
