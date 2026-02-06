@@ -163,6 +163,15 @@
   }
 
   /* Animations */
+  @keyframes urgentPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .animate-urgent-pulse {
+    animation: urgentPulse 2s ease-in-out infinite;
+  }
+
   @keyframes gradient-shift {
     0%, 100% {
       background-position: 0% 50%;

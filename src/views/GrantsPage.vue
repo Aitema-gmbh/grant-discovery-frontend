@@ -519,17 +519,15 @@
         </div>
 
         <!-- Deadline Urgency Badge -->
-        <div v-if="deadlineDaysLeft(grant.deadline) >= 0 && deadlineDaysLeft(grant.deadline) <= 7" class="absolute top-3 right-3">
-          <span class="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold animate-pulse">
-            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.828a1 1 0 101.415-1.414L11 9.586V6z" clip-rule="evenodd"/>
+        <div v-if="getDeadlineUrgency(grant.deadline)" class="absolute top-3 right-3">
+          <span
+            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold"
+            :class="[getDeadlineUrgency(grant.deadline)!.class, getDeadlineUrgency(grant.deadline)!.isPulse ? 'animate-urgent-pulse' : '']"
+          >
+            <svg v-if="getDeadlineUrgency(grant.deadline)!.daysLeft <= 7" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
             </svg>
-            {{ deadlineDaysLeft(grant.deadline) === 0 ? $t('grants.deadlineToday') : $t('grants.deadlineDaysLeft', { days: deadlineDaysLeft(grant.deadline) }) }}
-          </span>
-        </div>
-        <div v-else-if="deadlineDaysLeft(grant.deadline) > 7 && deadlineDaysLeft(grant.deadline) <= 14" class="absolute top-3 right-3">
-          <span class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-semibold">
-            {{ $t('grants.closingSoon') }}
+            {{ getDeadlineUrgency(grant.deadline)!.label }}
           </span>
         </div>
 
@@ -545,6 +543,13 @@
               </p>
             </div>
             <div class="flex items-center gap-1 ml-2 flex-shrink-0">
+              <button
+                @click.stop="openPreview(grant, $event)"
+                class="p-1.5 text-navy-400 hover:text-amber-500 transition-colors"
+                :title="$t('grants.quickPeek')"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              </button>
               <button
                 @click.stop="toggleCompareGrant(grant)"
                 class="text-navy-400 hover:text-blue-500 transition-colors"
@@ -888,6 +893,50 @@
       </Transition>
     </Teleport>
     <ScrollToTop />
+
+    <!-- Quick Preview Popover -->
+    <Teleport to="body">
+      <div v-if="previewGrant" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="closePreview">
+        <div class="absolute inset-0 bg-navy-900/30 backdrop-blur-sm" @click="closePreview"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
+          <button @click="closePreview" class="absolute top-3 right-3 p-1 text-navy-400 hover:text-navy-700 transition-colors">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+          </button>
+          <h3 class="text-lg font-display font-semibold text-navy-900 pr-8">{{ previewGrant.title }}</h3>
+          <p class="text-sm text-navy-500 mt-1">{{ previewGrant.program_name || previewGrant.source_id || '' }}</p>
+
+          <div class="grid grid-cols-2 gap-3 mt-4">
+            <div v-if="previewGrant.amount_max || previewGrant.amount_min" class="p-2.5 bg-amber-50 rounded-lg">
+              <p class="text-[10px] text-amber-600 font-medium">{{ $t('grants.quickPeekAmount') }}</p>
+              <p class="text-sm font-bold text-amber-800">{{ formatAmount(previewGrant.amount_min, previewGrant.amount_max, previewGrant.currency) }}</p>
+            </div>
+            <div v-if="previewGrant.deadline" class="p-2.5 bg-navy-50 rounded-lg">
+              <p class="text-[10px] text-navy-500 font-medium">{{ $t('grants.quickPeekDeadline') }}</p>
+              <p class="text-sm font-bold text-navy-800">{{ new Date(previewGrant.deadline).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) }}</p>
+            </div>
+            <div v-if="previewGrant.category" class="p-2.5 bg-sage-50 rounded-lg">
+              <p class="text-[10px] text-sage-600 font-medium">{{ $t('grants.quickPeekCategory') }}</p>
+              <p class="text-sm font-semibold text-sage-800">{{ previewGrant.category }}</p>
+            </div>
+            <div v-if="previewGrant.funding_rate" class="p-2.5 bg-purple-50 rounded-lg">
+              <p class="text-[10px] text-purple-500 font-medium">{{ $t('grants.quickPeekFunding') }}</p>
+              <p class="text-sm font-bold text-purple-800">{{ previewGrant.funding_rate }}%</p>
+            </div>
+          </div>
+
+          <p v-if="previewGrant.description" class="text-xs text-navy-600 mt-3 line-clamp-3">{{ previewGrant.description }}</p>
+
+          <div class="flex gap-2 mt-4">
+            <router-link :to="`/grants/${previewGrant.id}`" class="btn btn-primary btn-sm flex-1 text-center" @click="closePreview">
+              {{ $t('grants.quickPeekView') }}
+            </router-link>
+            <button @click="toggleSaveGrant(previewGrant.id); closePreview()" class="btn btn-outline btn-sm">
+              {{ $t('grants.quickPeekSave') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </AppLayout>
 </template>
 
@@ -911,6 +960,19 @@ const { t } = useI18n()
 const { trackPageView, trackGrantAction } = useFeedback()
 const toast = useToast()
 usePageTitle(t('nav.grants'))
+
+// Quick preview
+const previewGrant = ref<any>(null)
+
+function openPreview(grant: any, event: Event) {
+  event.preventDefault()
+  event.stopPropagation()
+  previewGrant.value = previewGrant.value?.id === grant.id ? null : grant
+}
+
+function closePreview() {
+  previewGrant.value = null
+}
 
 // Search input ref
 const searchInput = ref<HTMLInputElement | null>(null)
@@ -1537,6 +1599,18 @@ function deadlineDaysLeft(dateStr: string): number {
   const date = new Date(dateStr)
   const now = new Date()
   return Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+}
+
+function getDeadlineUrgency(deadline: string | null): { label: string; class: string; daysLeft: number; isPulse: boolean } | null {
+  if (!deadline) return null
+  const days = Math.ceil((new Date(deadline).getTime() - Date.now()) / (24 * 60 * 60 * 1000))
+  if (days < 0) return { label: t('grants.deadlinePassed'), class: 'bg-navy-200 text-navy-500', daysLeft: days, isPulse: false }
+  if (days === 0) return { label: t('grants.deadlineToday'), class: 'bg-red-100 text-red-700 border border-red-300', daysLeft: days, isPulse: true }
+  if (days <= 3) return { label: t('grants.deadlineDaysLeft', { days }), class: 'bg-red-100 text-red-700 border border-red-300', daysLeft: days, isPulse: true }
+  if (days <= 7) return { label: t('grants.deadlineDaysLeft', { days }), class: 'bg-red-50 text-red-600', daysLeft: days, isPulse: true }
+  if (days <= 14) return { label: t('grants.deadlineDaysLeft', { days }), class: 'bg-amber-100 text-amber-700', daysLeft: days, isPulse: false }
+  if (days <= 30) return { label: t('grants.deadlineDaysLeft', { days }), class: 'bg-amber-50 text-amber-600', daysLeft: days, isPulse: false }
+  return null
 }
 
 function categoryColorStrip(category: string): string {

@@ -222,6 +222,14 @@ export default {
         aiSearchActive: 'KI-semantische Suche aktiv',
         deadlineToday: 'Heute!',
         deadlineDaysLeft: '{days} T.',
+        deadlinePassed: 'Abgelaufen',
+        quickPeek: 'Schnellvorschau',
+        quickPeekAmount: 'Fordersumme',
+        quickPeekDeadline: 'Frist',
+        quickPeekCategory: 'Kategorie',
+        quickPeekFunding: 'Forderquote',
+        quickPeekView: 'Details anzeigen',
+        quickPeekSave: 'Speichern',
         showingResults: 'Zeige {from} - {to} von {total}',
         filters: {
             amount: 'Förderbetrag (EUR)',
@@ -1046,6 +1054,9 @@ export default {
         templateName: 'Vorlagenname eingeben:',
         templateSaved: 'Vorlage erfolgreich gespeichert!',
         templateLoaded: 'Vorlage geladen — Sie können alle Felder bearbeiten.',
+        shareProposal: 'Antrag teilen',
+        shareCopied: 'Antragslink in die Zwischenablage kopiert!',
+        shareError: 'Link konnte nicht erstellt werden',
     },
 
     // Proposal Detail

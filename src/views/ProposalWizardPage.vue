@@ -35,6 +35,9 @@
 
         <!-- Sync status indicator -->
         <div class="flex items-center gap-2 mb-2">
+          <button @click="shareProposal" class="p-2 text-navy-400 hover:text-amber-500 transition-colors rounded-lg hover:bg-amber-50" :title="$t('proposalWizard.shareProposal')">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+          </button>
           <div v-if="isSaving" class="flex items-center gap-1.5 text-xs text-navy-400">
             <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -520,6 +523,33 @@ async function startGeneration() {
   } catch (error) {
     console.error('Error creating proposal:', error)
     toast.error(t('errors.createProposal'))
+  }
+}
+
+function shareProposal() {
+  try {
+    const shareData = {
+      csoId: selectedCsoId.value || '',
+      grantId: grantId.value || '',
+      grantTitle: grantTitle.value || '',
+      content: generatedContent.value || {}
+    }
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(shareData))))
+    const truncated = encoded.length > 2000 ? encoded.substring(0, 2000) : encoded
+    const shareUrl = `${window.location.origin}${window.location.pathname}?shared=${truncated}`
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      toast.success(t('proposalWizard.shareCopied'))
+    }).catch(() => {
+      const input = document.createElement('input')
+      input.value = shareUrl
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand('copy')
+      document.body.removeChild(input)
+      toast.success(t('proposalWizard.shareCopied'))
+    })
+  } catch {
+    toast.error(t('proposalWizard.shareError'))
   }
 }
 

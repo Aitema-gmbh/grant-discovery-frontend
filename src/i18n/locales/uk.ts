@@ -222,6 +222,14 @@ export default {
         aiSearchActive: 'Використовується семантичний пошук ШІ',
         deadlineToday: 'Сьогодні!',
         deadlineDaysLeft: '{days} дн.',
+        deadlinePassed: 'Закрито',
+        quickPeek: 'Швидкий перегляд',
+        quickPeekAmount: 'Сума гранту',
+        quickPeekDeadline: 'Дедлайн',
+        quickPeekCategory: 'Категорія',
+        quickPeekFunding: 'Ставка фінансування',
+        quickPeekView: 'Детальніше',
+        quickPeekSave: 'Зберегти',
         showingResults: 'Показано {from} - {to} з {total}',
         filters: {
             amount: 'Сума гранту (EUR)',
@@ -1058,6 +1066,9 @@ export default {
         templateName: 'Введіть назву шаблону:',
         templateSaved: 'Шаблон успішно збережено!',
         templateLoaded: 'Шаблон завантажено — ви можете редагувати всі поля.',
+        shareProposal: 'Поділитися заявкою',
+        shareCopied: 'Посилання на заявку скопійовано!',
+        shareError: 'Не вдалося створити посилання',
     },
 
     // Proposal Detail

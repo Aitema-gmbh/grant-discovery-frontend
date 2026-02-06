@@ -222,6 +222,14 @@ export default {
         aiSearchActive: 'Using AI semantic search',
         deadlineToday: 'Today!',
         deadlineDaysLeft: '{days}d left',
+        deadlinePassed: 'Closed',
+        quickPeek: 'Quick Preview',
+        quickPeekAmount: 'Grant Amount',
+        quickPeekDeadline: 'Deadline',
+        quickPeekCategory: 'Category',
+        quickPeekFunding: 'Funding Rate',
+        quickPeekView: 'View Details',
+        quickPeekSave: 'Save',
         showingResults: 'Showing {from} - {to} of {total}',
         filters: {
             amount: 'Grant Amount (EUR)',
@@ -1043,6 +1051,9 @@ export default {
         templateName: 'Enter template name:',
         templateSaved: 'Template saved successfully!',
         templateLoaded: 'Template loaded — you can edit all fields.',
+        shareProposal: 'Share Proposal',
+        shareCopied: 'Proposal link copied to clipboard!',
+        shareError: 'Could not generate share link',
     },
 
     // Proposal Detail
