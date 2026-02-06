@@ -94,6 +94,15 @@ export default {
         savedGrantsAppear: 'Gespeicherte Förderungen erscheinen hier',
         grantTrends: 'Förderungs-Trends',
         chartComingSoon: 'Diagramm kommt bald',
+        charts: {
+            deadlineTimeline: 'Fristen-Zeitstrahl',
+            categoryDistribution: 'Förderungen nach Kategorie',
+            thisWeek: 'Diese Woche',
+            nextWeek: 'Nächste Woche',
+            thisMonth: 'Diesen Monat',
+            next3Months: '1-3 Monate',
+            later: 'Später',
+        },
         trackProgress: 'Verfolgen Sie Ihren Fortschritt bei der Fördersuche',
         help: {
             live: 'Echtzeit-Anzahl der aktuell offenen Fördermittel aus allen Quellen',
@@ -241,7 +250,16 @@ export default {
         viewMode: 'Ansichtsmodus',
         gridView: 'Rasteransicht',
         listView: 'Listenansicht',
-        unsaveGrant: 'Aus Gespeicherten entfernen'
+        unsaveGrant: 'Aus Gespeicherten entfernen',
+        batch: {
+            select: 'Auswählen',
+            selected: '{count} ausgewählt',
+            saveAll: 'Alle speichern',
+            exportCsv: 'CSV exportieren',
+            clearSelection: 'Aufheben',
+            selectAll: 'Alle auswählen',
+            savedAll: 'Alle ausgewählten Förderungen gespeichert',
+        },
     },
 
     // Grant Detail

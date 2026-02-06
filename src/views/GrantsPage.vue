@@ -384,6 +384,21 @@
       </div>
 
       <div class="flex items-center gap-3">
+        <!-- Batch Select Toggle -->
+        <button
+          v-if="grants.length > 0"
+          @click="toggleBatchMode"
+          :class="[
+            'btn btn-sm hidden sm:inline-flex items-center gap-1.5',
+            batchMode ? 'btn-primary' : 'btn-outline'
+          ]"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+          </svg>
+          {{ $t('grants.batch.select') }}
+        </button>
+
         <!-- CSV Export -->
         <button
           v-if="grants.length > 0"
@@ -454,6 +469,26 @@
       >
         <!-- Category Color Strip -->
         <div class="absolute top-0 left-0 w-1 h-full" :class="categoryColorStrip(grant.category)"></div>
+
+        <!-- Batch Checkbox -->
+        <div
+          v-if="batchMode"
+          class="absolute top-3 left-3 z-10"
+          @click.stop="toggleSelectGrant(grant.id, index, $event)"
+        >
+          <div
+            :class="[
+              'w-5 h-5 rounded border-2 flex items-center justify-center transition-all cursor-pointer',
+              selectedGrants.has(grant.id)
+                ? 'bg-amber-500 border-amber-500 text-white'
+                : 'bg-white border-navy-300 hover:border-amber-400'
+            ]"
+          >
+            <svg v-if="selectedGrants.has(grant.id)" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+        </div>
 
         <!-- Deadline Urgency Badge -->
         <div v-if="deadlineDaysLeft(grant.deadline) >= 0 && deadlineDaysLeft(grant.deadline) <= 7" class="absolute top-3 right-3">
@@ -676,6 +711,41 @@
           </button>
           <button @click="compareGrants = []" class="text-white/60 hover:text-white text-sm">
             {{ $t('common.clear') }}
+          </button>
+        </div>
+      </Transition>
+
+      <!-- Batch Actions Floating Bar -->
+      <Transition
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="translate-y-full opacity-0"
+        enter-to-class="translate-y-0 opacity-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="translate-y-0 opacity-100"
+        leave-to-class="translate-y-full opacity-0"
+      >
+        <div v-if="batchMode && selectedGrants.size > 0 && compareGrants.length === 0" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-navy-900 text-white rounded-2xl shadow-2xl px-5 py-3 flex items-center gap-4">
+          <span class="text-sm font-medium text-amber-400">
+            {{ $t('grants.batch.selected', { count: selectedGrants.size }) }}
+          </span>
+          <button @click="selectAllOnPage" class="text-sm text-white/80 hover:text-white transition-colors">
+            {{ $t('grants.batch.selectAll') }}
+          </button>
+          <div class="w-px h-5 bg-white/20"></div>
+          <button @click="batchSaveAll" class="btn btn-secondary btn-sm flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+            </svg>
+            {{ $t('grants.batch.saveAll') }}
+          </button>
+          <button @click="batchExportCsv" class="btn btn-outline btn-sm border-white/30 text-white hover:bg-white/10 flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            CSV
+          </button>
+          <button @click="toggleBatchMode" class="text-white/60 hover:text-white text-sm">
+            {{ $t('grants.batch.clearSelection') }}
           </button>
         </div>
       </Transition>
@@ -1173,6 +1243,93 @@ function toggleSaveGrant(grantId: string) {
     trackGrantAction(grantId, 'save', { source_page: 'grants' })
   }
   localStorage.setItem('savedGrants', JSON.stringify(savedGrants.value))
+}
+
+// Batch selection
+const selectedGrants = ref<Set<string>>(new Set())
+const batchMode = ref(false)
+let lastSelectedIndex = -1
+
+function toggleBatchMode() {
+  batchMode.value = !batchMode.value
+  if (!batchMode.value) {
+    selectedGrants.value = new Set()
+    lastSelectedIndex = -1
+  }
+}
+
+function toggleSelectGrant(grantId: string, index: number, event?: MouseEvent) {
+  if (!batchMode.value) batchMode.value = true
+  const newSet = new Set(selectedGrants.value)
+
+  // Shift+click range select
+  if (event?.shiftKey && lastSelectedIndex >= 0) {
+    const start = Math.min(lastSelectedIndex, index)
+    const end = Math.max(lastSelectedIndex, index)
+    for (let i = start; i <= end; i++) {
+      if (grants.value[i]) newSet.add(grants.value[i].id)
+    }
+  } else {
+    if (newSet.has(grantId)) {
+      newSet.delete(grantId)
+    } else {
+      newSet.add(grantId)
+    }
+  }
+
+  selectedGrants.value = newSet
+  lastSelectedIndex = index
+}
+
+function selectAllOnPage() {
+  const newSet = new Set(selectedGrants.value)
+  grants.value.forEach(g => newSet.add(g.id))
+  selectedGrants.value = newSet
+  batchMode.value = true
+}
+
+function clearSelection() {
+  selectedGrants.value = new Set()
+  lastSelectedIndex = -1
+}
+
+function batchSaveAll() {
+  selectedGrants.value.forEach(id => {
+    if (!savedGrants.value.includes(id)) {
+      savedGrants.value.push(id)
+    }
+  })
+  localStorage.setItem('savedGrants', JSON.stringify(savedGrants.value))
+  toast.success(t('grants.batch.savedAll'))
+  clearSelection()
+}
+
+function batchExportCsv() {
+  const selected = grants.value.filter(g => selectedGrants.value.has(g.id))
+  if (selected.length === 0) return
+
+  const headers = ['Title', 'Category', 'Donor', 'Amount Min', 'Amount Max', 'Currency', 'Deadline', 'Countries', 'URL']
+  const rows = selected.map((g: any) => [
+    `"${(g.title || '').replace(/"/g, '""')}"`,
+    g.category || '',
+    `"${(g.donor_name || '').replace(/"/g, '""')}"`,
+    g.amount_min || '',
+    g.amount_max || '',
+    g.currency || 'EUR',
+    g.deadline || '',
+    `"${(Array.isArray(g.eligible_countries) ? g.eligible_countries.join(', ') : g.eligible_countries || '').replace(/"/g, '""')}"`,
+    g.url || ''
+  ])
+
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `grants-selection-${new Date().toISOString().split('T')[0]}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+  toast.success(t('grants.csvExported'))
 }
 
 // Compare grants

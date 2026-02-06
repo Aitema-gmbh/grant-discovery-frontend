@@ -94,6 +94,15 @@ export default {
         savedGrantsAppear: 'Збережені гранти з\'являться тут',
         grantTrends: 'Тенденції пошуку грантів',
         chartComingSoon: 'Візуалізація графіків скоро буде',
+        charts: {
+            deadlineTimeline: 'Графік дедлайнів',
+            categoryDistribution: 'Гранти за категоріями',
+            thisWeek: 'Цей тиждень',
+            nextWeek: 'Наступний тижд.',
+            thisMonth: 'Цей місяць',
+            next3Months: '1-3 місяці',
+            later: 'Пізніше',
+        },
         trackProgress: 'Відстежуйте свій прогрес у пошуку грантів з часом',
         help: {
             live: 'Кількість відкритих грантів з усіх джерел у реальному часі',
@@ -241,7 +250,16 @@ export default {
         viewMode: 'Режим перегляду',
         gridView: 'Сітка',
         listView: 'Список',
-        unsaveGrant: 'Видалити зі збережених'
+        unsaveGrant: 'Видалити зі збережених',
+        batch: {
+            select: 'Вибрати',
+            selected: '{count} вибрано',
+            saveAll: 'Зберегти всі',
+            exportCsv: 'Експорт CSV',
+            clearSelection: 'Скасувати',
+            selectAll: 'Вибрати всі',
+            savedAll: 'Всі вибрані гранти збережено',
+        },
     },
 
     // Grant Detail

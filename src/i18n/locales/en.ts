@@ -94,6 +94,15 @@ export default {
         savedGrantsAppear: 'Saved grants will appear here',
         grantTrends: 'Grant Discovery Trends',
         chartComingSoon: 'Chart visualization coming soon',
+        charts: {
+            deadlineTimeline: 'Deadline Timeline',
+            categoryDistribution: 'Grants by Category',
+            thisWeek: 'This week',
+            nextWeek: 'Next week',
+            thisMonth: 'This month',
+            next3Months: '1-3 months',
+            later: 'Later',
+        },
         trackProgress: 'Track your grant discovery progress over time',
         help: {
             live: 'Real-time count of currently open grants from all sources',
@@ -242,7 +251,16 @@ export default {
         viewMode: 'View mode',
         gridView: 'Grid view',
         listView: 'List view',
-        unsaveGrant: 'Remove from saved'
+        unsaveGrant: 'Remove from saved',
+        batch: {
+            select: 'Select',
+            selected: '{count} selected',
+            saveAll: 'Save All',
+            exportCsv: 'Export CSV',
+            clearSelection: 'Clear',
+            selectAll: 'Select all',
+            savedAll: 'All selected grants saved',
+        },
     },
 
     // Grant Detail

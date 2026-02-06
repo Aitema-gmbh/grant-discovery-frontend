@@ -284,18 +284,41 @@
       </div>
     </div>
 
-    <!-- Charts Section (if we have data) -->
-    <div v-if="stats.activeGrants && stats.activeGrants > 0" class="mt-12 animate-fade-in" style="animation-delay: 0.4s">
+    <!-- Charts Section -->
+    <div v-if="allGrantsForCharts.length > 0" class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in" style="animation-delay: 0.4s">
+      <!-- Deadline Timeline -->
       <div class="card-premium">
-        <h3 class="section-title mb-6">{{ $t('dashboard.grantTrends') }}</h3>
-        <div class="h-64 flex items-center justify-center">
-          <div class="text-center">
-            <svg class="w-16 h-16 mx-auto mb-4 text-navy-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-            </svg>
-            <p class="text-lg font-medium text-navy-600">{{ $t('dashboard.chartComingSoon') }}</p>
-            <p class="text-sm text-navy-400 mt-1">{{ $t('dashboard.trackProgress') }}</p>
+        <h3 class="section-title mb-6">{{ $t('dashboard.charts.deadlineTimeline') }}</h3>
+        <div class="space-y-4">
+          <div v-for="bucket in deadlineChartData" :key="bucket.label" class="flex items-center gap-3">
+            <span class="text-xs font-medium text-navy-600 w-24 text-right truncate">{{ bucket.label }}</span>
+            <div class="flex-1 bg-navy-100 rounded-full h-6 overflow-hidden">
+              <div
+                class="h-full rounded-full flex items-center justify-end pr-2 transition-all duration-700"
+                :style="`width: ${Math.max(bucket.percent, bucket.count > 0 ? 12 : 0)}%; background-color: ${bucket.color}`"
+              >
+                <span v-if="bucket.count > 0" class="text-xs font-bold text-white">{{ bucket.count }}</span>
+              </div>
+            </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Category Distribution -->
+      <div class="card-premium">
+        <h3 class="section-title mb-6">{{ $t('dashboard.charts.categoryDistribution') }}</h3>
+        <div class="space-y-3">
+          <div v-for="cat in categoryChartData" :key="cat.name" class="flex items-center gap-3">
+            <span class="text-xs font-medium text-navy-600 w-28 text-right truncate" :title="cat.name">{{ cat.name }}</span>
+            <div class="flex-1 bg-navy-100 rounded-full h-5 overflow-hidden">
+              <div
+                class="h-full rounded-full transition-all duration-700"
+                :style="`width: ${Math.max(cat.percent, cat.count > 0 ? 12 : 0)}%; background-color: ${cat.color}`"
+              ></div>
+            </div>
+            <span class="text-xs font-semibold text-navy-700 w-8">{{ cat.count }}</span>
+          </div>
+          <p v-if="categoryChartData.length === 0" class="text-sm text-navy-400 text-center py-4">{{ $t('common.noResults') }}</p>
         </div>
       </div>
     </div>
@@ -336,6 +359,9 @@ const recentActivity = ref<any[]>([])
 
 // Upcoming deadlines list
 const upcomingDeadlinesList = ref<any[]>([])
+
+// All grants for charts
+const allGrantsForCharts = ref<any[]>([])
 
 // Display name
 const displayName = computed(() => {
@@ -408,6 +434,57 @@ const insights = computed(() => {
   return items.slice(0, 3) // Max 3 insights
 })
 
+// Chart data: Category distribution
+const categoryChartData = computed(() => {
+  const counts: Record<string, number> = {}
+  allGrantsForCharts.value.forEach((g: any) => {
+    const cat = g.category || 'Other'
+    counts[cat] = (counts[cat] || 0) + 1
+  })
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 6)
+  const max = sorted.length > 0 ? sorted[0]![1] : 1
+  return sorted.map(([name, count]) => ({
+    name,
+    count,
+    percent: Math.round((count / max) * 100),
+    color: categoryChartColor(name),
+  }))
+})
+
+function categoryChartColor(cat: string): string {
+  const c = cat.toLowerCase()
+  if (c.includes('humanitarian') || c.includes('health')) return '#ef4444'
+  if (c.includes('education') || c.includes('scholarship')) return '#3b82f6'
+  if (c.includes('democracy') || c.includes('governance')) return '#6366f1'
+  if (c.includes('environment') || c.includes('climate')) return '#10b981'
+  if (c.includes('culture') || c.includes('media')) return '#8b5cf6'
+  if (c.includes('infrastructure')) return '#f97316'
+  if (c.includes('economic') || c.includes('development')) return '#14b8a6'
+  return '#64748b'
+}
+
+// Chart data: Deadline timeline
+const deadlineChartData = computed(() => {
+  const now = new Date()
+  const buckets = [
+    { label: t('dashboard.charts.thisWeek'), max: 7, count: 0, color: '#ef4444' },
+    { label: t('dashboard.charts.nextWeek'), max: 14, count: 0, color: '#f59e0b' },
+    { label: t('dashboard.charts.thisMonth'), max: 30, count: 0, color: '#3b82f6' },
+    { label: t('dashboard.charts.next3Months'), max: 90, count: 0, color: '#10b981' },
+    { label: t('dashboard.charts.later'), max: 999, count: 0, color: '#64748b' },
+  ]
+  allGrantsForCharts.value.forEach((g: any) => {
+    if (!g.deadline) return
+    const days = Math.ceil((new Date(g.deadline).getTime() - now.getTime()) / (24 * 60 * 60 * 1000))
+    if (days < 0) return
+    for (const b of buckets) {
+      if (days <= b.max) { b.count++; break }
+    }
+  })
+  const max = Math.max(...buckets.map(b => b.count), 1)
+  return buckets.map(b => ({ ...b, percent: Math.round((b.count / max) * 100) }))
+})
+
 // Activity icon class
 function activityIconClass(type: string) {
   switch (type) {
@@ -464,6 +541,7 @@ async function fetchDashboardData() {
     const deadlinesResponse = await api.get('/api/grants?limit=100')
 
     if (deadlinesResponse.data && Array.isArray(deadlinesResponse.data.grants)) {
+      allGrantsForCharts.value = deadlinesResponse.data.grants
       const grantsWithDeadlines = deadlinesResponse.data.grants
         .filter((g: any) => g.deadline)
         .map((g: any) => {
