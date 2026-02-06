@@ -540,6 +540,62 @@
           rows="4"
         ></textarea>
       </div>
+
+      <!-- Preparation Checklist -->
+      <div class="card mt-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-navy-900 flex items-center gap-2">
+            <svg class="w-5 h-5 text-sage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+            {{ $t('grantDetail.prepChecklist.title') }}
+          </h2>
+          <span v-if="prepItems.length > 0" class="text-xs font-medium" :class="prepProgress === 100 ? 'text-sage-600' : 'text-navy-400'">
+            {{ prepCheckedCount }}/{{ prepItems.length }}
+          </span>
+        </div>
+
+        <!-- Progress bar -->
+        <div v-if="prepItems.length > 0" class="w-full bg-navy-100 rounded-full h-1.5 mb-4">
+          <div class="h-1.5 rounded-full transition-all duration-500" :class="prepProgress === 100 ? 'bg-sage-500' : 'bg-amber-400'" :style="`width: ${prepProgress}%`"></div>
+        </div>
+
+        <!-- Checklist items -->
+        <div class="space-y-2 mb-4">
+          <div v-for="(item, index) in prepItems" :key="index" class="flex items-start gap-3 group">
+            <button
+              @click="togglePrepItem(index)"
+              class="mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all"
+              :class="item.checked ? 'bg-sage-500 border-sage-500 text-white' : 'border-navy-300 hover:border-amber-400'"
+            >
+              <svg v-if="item.checked" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+            <span class="text-sm flex-1" :class="item.checked ? 'text-navy-400 line-through' : 'text-navy-700'">
+              {{ item.text }}
+            </span>
+            <button @click="removePrepItem(index)" class="opacity-0 group-hover:opacity-100 p-0.5 text-navy-300 hover:text-red-400 transition-all">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Add item -->
+        <div class="flex gap-2">
+          <input
+            v-model="newPrepItem"
+            @keyup.enter="addPrepItem"
+            :placeholder="$t('grantDetail.prepChecklist.addPlaceholder')"
+            class="input text-sm flex-1 py-1.5"
+          />
+          <button @click="addPrepItem" :disabled="!newPrepItem.trim()" class="btn btn-sm bg-sage-500 text-white hover:bg-sage-600 disabled:opacity-40">
+            +
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Error State -->
@@ -624,6 +680,46 @@ function debounceSaveNote() {
   if (noteSaveTimeout) clearTimeout(noteSaveTimeout)
   noteSaveTimeout = setTimeout(saveNote, 1000)
 }
+// Preparation checklist
+interface PrepItem { text: string; checked: boolean }
+const prepItems = ref<PrepItem[]>([])
+const newPrepItem = ref('')
+const PREP_KEY = computed(() => `grantPrep_${route.params.id}`)
+
+function loadPrepItems() {
+  try {
+    prepItems.value = JSON.parse(localStorage.getItem(PREP_KEY.value) || '[]')
+  } catch { prepItems.value = [] }
+}
+
+function savePrepItems() {
+  try {
+    localStorage.setItem(PREP_KEY.value, JSON.stringify(prepItems.value))
+  } catch { /* storage full */ }
+}
+
+function addPrepItem() {
+  if (!newPrepItem.value.trim()) return
+  prepItems.value.push({ text: newPrepItem.value.trim(), checked: false })
+  newPrepItem.value = ''
+  savePrepItems()
+}
+
+function togglePrepItem(index: number) {
+  if (prepItems.value[index]) {
+    prepItems.value[index]!.checked = !prepItems.value[index]!.checked
+    savePrepItems()
+  }
+}
+
+function removePrepItem(index: number) {
+  prepItems.value.splice(index, 1)
+  savePrepItems()
+}
+
+const prepCheckedCount = computed(() => prepItems.value.filter(i => i.checked).length)
+const prepProgress = computed(() => prepItems.value.length === 0 ? 0 : Math.round((prepCheckedCount.value / prepItems.value.length) * 100))
+
 const descriptionEl = ref<HTMLElement | null>(null)
 
 // Computed properties
@@ -925,8 +1021,9 @@ async function fetchGrantDetails() {
     const reminders = JSON.parse(localStorage.getItem('grantReminders') || '[]')
     isReminderSet.value = reminders.some((r: any) => r.grantId === grantId)
 
-    // Load notes
+    // Load notes and prep checklist
     loadNote(grantId)
+    loadPrepItems()
 
     // Check for existing proposals for this grant
     if (authStore.isAuthenticated) {

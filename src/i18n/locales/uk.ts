@@ -393,6 +393,10 @@ export default {
             continue: 'Продовжити',
             start: 'Почати',
         },
+        prepChecklist: {
+            title: 'Контрольний список підготовки',
+            addPlaceholder: 'Додати завдання (напр. "Підготувати бюджетний опис")',
+        },
         copySection: 'Копіювати в буфер обміну',
         copiedToClipboard: '{section} скопійовано в буфер обміну'
     },
@@ -744,6 +748,14 @@ export default {
             submitted: 'Подано',
             outcome: 'Результат',
         },
+        timeline: {
+            overdue: 'Прострочено',
+            thisWeek: 'Цього тижня',
+            nextWeek: 'Наступного тижня',
+            thisMonth: 'Цього місяця',
+            later: 'Пізніше',
+            noDeadline: 'Без дедлайну',
+        },
     },
 
     // Footer
@@ -972,7 +984,11 @@ export default {
         draftFound: 'У вас є незавершений чернетка для цього гранту. Бажаєте відновити?',
         restoreDraft: 'Відновити',
         discardDraft: 'Видалити',
-        draftRestored: 'Чернетку успішно відновлено'
+        draftRestored: 'Чернетку успішно відновлено',
+        offline: 'Ви офлайн',
+        offlineDesc: 'Зміни зберігаються локально і будуть доступні після підключення.',
+        saving: 'Зберігається...',
+        savedLocally: 'Збережено локально о {time}',
     },
 
     // Proposal Detail

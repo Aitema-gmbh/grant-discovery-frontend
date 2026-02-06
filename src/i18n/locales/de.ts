@@ -393,6 +393,10 @@ export default {
             continue: 'Fortsetzen',
             start: 'Starten',
         },
+        prepChecklist: {
+            title: 'Vorbereitungscheckliste',
+            addPlaceholder: 'Aufgabe hinzufügen (z.B. "Budget-Beschreibung erstellen")',
+        },
         copySection: 'In Zwischenablage kopieren',
         copiedToClipboard: '{section} in die Zwischenablage kopiert'
     },
@@ -732,6 +736,14 @@ export default {
             submitted: 'Eingereicht',
             outcome: 'Ergebnis',
         },
+        timeline: {
+            overdue: 'Überfällig',
+            thisWeek: 'Diese Woche',
+            nextWeek: 'Nächste Woche',
+            thisMonth: 'Diesen Monat',
+            later: 'Später',
+            noDeadline: 'Ohne Frist',
+        },
     },
 
     // Footer
@@ -960,7 +972,11 @@ export default {
         draftFound: 'Sie haben einen unvollständigen Entwurf für diesen Grant. Möchten Sie ihn wiederherstellen?',
         restoreDraft: 'Wiederherstellen',
         discardDraft: 'Verwerfen',
-        draftRestored: 'Entwurf erfolgreich wiederhergestellt'
+        draftRestored: 'Entwurf erfolgreich wiederhergestellt',
+        offline: 'Sie sind offline',
+        offlineDesc: 'Änderungen werden lokal gespeichert und sind nach Wiederverbindung verfügbar.',
+        saving: 'Wird gespeichert...',
+        savedLocally: 'Lokal gespeichert um {time}',
     },
 
     // Proposal Detail

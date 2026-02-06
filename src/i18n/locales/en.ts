@@ -396,6 +396,10 @@ export default {
             continue: 'Continue',
             start: 'Start',
         },
+        prepChecklist: {
+            title: 'Preparation Checklist',
+            addPlaceholder: 'Add task (e.g. "Prepare budget narrative")',
+        },
     },
 
     // Matches
@@ -729,6 +733,14 @@ export default {
             submitted: 'Submitted',
             outcome: 'Outcome',
         },
+        timeline: {
+            overdue: 'Overdue',
+            thisWeek: 'This Week',
+            nextWeek: 'Next Week',
+            thisMonth: 'This Month',
+            later: 'Later',
+            noDeadline: 'No Deadline',
+        },
     },
 
     // Footer
@@ -957,7 +969,11 @@ export default {
         draftFound: 'You have an unfinished draft for this grant. Would you like to restore it?',
         restoreDraft: 'Restore',
         discardDraft: 'Discard',
-        draftRestored: 'Draft restored successfully'
+        draftRestored: 'Draft restored successfully',
+        offline: 'You are offline',
+        offlineDesc: 'Changes are saved locally and will be available when you reconnect.',
+        saving: 'Saving...',
+        savedLocally: 'Saved locally at {time}',
     },
 
     // Proposal Detail

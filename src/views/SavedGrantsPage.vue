@@ -7,6 +7,15 @@
         <p class="text-navy-600 mt-1">{{ $t('savedGrants.subtitle') }}</p>
       </div>
       <div class="flex items-center gap-3">
+        <!-- View Toggle -->
+        <div v-if="allGrants.length > 0" class="flex bg-stone-100 rounded-lg p-0.5">
+          <button @click="viewMode = 'cards'" :class="['px-3 py-1.5 rounded-md text-xs font-medium transition-all', viewMode === 'cards' ? 'bg-white text-navy-900 shadow-sm' : 'text-navy-500 hover:text-navy-700']">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+          </button>
+          <button @click="viewMode = 'timeline'" :class="['px-3 py-1.5 rounded-md text-xs font-medium transition-all', viewMode === 'timeline' ? 'bg-white text-navy-900 shadow-sm' : 'text-navy-500 hover:text-navy-700']">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          </button>
+        </div>
         <button v-if="allGrants.length > 0" @click="exportSavedCsv" class="btn btn-outline btn-sm flex items-center gap-1.5">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -72,8 +81,8 @@
       </div>
     </div>
 
-    <!-- Grants List -->
-    <div v-else-if="filteredGrants.length > 0" class="space-y-4">
+    <!-- Cards View -->
+    <div v-if="!loading && filteredGrants.length > 0 && viewMode === 'cards'" class="space-y-4">
       <div
         v-for="grant in filteredGrants"
         :key="grant.id"
@@ -124,6 +133,46 @@
       </div>
     </div>
 
+    <!-- Timeline View -->
+    <div v-else-if="!loading && filteredGrants.length > 0 && viewMode === 'timeline'" class="space-y-8 animate-fade-in">
+      <div v-for="group in timelineGroups" :key="group.key">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-3 h-3 rounded-full" :class="group.dotColor"></div>
+          <h3 class="text-sm font-bold uppercase tracking-wide" :class="group.textColor">
+            {{ group.label }}
+          </h3>
+          <span class="text-xs text-navy-400 font-medium">({{ group.grants.length }})</span>
+          <div class="flex-1 h-px bg-navy-100"></div>
+        </div>
+        <div class="ml-1.5 border-l-2 pl-6 space-y-3" :class="group.borderColor">
+          <router-link
+            v-for="grant in group.grants"
+            :key="grant.id"
+            :to="`/grants/${grant.id}`"
+            class="block p-4 bg-white rounded-xl border border-stone-200 hover:shadow-soft hover:border-amber-200 transition-all"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-xs">{{ getStatusIcon(grant.id) }}</span>
+                  <h4 class="text-sm font-semibold text-navy-900 truncate">{{ grant.title }}</h4>
+                </div>
+                <p class="text-xs text-navy-500">{{ grant.program_name || '' }}</p>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p v-if="grant.deadline" class="text-xs font-bold" :class="deadlineColor(grant.deadline)">
+                  {{ formatDeadline(grant.deadline) }}
+                </p>
+                <p v-if="grant.amount_max" class="text-xs text-amber-600 font-medium mt-0.5">
+                  {{ formatAmount(grant.amount_min, grant.amount_max, grant.currency) }}
+                </p>
+              </div>
+            </div>
+          </router-link>
+        </div>
+      </div>
+    </div>
+
     <!-- Empty State -->
     <div v-else class="text-center py-16 animate-fade-in">
       <div class="inline-flex items-center justify-center w-20 h-20 bg-amber-100 rounded-full mb-6">
@@ -156,6 +205,7 @@ const loading = ref(true)
 const allGrants = ref<any[]>([])
 const activeStatusFilter = ref<string | null>(null)
 const loadError = ref(false)
+const viewMode = ref<'cards' | 'timeline'>('cards')
 
 // Workflow statuses
 const workflowStatuses = computed(() => [
@@ -189,6 +239,35 @@ function grantsForStatus(statusId: string): any[] {
 const filteredGrants = computed(() => {
   if (!activeStatusFilter.value) return allGrants.value
   return allGrants.value.filter(g => getGrantStatus(g.id) === activeStatusFilter.value)
+})
+
+function getStatusIcon(grantId: string): string {
+  const status = getGrantStatus(grantId)
+  const s = workflowStatuses.value.find(ws => ws.id === status)
+  return s?.icon || '⭐'
+}
+
+// Timeline groups
+const timelineGroups = computed(() => {
+  const now = Date.now()
+  const groups = [
+    { key: 'overdue', label: t('savedGrants.timeline.overdue'), grants: [] as any[], dotColor: 'bg-red-500', textColor: 'text-red-600', borderColor: 'border-red-200' },
+    { key: 'thisWeek', label: t('savedGrants.timeline.thisWeek'), grants: [] as any[], dotColor: 'bg-red-400', textColor: 'text-red-500', borderColor: 'border-red-200' },
+    { key: 'nextWeek', label: t('savedGrants.timeline.nextWeek'), grants: [] as any[], dotColor: 'bg-amber-400', textColor: 'text-amber-600', borderColor: 'border-amber-200' },
+    { key: 'thisMonth', label: t('savedGrants.timeline.thisMonth'), grants: [] as any[], dotColor: 'bg-blue-400', textColor: 'text-blue-600', borderColor: 'border-blue-200' },
+    { key: 'later', label: t('savedGrants.timeline.later'), grants: [] as any[], dotColor: 'bg-navy-300', textColor: 'text-navy-500', borderColor: 'border-navy-200' },
+    { key: 'noDeadline', label: t('savedGrants.timeline.noDeadline'), grants: [] as any[], dotColor: 'bg-stone-300', textColor: 'text-stone-500', borderColor: 'border-stone-200' },
+  ]
+  filteredGrants.value.forEach(g => {
+    if (!g.deadline) { groups[5]!.grants.push(g); return }
+    const days = Math.ceil((new Date(g.deadline).getTime() - now) / (24 * 60 * 60 * 1000))
+    if (days < 0) groups[0]!.grants.push(g)
+    else if (days <= 7) groups[1]!.grants.push(g)
+    else if (days <= 14) groups[2]!.grants.push(g)
+    else if (days <= 30) groups[3]!.grants.push(g)
+    else groups[4]!.grants.push(g)
+  })
+  return groups.filter(g => g.grants.length > 0)
 })
 
 function removeSavedGrant(grantId: string) {

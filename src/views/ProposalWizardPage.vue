@@ -15,17 +15,41 @@
         </div>
       </div>
 
+      <!-- Offline Banner -->
+      <div v-if="isOffline" class="mb-4 p-3 bg-amber-50 border border-amber-300 rounded-xl flex items-center gap-3 animate-fade-in">
+        <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m-2.829-2.829a5 5 0 000-7.07m-2.828 2.828a1 1 0 010 1.414"/>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-amber-800">{{ $t('proposalWizard.offline') }}</p>
+          <p class="text-xs text-amber-600">{{ $t('proposalWizard.offlineDesc') }}</p>
+        </div>
+      </div>
+
       <!-- Header with Progress -->
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $t('proposalWizard.title') }}</h1>
         <p class="text-gray-600 mb-6">{{ grantTitle }}</p>
 
-        <!-- Auto-save indicator -->
-        <div v-if="lastSavedAt" class="text-xs text-navy-400 mb-2 flex items-center gap-1">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-          </svg>
-          {{ $t('proposalWizard.autoSaved', { time: lastSavedAt }) }}
+        <!-- Sync status indicator -->
+        <div class="flex items-center gap-2 mb-2">
+          <div v-if="isSaving" class="flex items-center gap-1.5 text-xs text-navy-400">
+            <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            {{ $t('proposalWizard.saving') }}
+          </div>
+          <div v-else-if="lastSavedAt" class="flex items-center gap-1.5 text-xs" :class="isOffline ? 'text-amber-500' : 'text-sage-600'">
+            <svg v-if="!isOffline" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+            </svg>
+            {{ isOffline ? $t('proposalWizard.savedLocally', { time: lastSavedAt }) : $t('proposalWizard.autoSaved', { time: lastSavedAt }) }}
+          </div>
         </div>
 
         <!-- Progress Steps -->
@@ -289,6 +313,12 @@ const completedSections = ref<SectionType[]>([])
 const generatedContent = ref<Record<string, string>>({})
 const generationComplete = computed(() => completedSections.value.length === selectedSections.value.length && selectedSections.value.length > 0)
 
+// Offline detection
+const isOffline = ref(!navigator.onLine)
+const isSaving = ref(false)
+function handleOnline() { isOffline.value = false }
+function handleOffline() { isOffline.value = true }
+
 // Auto-save state
 const lastSavedAt = ref('')
 const showDraftBanner = ref(false)
@@ -297,6 +327,7 @@ const DRAFT_KEY = computed(() => `proposalDraft_${grantId.value}`)
 
 function saveDraft() {
   if (!grantId.value || generationComplete.value) return
+  isSaving.value = true
   const draft = {
     grantId: grantId.value,
     grantTitle: grantTitle.value,
@@ -313,6 +344,7 @@ function saveDraft() {
     const now = new Date()
     lastSavedAt.value = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   } catch { /* storage full */ }
+  setTimeout(() => { isSaving.value = false }, 500)
 }
 
 function restoreDraft() {
@@ -459,6 +491,8 @@ function viewProposal() {
 
 onMounted(async () => {
   window.addEventListener('beforeunload', beforeUnloadHandler)
+  window.addEventListener('online', handleOnline)
+  window.addEventListener('offline', handleOffline)
 
   // Get grant ID from query
   grantId.value = route.query.grantId as string
@@ -510,6 +544,8 @@ onMounted(async () => {
 
 onUnmounted(() => {
   window.removeEventListener('beforeunload', beforeUnloadHandler)
+  window.removeEventListener('online', handleOnline)
+  window.removeEventListener('offline', handleOffline)
   if (autoSaveInterval) clearInterval(autoSaveInterval)
   // Final save on leave (unless complete)
   if (!generationComplete.value && currentStep.value > 0) {
