@@ -172,6 +172,114 @@
       </div>
     </div>
 
+    <!-- Content Map -->
+    <div class="mb-8 animate-fade-in">
+      <button @click="showContentMap = !showContentMap"
+        class="w-full flex items-center justify-between mb-3 group">
+        <h3 class="text-lg font-display font-semibold text-[#1e3a5f] flex items-center gap-2">
+          <svg class="w-5 h-5 text-[#7c9a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+          </svg>
+          {{ $t('proposals.contentMap.title') }}
+        </h3>
+        <svg class="w-4 h-4 text-stone-400 transition-transform" :class="showContentMap ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+
+      <div v-if="showContentMap">
+        <!-- Empty State -->
+        <div v-if="contentMapData.length === 0" class="card p-8 text-center">
+          <div class="inline-flex items-center justify-center w-14 h-14 bg-[#7c9a6e]/10 rounded-full mb-4">
+            <svg class="w-7 h-7 text-[#7c9a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z"/>
+            </svg>
+          </div>
+          <p class="text-sm text-stone-600 mb-1">{{ $t('proposals.contentMap.noProposals') }}</p>
+          <p class="text-xs text-stone-400">{{ $t('proposals.contentMap.noProposalsDesc') }}</p>
+        </div>
+
+        <!-- Content Map Grid -->
+        <div v-else class="card overflow-x-auto">
+          <p class="text-xs text-stone-500 mb-3">{{ $t('proposals.contentMap.subtitle') }}</p>
+
+          <!-- Legend -->
+          <div class="flex items-center gap-4 mb-4 text-[10px]">
+            <div class="flex items-center gap-1.5">
+              <div class="w-3 h-3 rounded bg-[#7c9a6e]"></div>
+              <span class="text-stone-600">{{ $t('proposals.contentMap.written') }}</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <div class="w-3 h-3 rounded bg-stone-200"></div>
+              <span class="text-stone-600">{{ $t('proposals.contentMap.empty') }}</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <div class="w-3 h-3 rounded bg-[#d4a843]"></div>
+              <span class="text-stone-600">{{ $t('proposals.contentMap.stale') }}</span>
+            </div>
+          </div>
+
+          <table class="w-full text-xs">
+            <thead>
+              <tr>
+                <th class="text-left py-2 pr-3 text-[10px] font-semibold text-[#1e3a5f] border-b border-stone-200 min-w-[140px]">
+                  {{ $t('proposals.contentMap.proposal') }}
+                </th>
+                <th
+                  v-for="sType in contentMapSectionTypes"
+                  :key="sType"
+                  class="py-2 px-1.5 text-[10px] font-semibold text-[#1e3a5f] text-center border-b border-stone-200 min-w-[70px]"
+                >
+                  {{ $t(`proposals.contentMap.sectionTypes.${sType}`) }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="entry in contentMapData"
+                :key="entry.proposalId"
+                class="hover:bg-stone-50 transition-colors cursor-pointer"
+                @click="navigateToProposalWizard(entry.proposalId)"
+              >
+                <td class="py-2 pr-3 border-b border-stone-100">
+                  <span class="text-[11px] font-medium text-[#1e3a5f] truncate block max-w-[200px]" :title="entry.title">
+                    {{ entry.title }}
+                  </span>
+                </td>
+                <td
+                  v-for="sType in contentMapSectionTypes"
+                  :key="sType"
+                  class="py-2 px-1.5 text-center border-b border-stone-100"
+                >
+                  <div class="flex justify-center">
+                    <div
+                      class="w-6 h-6 rounded flex items-center justify-center transition-colors"
+                      :class="{
+                        'bg-[#7c9a6e] text-white': getContentMapCell(entry.proposalId, sType) === 'written',
+                        'bg-stone-200 text-stone-400': getContentMapCell(entry.proposalId, sType) === 'empty',
+                        'bg-[#d4a843] text-white': getContentMapCell(entry.proposalId, sType) === 'stale',
+                      }"
+                      :title="getContentMapCell(entry.proposalId, sType) === 'written'
+                        ? (entry.sections[sType]?.wordCount || 0) + ' words'
+                        : getContentMapCell(entry.proposalId, sType)"
+                    >
+                      <svg v-if="getContentMapCell(entry.proposalId, sType) === 'written'" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                      </svg>
+                      <svg v-else-if="getContentMapCell(entry.proposalId, sType) === 'stale'" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                      </svg>
+                      <span v-else class="text-[10px]">&mdash;</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- Loading state -->
     <div v-if="loading" class="space-y-4">
       <div v-for="i in 4" :key="i" class="card-premium animate-pulse">
@@ -378,6 +486,67 @@ function deleteLibrarySnippet(id: string) {
 
 function toggleExpandSnippet(id: string) {
   expandedSnippet.value = expandedSnippet.value === id ? null : id
+}
+
+// Content Map
+const showContentMap = ref(false)
+
+const contentMapSectionTypes = ['objectives', 'methodology', 'impact', 'sustainability', 'budget_justification', 'organization'] as const
+
+interface ContentMapEntry {
+  proposalId: string
+  title: string
+  sections: Record<string, { status: 'written' | 'empty' | 'stale'; wordCount: number }>
+}
+
+const contentMapData = computed((): ContentMapEntry[] => {
+  const entries: ContentMapEntry[] = []
+  const sixMonthsAgo = Date.now() - (6 * 30 * 24 * 60 * 60 * 1000)
+
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (!key) continue
+
+      if (key.startsWith('proposal_') || key.startsWith('proposalDraft_')) {
+        try {
+          const data = JSON.parse(localStorage.getItem(key) || '{}')
+          const proposalId = key.replace('proposal_', '').replace('proposalDraft_', '')
+          const title = data.grantTitle || data.title || proposalId
+          const createdAt = data.createdAt || data.savedAt || ''
+          const isStale = createdAt ? new Date(createdAt).getTime() < sixMonthsAgo : false
+          const sections = data.sections || data.generatedContent || {}
+
+          const sectionStatuses: Record<string, { status: 'written' | 'empty' | 'stale'; wordCount: number }> = {}
+          for (const sType of contentMapSectionTypes) {
+            const content = sections[sType]
+            if (typeof content === 'string' && content.trim().length > 20) {
+              sectionStatuses[sType] = {
+                status: isStale ? 'stale' : 'written',
+                wordCount: content.split(/\s+/).length,
+              }
+            } else {
+              sectionStatuses[sType] = { status: 'empty', wordCount: 0 }
+            }
+          }
+
+          entries.push({ proposalId, title, sections: sectionStatuses })
+        } catch { /* skip invalid */ }
+      }
+    }
+  } catch { /* localStorage error */ }
+
+  return entries
+})
+
+function getContentMapCell(proposalId: string, sectionType: string): 'written' | 'empty' | 'stale' {
+  const entry = contentMapData.value.find(e => e.proposalId === proposalId)
+  if (!entry) return 'empty'
+  return entry.sections[sectionType]?.status || 'empty'
+}
+
+function navigateToProposalWizard(proposalId: string) {
+  router.push(`/proposals/new?grantId=${proposalId}`)
 }
 
 function loadTemplates() {

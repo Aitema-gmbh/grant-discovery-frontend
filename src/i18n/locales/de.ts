@@ -547,6 +547,31 @@ export default {
             addNote: 'Notiz hinzufügen...',
             fallbackNote: 'Basierend auf typischen Anforderungen für diesen Fördertyp',
         },
+        dependencies: {
+            title: 'Abhängigkeiten & Voraussetzungen',
+            count: '{count} Abhängigkeit(en)',
+            addDependency: 'Abhängigkeit hinzufügen',
+            noDependencies: 'Keine Abhängigkeiten definiert. Fügen Sie Voraussetzungen hinzu, von denen diese Förderung abhängt.',
+            type: {
+                grant_completion: 'Förderungsabschluss',
+                document: 'Dokument',
+                milestone: 'Meilenstein',
+                custom: 'Benutzerdefiniert',
+            },
+            typeLabel: 'Typ',
+            targetGrant: 'Zielförderung',
+            customLabel: 'Bezeichnung',
+            customLabelPlaceholder: 'z.B. "Prüfbericht einreichen"',
+            statusPending: 'Ausstehend',
+            statusMet: 'Erfüllt',
+            notes: 'Notizen',
+            notesPlaceholder: 'Optionale Notizen...',
+            remove: 'Abhängigkeit entfernen',
+            selectGrant: 'Förderung auswählen...',
+            selectType: 'Typ auswählen...',
+            pendingWarning: '{count} ausstehende Voraussetzung(en) — diese Förderung ist blockiert',
+            allMet: 'Alle Voraussetzungen erfüllt',
+        },
     },
 
     // Matches
@@ -725,6 +750,25 @@ export default {
             outcomes: 'Ergebnisverteilung',
             won: 'Gewonnen',
             lost: 'Verloren',
+        },
+        contentMap: {
+            title: 'Inhaltsübersicht',
+            subtitle: 'Überblick über geschriebene Abschnitte in allen Anträgen',
+            toggleButton: 'Inhaltsübersicht',
+            written: 'Geschrieben',
+            empty: 'Leer',
+            stale: 'Veraltet (>6 Monate)',
+            noProposals: 'Keine Antragsdaten gefunden',
+            noProposalsDesc: 'Erstellen Sie Anträge, um Ihre Inhaltsabdeckung hier zu sehen.',
+            sectionTypes: {
+                objectives: 'Ziele',
+                methodology: 'Methodik',
+                impact: 'Wirkung',
+                sustainability: 'Nachhaltigkeit',
+                budget_justification: 'Budget',
+                organization: 'Organisation',
+            },
+            proposal: 'Antrag',
         },
         contentLibrary: {
             title: 'Inhaltsbibliothek',
@@ -1011,6 +1055,11 @@ export default {
             milestoneProgress: 'Fortschritt',
             hidePanel: 'Konflikte ausblenden',
             showPanel: 'Konflikte anzeigen',
+        },
+        dependencies: {
+            blocked: 'Blockiert',
+            blockedCount: '{count} blockiert',
+            blockedBadge: '{count} blockierte Förderung(en)',
         },
     },
 
@@ -1301,6 +1350,23 @@ export default {
                 other: 'Sonstiges',
             },
         },
+        reuse: {
+            buttonLabel: 'Aus vorherigen übernehmen',
+            panelTitle: 'Wiederverwendbare Abschnitte',
+            panelSubtitle: 'Importieren Sie Inhalte aus Ihren vorherigen Anträgen',
+            loading: 'Vorherige Anträge werden durchsucht...',
+            noCandidates: 'Keine ähnlichen Abschnitte gefunden',
+            noCandidatesDesc: 'Schreiben Sie mehr Anträge, um Ihre wiederverwendbare Inhaltsbibliothek aufzubauen.',
+            similarity: '{score}% Übereinstimmung',
+            wordCount: '{count} Wörter',
+            importButton: 'Importieren',
+            importedSuccess: 'Abschnittsinhalt erfolgreich importiert',
+            previewLabel: 'Vorschau',
+            fromGrant: 'Aus: {title}',
+            sectionType: 'Abschnitt: {type}',
+            createdAt: 'Erstellt {date}',
+            hidePanel: 'Wiederverwendungs-Panel ausblenden',
+        },
     },
 
     // Proposal Detail
@@ -1347,5 +1413,23 @@ export default {
         title: '404',
         message: 'Seite nicht gefunden',
         goHome: 'Zur Startseite'
-    }
+    },
+
+    // Command Palette
+    commandPalette: {
+        searchPlaceholder: 'Grants, Seiten, Aktionen suchen...',
+        pages: 'Seiten',
+        grants: 'Gespeicherte Grants',
+        proposals: 'Antraege',
+        snippets: 'Textbausteine',
+        actions: 'Aktionen',
+        recentlyViewed: 'Zuletzt angesehen',
+        noResults: 'Keine Ergebnisse gefunden. Versuchen Sie einen anderen Suchbegriff.',
+        keyboardHint: 'Tastenkuerzel fuer schnelle Navigation nutzen',
+        navigate: 'Navigieren',
+        open: 'Oeffnen',
+        close: 'Schliessen',
+        actionExportData: 'Daten exportieren',
+        actionClearRecent: 'Letzte Suchen loeschen',
+    },
 }

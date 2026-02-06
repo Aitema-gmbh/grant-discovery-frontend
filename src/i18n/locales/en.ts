@@ -548,6 +548,31 @@ export default {
             delete: 'Delete note',
             empty: 'No notes yet. Add the first note to help your team.',
         },
+        dependencies: {
+            title: 'Dependencies & Pre-Requisites',
+            count: '{count} dependency(ies)',
+            addDependency: 'Add Dependency',
+            noDependencies: 'No dependencies defined. Add pre-requisites this grant depends on.',
+            type: {
+                grant_completion: 'Grant Completion',
+                document: 'Document',
+                milestone: 'Milestone',
+                custom: 'Custom',
+            },
+            typeLabel: 'Type',
+            targetGrant: 'Target Grant',
+            customLabel: 'Label',
+            customLabelPlaceholder: 'e.g. "Submit audit report"',
+            statusPending: 'Pending',
+            statusMet: 'Met',
+            notes: 'Notes',
+            notesPlaceholder: 'Optional notes...',
+            remove: 'Remove dependency',
+            selectGrant: 'Select a grant...',
+            selectType: 'Select type...',
+            pendingWarning: '{count} pending pre-requisite(s) — this grant is blocked',
+            allMet: 'All pre-requisites met',
+        },
     },
 
     // Matches
@@ -726,6 +751,25 @@ export default {
             outcomes: 'Outcome Distribution',
             won: 'Won',
             lost: 'Lost',
+        },
+        contentMap: {
+            title: 'Content Map',
+            subtitle: 'Overview of written sections across all proposals',
+            toggleButton: 'Content Map',
+            written: 'Written',
+            empty: 'Empty',
+            stale: 'Stale (>6 months)',
+            noProposals: 'No proposal data found',
+            noProposalsDesc: 'Start creating proposals to see your content coverage here.',
+            sectionTypes: {
+                objectives: 'Objectives',
+                methodology: 'Methodology',
+                impact: 'Impact',
+                sustainability: 'Sustainability',
+                budget_justification: 'Budget',
+                organization: 'Organization',
+            },
+            proposal: 'Proposal',
         },
         contentLibrary: {
             title: 'Content Library',
@@ -1008,6 +1052,11 @@ export default {
             milestoneProgress: 'Progress',
             hidePanel: 'Hide conflicts',
             showPanel: 'Show conflicts',
+        },
+        dependencies: {
+            blocked: 'Blocked',
+            blockedCount: '{count} blocked',
+            blockedBadge: '{count} blocked grant(s)',
         },
     },
 
@@ -1298,6 +1347,23 @@ export default {
                 other: 'Other',
             },
         },
+        reuse: {
+            buttonLabel: 'Reuse from previous',
+            panelTitle: 'Reusable Sections',
+            panelSubtitle: 'Import content from your previous proposals',
+            loading: 'Scanning previous proposals...',
+            noCandidates: 'No similar sections found',
+            noCandidatesDesc: 'Write more proposals to build your reusable content library.',
+            similarity: '{score}% match',
+            wordCount: '{count} words',
+            importButton: 'Import',
+            importedSuccess: 'Section content imported successfully',
+            previewLabel: 'Preview',
+            fromGrant: 'From: {title}',
+            sectionType: 'Section: {type}',
+            createdAt: 'Created {date}',
+            hidePanel: 'Hide reuse panel',
+        },
     },
 
     // Proposal Detail
@@ -1349,5 +1415,23 @@ export default {
         title: '404',
         message: 'Page not found',
         goHome: 'Go Home'
-    }
+    },
+
+    // Command Palette
+    commandPalette: {
+        searchPlaceholder: 'Search grants, pages, actions...',
+        pages: 'Pages',
+        grants: 'Saved Grants',
+        proposals: 'Proposals',
+        snippets: 'Snippets',
+        actions: 'Actions',
+        recentlyViewed: 'Recently Viewed',
+        noResults: 'No results found. Try a different search term.',
+        keyboardHint: 'Use keyboard shortcuts to navigate quickly',
+        navigate: 'Navigate',
+        open: 'Open',
+        close: 'Close',
+        actionExportData: 'Export Data',
+        actionClearRecent: 'Clear Recent Searches',
+    },
 }

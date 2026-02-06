@@ -304,6 +304,112 @@
             </div>
           </div>
 
+          <!-- Reuse from Previous Button -->
+          <div v-if="!currentGeneratingSection || currentGeneratingSection !== sectionType" class="mb-3">
+            <button
+              @click="toggleReusePanel(sectionType)"
+              class="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg transition-colors"
+              :class="showReusePanel[sectionType]
+                ? 'bg-[#1e3a5f] text-white'
+                : 'text-[#1e3a5f] border border-[#1e3a5f]/20 hover:bg-[#1e3a5f]/5'"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              {{ showReusePanel[sectionType] ? t('proposalWizard.reuse.hidePanel') : t('proposalWizard.reuse.buttonLabel') }}
+            </button>
+
+            <!-- Reuse Candidates Panel -->
+            <div v-if="showReusePanel[sectionType]" class="mt-2 p-3 bg-stone-50 border border-[#1e3a5f]/10 rounded-lg animate-fade-in">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h4 class="text-xs font-semibold text-[#1e3a5f]">{{ t('proposalWizard.reuse.panelTitle') }}</h4>
+                  <p class="text-[10px] text-stone-400 mt-0.5">{{ t('proposalWizard.reuse.panelSubtitle') }}</p>
+                </div>
+              </div>
+
+              <!-- Loading -->
+              <div v-if="reuseLoading" class="flex items-center gap-2 py-4 justify-center">
+                <div class="w-4 h-4 border-2 border-[#1e3a5f] border-t-transparent rounded-full animate-spin"></div>
+                <span class="text-xs text-stone-500">{{ t('proposalWizard.reuse.loading') }}</span>
+              </div>
+
+              <!-- No Candidates -->
+              <div v-else-if="reuseCandidates.length === 0" class="text-center py-4">
+                <svg class="w-8 h-8 text-stone-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <p class="text-xs text-stone-500">{{ t('proposalWizard.reuse.noCandidates') }}</p>
+                <p class="text-[10px] text-stone-400 mt-0.5">{{ t('proposalWizard.reuse.noCandidatesDesc') }}</p>
+              </div>
+
+              <!-- Candidate List -->
+              <div v-else class="space-y-2 max-h-72 overflow-y-auto">
+                <div
+                  v-for="candidate in reuseCandidates"
+                  :key="candidate.section.proposalId + '_' + candidate.section.sectionType"
+                  class="p-3 bg-white rounded-lg border border-stone-200 hover:border-[#d4a843]/40 transition-colors group"
+                >
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-1 flex-wrap">
+                        <span class="text-xs font-medium text-[#1e3a5f] truncate max-w-[200px]">{{ candidate.section.grantTitle }}</span>
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-stone-100 text-stone-600">
+                          {{ candidate.section.sectionType }}
+                        </span>
+                        <!-- Similarity Badge -->
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold"
+                          :class="candidate.similarityScore >= 50
+                            ? 'bg-[#7c9a6e]/15 text-[#7c9a6e]'
+                            : candidate.similarityScore >= 25
+                              ? 'bg-[#d4a843]/15 text-[#d4a843]'
+                              : 'bg-stone-100 text-stone-500'"
+                        >
+                          {{ t('proposalWizard.reuse.similarity', { score: candidate.similarityScore }) }}
+                        </span>
+                      </div>
+
+                      <!-- Preview text -->
+                      <p class="text-[10px] text-stone-500 line-clamp-2 mt-1">{{ candidate.section.content.substring(0, 150) }}{{ candidate.section.content.length > 150 ? '...' : '' }}</p>
+
+                      <!-- Meta info -->
+                      <div class="flex items-center gap-3 mt-1.5">
+                        <span class="text-[9px] text-stone-400">{{ t('proposalWizard.reuse.wordCount', { count: candidate.section.wordCount }) }}</span>
+                        <span class="text-[9px] text-stone-400">{{ t('proposalWizard.reuse.createdAt', { date: new Date(candidate.section.createdAt).toLocaleDateString() }) }}</span>
+                      </div>
+
+                      <!-- Similarity bar -->
+                      <div class="mt-1.5 flex items-center gap-2">
+                        <div class="flex-1 h-1 bg-stone-200 rounded-full overflow-hidden">
+                          <div
+                            class="h-full rounded-full transition-all"
+                            :class="candidate.similarityScore >= 50
+                              ? 'bg-[#7c9a6e]'
+                              : candidate.similarityScore >= 25
+                                ? 'bg-[#d4a843]'
+                                : 'bg-stone-400'"
+                            :style="{ width: candidate.similarityScore + '%' }"
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Import Button -->
+                    <button
+                      @click="importSection(candidate, sectionType)"
+                      class="px-2.5 py-1.5 bg-[#1e3a5f] text-white rounded-lg text-[10px] font-medium hover:bg-[#2a4d7a] transition-colors flex-shrink-0 flex items-center gap-1"
+                    >
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                      </svg>
+                      {{ t('proposalWizard.reuse.importButton') }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Streaming Content -->
           <div
             v-if="currentGeneratingSection === sectionType || completedSections.includes(sectionType)"
@@ -835,6 +941,191 @@ const filteredSnippets = computed(() => {
 function getSnippetsForSection(sectionKey: string): ProposalSnippet[] {
   const category = sectionToCategory[sectionKey] || 'other'
   return snippets.value.filter(s => s.category === category)
+}
+
+// Proposal Section Reuse Engine
+interface ProposalSectionIndex {
+  proposalId: string
+  grantTitle: string
+  sectionType: string
+  content: string
+  wordCount: number
+  createdAt: string
+}
+
+interface ReuseCandidate {
+  section: ProposalSectionIndex
+  similarityScore: number
+}
+
+const showReusePanel = ref<Record<string, boolean>>({})
+const reuseCandidates = ref<ReuseCandidate[]>([])
+const reuseLoading = ref(false)
+
+function getJaccardSimilarity(text1: string, text2: string): number {
+  const tokenize = (text: string): Set<string> => {
+    return new Set(
+      text.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .split(/\s+/)
+        .filter(w => w.length > 2)
+    )
+  }
+  const set1 = tokenize(text1)
+  const set2 = tokenize(text2)
+  if (set1.size === 0 || set2.size === 0) return 0
+
+  let intersection = 0
+  for (const word of set1) {
+    if (set2.has(word)) intersection++
+  }
+  const union = new Set([...set1, ...set2]).size
+  return union > 0 ? intersection / union : 0
+}
+
+function buildSectionIndex(): ProposalSectionIndex[] {
+  const index: ProposalSectionIndex[] = []
+
+  try {
+    // Scan all localStorage keys for proposal data
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (!key) continue
+
+      // proposal_ keys (saved proposals)
+      if (key.startsWith('proposal_')) {
+        try {
+          const data = JSON.parse(localStorage.getItem(key) || '{}')
+          const proposalId = key.replace('proposal_', '')
+          const title = data.grantTitle || data.title || t('proposalWizard.reuse.fromGrant', { title: proposalId })
+
+          // Check for sections in various data shapes
+          const sections = data.sections || data.generatedContent || {}
+          for (const [sectionType, content] of Object.entries(sections)) {
+            if (typeof content === 'string' && content.trim().length > 20) {
+              index.push({
+                proposalId,
+                grantTitle: title,
+                sectionType,
+                content: content as string,
+                wordCount: (content as string).split(/\s+/).length,
+                createdAt: data.createdAt || data.savedAt || new Date().toISOString(),
+              })
+            }
+          }
+        } catch { /* skip invalid entries */ }
+      }
+
+      // proposalDraft_ keys (draft proposals)
+      if (key.startsWith('proposalDraft_')) {
+        try {
+          const data = JSON.parse(localStorage.getItem(key) || '{}')
+          const proposalId = key.replace('proposalDraft_', '')
+          const title = data.grantTitle || t('proposalWizard.reuse.fromGrant', { title: proposalId })
+
+          const sections = data.generatedContent || {}
+          for (const [sectionType, content] of Object.entries(sections)) {
+            if (typeof content === 'string' && content.trim().length > 20) {
+              index.push({
+                proposalId,
+                grantTitle: title,
+                sectionType,
+                content: content as string,
+                wordCount: (content as string).split(/\s+/).length,
+                createdAt: data.savedAt || new Date().toISOString(),
+              })
+            }
+          }
+        } catch { /* skip invalid entries */ }
+      }
+    }
+
+    // Also scan proposalSnippets for reusable content
+    try {
+      const snippetsData = JSON.parse(localStorage.getItem('proposalSnippets') || '[]')
+      for (const snippet of snippetsData) {
+        if (snippet.content && snippet.content.trim().length > 20) {
+          index.push({
+            proposalId: `snippet_${snippet.id}`,
+            grantTitle: snippet.sourceGrantTitle || snippet.title || 'Snippet',
+            sectionType: snippet.category || 'other',
+            content: snippet.content,
+            wordCount: snippet.content.split(/\s+/).length,
+            createdAt: snippet.createdAt || new Date().toISOString(),
+          })
+        }
+      }
+    } catch { /* skip */ }
+  } catch { /* localStorage access error */ }
+
+  return index
+}
+
+function findReusableSections(sectionType: string) {
+  reuseLoading.value = true
+  reuseCandidates.value = []
+
+  setTimeout(() => {
+    const index = buildSectionIndex()
+    const currentContent = generatedContent.value[sectionType] || ''
+
+    // Get the section label as reference text for similarity when no current content
+    const sectionLabel = getSectionLabel(sectionType).toLowerCase()
+    const referenceText = currentContent.length > 20 ? currentContent : sectionLabel
+
+    const candidates: ReuseCandidate[] = []
+
+    for (const entry of index) {
+      // Skip entries from the current proposal
+      if (entry.proposalId === grantId.value) continue
+
+      // Calculate similarity: if we have content, compare content; otherwise compare section types
+      let score: number
+      if (currentContent.length > 20) {
+        score = getJaccardSimilarity(currentContent, entry.content)
+      } else {
+        // Boost score for matching section types
+        const typeMatch = entry.sectionType === sectionType ? 0.5 : 0
+        const textSimilarity = getJaccardSimilarity(referenceText, entry.content.substring(0, 500))
+        score = Math.min(1, typeMatch + textSimilarity)
+      }
+
+      if (score > 0.02) {
+        candidates.push({
+          section: entry,
+          similarityScore: Math.round(score * 100),
+        })
+      }
+    }
+
+    // Sort by score descending, take top 5
+    candidates.sort((a, b) => b.similarityScore - a.similarityScore)
+    reuseCandidates.value = candidates.slice(0, 5)
+    reuseLoading.value = false
+  }, 300) // Small delay for UX
+}
+
+function importSection(candidate: ReuseCandidate, targetSectionKey: string) {
+  const existing = generatedContent.value[targetSectionKey] || ''
+  generatedContent.value[targetSectionKey] = existing
+    ? existing + '\n\n' + candidate.section.content
+    : candidate.section.content
+
+  // Mark as completed if not already
+  if (!completedSections.value.includes(targetSectionKey as SectionType)) {
+    completedSections.value.push(targetSectionKey as SectionType)
+  }
+
+  toast.success(t('proposalWizard.reuse.importedSuccess'))
+  showReusePanel.value[targetSectionKey] = false
+}
+
+function toggleReusePanel(sectionType: string) {
+  const isOpen = showReusePanel.value[sectionType]
+  showReusePanel.value[sectionType] = !isOpen
+  if (!isOpen) {
+    findReusableSections(sectionType)
+  }
 }
 
 // Offline detection

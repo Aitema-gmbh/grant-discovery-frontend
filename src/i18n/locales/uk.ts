@@ -547,6 +547,31 @@ export default {
             addNote: 'Додати примітку...',
             fallbackNote: 'На основі типових вимог для цього типу гранту',
         },
+        dependencies: {
+            title: 'Залежності та передумови',
+            count: '{count} залежність(ей)',
+            addDependency: 'Додати залежність',
+            noDependencies: 'Залежностей не визначено. Додайте передумови, від яких залежить цей грант.',
+            type: {
+                grant_completion: 'Завершення гранту',
+                document: 'Документ',
+                milestone: 'Етап',
+                custom: 'Інше',
+            },
+            typeLabel: 'Тип',
+            targetGrant: 'Цільовий грант',
+            customLabel: 'Назва',
+            customLabelPlaceholder: 'напр. "Подати аудиторський звіт"',
+            statusPending: 'Очікується',
+            statusMet: 'Виконано',
+            notes: 'Нотатки',
+            notesPlaceholder: 'Необов\'язкові нотатки...',
+            remove: 'Видалити залежність',
+            selectGrant: 'Оберіть грант...',
+            selectType: 'Оберіть тип...',
+            pendingWarning: '{count} невиконана(их) передумова(и) — цей грант заблоковано',
+            allMet: 'Усі передумови виконано',
+        },
     },
 
     // Matches
@@ -725,6 +750,25 @@ export default {
             outcomes: 'Розподіл результатів',
             won: 'Виграно',
             lost: 'Програно',
+        },
+        contentMap: {
+            title: 'Карта контенту',
+            subtitle: 'Огляд написаних розділів у всіх заявках',
+            toggleButton: 'Карта контенту',
+            written: 'Написано',
+            empty: 'Порожньо',
+            stale: 'Застарілий (>6 місяців)',
+            noProposals: 'Дані заявок не знайдено',
+            noProposalsDesc: 'Почніть створювати заявки, щоб побачити охоплення контенту тут.',
+            sectionTypes: {
+                objectives: 'Цілі',
+                methodology: 'Методологія',
+                impact: 'Вплив',
+                sustainability: 'Сталість',
+                budget_justification: 'Бюджет',
+                organization: 'Організація',
+            },
+            proposal: 'Заявка',
         },
         contentLibrary: {
             title: 'Бібліотека контенту',
@@ -1024,6 +1068,11 @@ export default {
             hidePanel: 'Сховати конфлікти',
             showPanel: 'Показати конфлікти',
         },
+        dependencies: {
+            blocked: 'Заблоковано',
+            blockedCount: '{count} заблоковано',
+            blockedBadge: '{count} заблокований(их) грант(ів)',
+        },
     },
 
     // Footer
@@ -1313,6 +1362,23 @@ export default {
                 other: 'Інше',
             },
         },
+        reuse: {
+            buttonLabel: 'Використати з попередніх',
+            panelTitle: 'Розділи для повторного використання',
+            panelSubtitle: 'Імпортуйте контент з ваших попередніх заявок',
+            loading: 'Сканування попередніх заявок...',
+            noCandidates: 'Схожих розділів не знайдено',
+            noCandidatesDesc: 'Напишіть більше заявок, щоб створити бібліотеку для повторного використання.',
+            similarity: '{score}% збіг',
+            wordCount: '{count} слів',
+            importButton: 'Імпортувати',
+            importedSuccess: 'Вміст розділу успішно імпортовано',
+            previewLabel: 'Попередній перегляд',
+            fromGrant: 'З: {title}',
+            sectionType: 'Розділ: {type}',
+            createdAt: 'Створено {date}',
+            hidePanel: 'Сховати панель повторного використання',
+        },
     },
 
     // Proposal Detail
@@ -1347,5 +1413,23 @@ export default {
         title: '404',
         message: 'Сторінку не знайдено',
         goHome: 'На головну'
-    }
+    },
+
+    // Command Palette
+    commandPalette: {
+        searchPlaceholder: 'Пошук грантів, сторінок, дій...',
+        pages: 'Сторінки',
+        grants: 'Збережені гранти',
+        proposals: 'Заявки',
+        snippets: 'Фрагменти',
+        actions: 'Дії',
+        recentlyViewed: 'Нещодавно переглянуті',
+        noResults: 'Нічого не знайдено. Спробуйте інший пошуковий запит.',
+        keyboardHint: 'Використовуйте клавіші для швидкої навігації',
+        navigate: 'Навігація',
+        open: 'Відкрити',
+        close: 'Закрити',
+        actionExportData: 'Експорт даних',
+        actionClearRecent: 'Очистити нещодавні пошуки',
+    },
 }

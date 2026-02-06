@@ -19,6 +19,11 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
           </button>
         </div>
+        <!-- Blocked Dependencies Badge -->
+        <span v-if="allGrants.length > 0 && getBlockedCount() > 0" class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium border border-amber-200">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+          {{ $t('savedGrants.dependencies.blockedCount', { count: getBlockedCount() }) }}
+        </span>
         <select v-if="allGrants.length > 0" v-model="sortMode" class="text-xs border border-navy-200 rounded-lg px-3 py-1.5 text-navy-700 bg-white focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none">
           <option value="default">{{ $t('savedGrants.sort.default') }}</option>
           <option value="urgent">{{ $t('savedGrants.sort.urgent') }}</option>
@@ -450,12 +455,19 @@
                 :key="grant.id"
                 draggable="true"
                 @dragstart="onDragStart(grant)"
-                class="bg-white rounded-lg p-3 shadow-sm border border-stone-200 cursor-grab active:cursor-grabbing hover:shadow-md transition-all"
+                class="bg-white rounded-lg p-3 shadow-sm cursor-grab active:cursor-grabbing hover:shadow-md transition-all"
+                :class="isGrantBlocked(String(grant.id)) ? 'border-2 border-dashed border-amber-400' : 'border border-stone-200'"
               >
                 <router-link :to="`/grants/${grant.id}`" class="block" @click.stop>
-                  <h4 class="text-xs font-semibold text-navy-900 line-clamp-2 hover:text-amber-600 transition-colors">
-                    {{ grant.title }}
-                  </h4>
+                  <div class="flex items-center gap-1.5">
+                    <h4 class="text-xs font-semibold text-navy-900 line-clamp-2 hover:text-amber-600 transition-colors flex-1">
+                      {{ grant.title }}
+                    </h4>
+                    <span v-if="isGrantBlocked(String(grant.id))" class="flex-shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-[10px] font-medium">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                      {{ $t('savedGrants.dependencies.blocked') }}
+                    </span>
+                  </div>
                   <p class="text-[10px] text-navy-500 mt-1 truncate">{{ grant.program_name || '' }}</p>
                 </router-link>
                 <div class="flex items-center justify-between mt-2">
@@ -512,6 +524,39 @@ const activeStatusFilter = ref<string | null>(null)
 const loadError = ref(false)
 const viewMode = ref<'cards' | 'timeline' | 'kanban'>('cards')
 const sortMode = ref('default')
+
+// Grant Dependency Mapper
+interface GrantDependency {
+  id: string
+  fromGrantId: string
+  toGrantId: string | null
+  prerequisiteLabel?: string
+  type: 'grant_completion' | 'document' | 'milestone' | 'custom'
+  status: 'pending' | 'met'
+  notes?: string
+  createdAt: string
+}
+
+const grantDependencies = ref<GrantDependency[]>([])
+
+function loadDependencies() {
+  try {
+    grantDependencies.value = JSON.parse(localStorage.getItem('grantDependencies') || '[]')
+  } catch { grantDependencies.value = [] }
+}
+
+function getDependenciesFor(grantId: string): GrantDependency[] {
+  return grantDependencies.value.filter(d => d.fromGrantId === grantId)
+}
+
+function isGrantBlocked(grantId: string): boolean {
+  return getDependenciesFor(grantId).some(d => d.status === 'pending')
+}
+
+function getBlockedCount(): number {
+  const grantIds = new Set(allGrants.value.map(g => String(g.id)))
+  return Array.from(grantIds).filter(id => isGrantBlocked(id)).length
+}
 
 // Tagging system
 const allTags = ref<string[]>([])
@@ -1031,5 +1076,6 @@ async function loadSavedGrants() {
 onMounted(() => {
   loadSavedGrants()
   loadTags()
+  loadDependencies()
 })
 </script>

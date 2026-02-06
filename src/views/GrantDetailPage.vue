@@ -849,6 +849,118 @@
           </button>
         </div>
       </div>
+
+      <!-- Dependencies & Pre-Requisites Panel -->
+      <div class="card mt-6">
+        <div class="p-5">
+          <!-- Collapsible Header -->
+          <button @click="showDependencies = !showDependencies" class="w-full flex items-center justify-between">
+            <h3 class="text-lg font-bold text-navy-900 flex items-center gap-2">
+              <svg class="w-5 h-5 text-[#d4a843]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+              </svg>
+              {{ $t('grantDetail.dependencies.title') }}
+              <span v-if="currentGrantDeps.length > 0" class="text-xs font-medium px-2 py-0.5 rounded-full" :class="pendingDepsCount > 0 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'">
+                {{ $t('grantDetail.dependencies.count', { count: currentGrantDeps.length }) }}
+              </span>
+            </h3>
+            <svg class="w-5 h-5 text-navy-400 transition-transform duration-200" :class="{ 'rotate-180': showDependencies }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+
+          <div v-if="showDependencies" class="mt-4">
+            <!-- Status Summary -->
+            <div v-if="currentGrantDeps.length > 0" class="mb-4 p-3 rounded-lg text-sm" :class="pendingDepsCount > 0 ? 'bg-amber-50 border border-amber-200 text-amber-700' : 'bg-green-50 border border-green-200 text-green-700'">
+              <span v-if="pendingDepsCount > 0">{{ $t('grantDetail.dependencies.pendingWarning', { count: pendingDepsCount }) }}</span>
+              <span v-else>{{ $t('grantDetail.dependencies.allMet') }}</span>
+            </div>
+
+            <!-- Dependencies List -->
+            <div v-if="currentGrantDeps.length > 0" class="space-y-3 mb-5">
+              <div v-for="dep in currentGrantDeps" :key="dep.id"
+                class="flex items-start gap-3 p-3 rounded-lg border group transition-colors"
+                :class="dep.status === 'met' ? 'bg-green-50/50 border-green-200' : 'bg-amber-50/50 border-amber-200'">
+                <!-- Status checkbox -->
+                <button @click="toggleDepStatus(dep.id)"
+                  class="mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all"
+                  :class="dep.status === 'met' ? 'bg-green-500 border-green-500 text-white' : 'border-amber-400 hover:border-amber-500'">
+                  <svg v-if="dep.status === 'met'" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                </button>
+
+                <!-- Content -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 mb-1">
+                    <!-- Type badge -->
+                    <span class="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded"
+                      :class="{
+                        'bg-[#1e3a5f]/10 text-[#1e3a5f]': dep.type === 'grant_completion',
+                        'bg-[#d4a843]/15 text-[#d4a843]': dep.type === 'document',
+                        'bg-[#7c9a6e]/15 text-[#7c9a6e]': dep.type === 'milestone',
+                        'bg-stone-200 text-stone-600': dep.type === 'custom'
+                      }">
+                      {{ $t(`grantDetail.dependencies.type.${dep.type}`) }}
+                    </span>
+                    <span class="text-[10px] font-medium" :class="dep.status === 'met' ? 'text-green-600' : 'text-amber-600'">
+                      {{ dep.status === 'met' ? $t('grantDetail.dependencies.statusMet') : $t('grantDetail.dependencies.statusPending') }}
+                    </span>
+                  </div>
+                  <p class="text-sm font-medium" :class="dep.status === 'met' ? 'text-stone-400 line-through' : 'text-navy-800'">
+                    {{ getDepTargetGrantTitle(dep) }}
+                  </p>
+                  <p v-if="dep.notes" class="text-xs text-stone-500 mt-1">{{ dep.notes }}</p>
+                </div>
+
+                <!-- Delete button -->
+                <button @click="removeDependency(dep.id)" class="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-red-100 text-red-400 hover:text-red-600 transition-all flex-shrink-0" :title="$t('grantDetail.dependencies.remove')">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <p v-if="currentGrantDeps.length === 0" class="text-sm text-stone-400 text-center py-4 mb-4">
+              {{ $t('grantDetail.dependencies.noDependencies') }}
+            </p>
+
+            <!-- Add Dependency Form -->
+            <div class="border border-stone-200 rounded-lg p-3 bg-stone-50">
+              <p class="text-xs font-semibold text-navy-700 mb-2">{{ $t('grantDetail.dependencies.addDependency') }}</p>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <!-- Type selector -->
+                <select v-model="newDepType" class="text-xs border border-stone-200 rounded-lg px-2.5 py-2 bg-white text-navy-700 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none sm:w-40">
+                  <option value="grant_completion">{{ $t('grantDetail.dependencies.type.grant_completion') }}</option>
+                  <option value="document">{{ $t('grantDetail.dependencies.type.document') }}</option>
+                  <option value="milestone">{{ $t('grantDetail.dependencies.type.milestone') }}</option>
+                  <option value="custom">{{ $t('grantDetail.dependencies.type.custom') }}</option>
+                </select>
+
+                <!-- Grant dropdown (for grant_completion) or text input (for others) -->
+                <select v-if="newDepType === 'grant_completion'" v-model="newDepTargetGrant"
+                  class="flex-1 text-xs border border-stone-200 rounded-lg px-2.5 py-2 bg-white text-navy-700 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none">
+                  <option value="">{{ $t('grantDetail.dependencies.selectGrant') }}</option>
+                  <option v-for="sg in savedGrantsList" :key="sg.id" :value="sg.id">{{ sg.title }}</option>
+                </select>
+                <input v-else v-model="newDepLabel" type="text"
+                  :placeholder="$t('grantDetail.dependencies.customLabelPlaceholder')"
+                  class="flex-1 text-xs border border-stone-200 rounded-lg px-2.5 py-2 bg-white text-navy-700 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none"
+                  @keyup.enter="handleAddDependency" />
+
+                <!-- Add button -->
+                <button @click="handleAddDependency"
+                  class="px-4 py-2 bg-[#1e3a5f] text-white rounded-lg text-xs font-medium hover:bg-[#1e3a5f]/90 transition-colors whitespace-nowrap"
+                  :disabled="newDepType === 'grant_completion' ? !newDepTargetGrant : !newDepLabel.trim()">
+                  {{ $t('grantDetail.dependencies.addDependency') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Error State -->
@@ -1114,6 +1226,110 @@ function timeAgo(dateStr: string): string {
   const days = Math.floor(hours / 24)
   return `${days}d ago`
 }
+
+// Grant Dependency Mapper
+interface GrantDependency {
+  id: string
+  fromGrantId: string
+  toGrantId: string | null
+  prerequisiteLabel?: string
+  type: 'grant_completion' | 'document' | 'milestone' | 'custom'
+  status: 'pending' | 'met'
+  notes?: string
+  createdAt: string
+}
+
+const grantDependencies = ref<GrantDependency[]>([])
+const showDependencies = ref(true)
+const newDepType = ref<GrantDependency['type']>('document')
+const newDepTargetGrant = ref('')
+const newDepLabel = ref('')
+
+function loadAllDependencies() {
+  try {
+    grantDependencies.value = JSON.parse(localStorage.getItem('grantDependencies') || '[]')
+  } catch { grantDependencies.value = [] }
+}
+
+function saveAllDependencies() {
+  try {
+    localStorage.setItem('grantDependencies', JSON.stringify(grantDependencies.value))
+  } catch { /* storage full */ }
+}
+
+const currentGrantDeps = computed(() => {
+  const grantId = route.params.id as string
+  return grantDependencies.value.filter(d => d.fromGrantId === grantId)
+})
+
+const savedGrantsList = computed(() => {
+  try {
+    const savedIds: string[] = JSON.parse(localStorage.getItem('savedGrants') || '[]')
+    const currentId = route.params.id as string
+    // We return just the IDs with titles from the all grants cache or localStorage
+    // Try to get grant titles from recently viewed
+    const recent: Array<{id: string, title: string}> = JSON.parse(localStorage.getItem('recentlyViewedGrants') || '[]')
+    const recentMap = new Map(recent.map(r => [r.id, r.title]))
+    return savedIds
+      .filter(id => id !== currentId)
+      .map(id => ({ id, title: recentMap.get(id) || `Grant ${id.slice(0, 8)}...` }))
+  } catch { return [] }
+})
+
+function addDependency(type: GrantDependency['type'], targetGrantId?: string, label?: string) {
+  const grantId = route.params.id as string
+  const dep: GrantDependency = {
+    id: Date.now().toString() + Math.random().toString(36).slice(2, 6),
+    fromGrantId: grantId,
+    toGrantId: type === 'grant_completion' ? (targetGrantId || null) : null,
+    prerequisiteLabel: type !== 'grant_completion' ? (label || '') : undefined,
+    type,
+    status: 'pending',
+    notes: '',
+    createdAt: new Date().toISOString()
+  }
+  grantDependencies.value.push(dep)
+  saveAllDependencies()
+  // Reset form
+  newDepType.value = 'document'
+  newDepTargetGrant.value = ''
+  newDepLabel.value = ''
+}
+
+function removeDependency(depId: string) {
+  grantDependencies.value = grantDependencies.value.filter(d => d.id !== depId)
+  saveAllDependencies()
+}
+
+function toggleDepStatus(depId: string) {
+  const dep = grantDependencies.value.find(d => d.id === depId)
+  if (dep) {
+    dep.status = dep.status === 'pending' ? 'met' : 'pending'
+    saveAllDependencies()
+  }
+}
+
+function getDepTargetGrantTitle(dep: GrantDependency): string {
+  if (dep.type === 'grant_completion' && dep.toGrantId) {
+    const recent: Array<{id: string, title: string}> = JSON.parse(localStorage.getItem('recentlyViewedGrants') || '[]')
+    const found = recent.find(r => r.id === dep.toGrantId)
+    return found?.title || `Grant ${dep.toGrantId.slice(0, 8)}...`
+  }
+  return dep.prerequisiteLabel || ''
+}
+
+function handleAddDependency() {
+  if (newDepType.value === 'grant_completion') {
+    if (!newDepTargetGrant.value) return
+    addDependency('grant_completion', newDepTargetGrant.value)
+  } else {
+    if (!newDepLabel.value.trim()) return
+    addDependency(newDepType.value, undefined, newDepLabel.value.trim())
+  }
+}
+
+const pendingDepsCount = computed(() => currentGrantDeps.value.filter(d => d.status === 'pending').length)
+
 // Budget planner
 const showBudgetPlanner = ref(false)
 const budgetRequested = ref(0)
@@ -1672,11 +1888,12 @@ async function fetchGrantDetails() {
     const reminders = JSON.parse(localStorage.getItem('grantReminders') || '[]')
     isReminderSet.value = reminders.some((r: any) => r.grantId === grantId)
 
-    // Load handoff notes, prep checklist, budget plan, and requirements
+    // Load handoff notes, prep checklist, budget plan, requirements, and dependencies
     loadHandoffNotes()
     loadPrepItems()
     loadBudgetPlan()
     loadRequirements()
+    loadAllDependencies()
     // Pre-fill budget from grant data
     if (!budgetRequested.value && grant.value) {
       budgetRequested.value = grant.value.amount_max || grant.value.amount_min || 0

@@ -7,17 +7,36 @@
     </router-view>
     <OnboardingTour ref="tourRef" />
     <FeedbackButton />
+    <CommandPalette v-if="showCommandPalette" @close="showCommandPalette = false" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useAuthStore } from './stores/auth'
 import OnboardingTour from './components/OnboardingTour.vue'
 import FeedbackButton from './components/FeedbackButton.vue'
+import CommandPalette from './components/CommandPalette.vue'
 
 const authStore = useAuthStore()
 const tourRef = ref()
+const showCommandPalette = ref(false)
+
+// Global keyboard shortcut: Cmd+K (Mac) / Ctrl+K (Windows/Linux)
+function handleGlobalKeydown(e: KeyboardEvent) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault()
+    showCommandPalette.value = !showCommandPalette.value
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleGlobalKeydown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeydown)
+})
 
 // Initialize auth state on app mount
 onMounted(async () => {
