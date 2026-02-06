@@ -31,9 +31,10 @@ const variantText = computed(() => ({
   <div class="flex flex-col items-center justify-center py-16 px-4 text-center animate-fade-in">
     <!-- Sad Sunflower Illustration -->
     <div class="mb-8 animate-float">
-      <img 
-        :src="emptyStateImage" 
-        alt="No results" 
+      <img
+        :src="emptyStateImage"
+        alt="No results"
+        loading="lazy"
         class="w-48 h-48 object-contain opacity-90"
       />
     </div>

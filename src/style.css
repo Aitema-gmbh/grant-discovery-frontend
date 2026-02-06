@@ -369,17 +369,31 @@
   /* Hide non-essential UI elements */
   nav,
   footer,
-  .btn,
-  .btn-primary,
-  .btn-secondary,
-  .btn-outline,
-  .badge,
   .hero-ukraine,
   [role="navigation"],
   [data-tour],
   .fixed,
-  .sticky {
+  .sticky,
+  .no-print {
     display: none !important;
+  }
+
+  /* Hide action buttons but keep status badges */
+  button,
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline {
+    display: none !important;
+  }
+
+  /* Keep badges visible for status display */
+  .badge,
+  .badge-success,
+  .badge-warning,
+  .badge-info {
+    display: inline-flex !important;
+    border: 1px solid #999 !important;
   }
 
   /* Reset background and shadows for printing */
@@ -455,4 +469,11 @@
   @page {
     margin: 2cm;
   }
+}
+
+/* Performance: content-visibility for off-screen cards */
+.grant-card,
+.grant-card-ukraine {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 280px;
 }

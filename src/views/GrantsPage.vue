@@ -17,16 +17,56 @@
       <!-- Search Bar -->
       <div class="relative mb-6">
         <input
+          ref="searchInput"
           v-model="searchQuery"
-          @input="debouncedSearch"
+          @input="onSearchInput"
+          @focus="showSuggestions = suggestions.length > 0"
+          @blur="hideSuggestionsDelayed"
+          @keydown.down.prevent="navigateSuggestion(1)"
+          @keydown.up.prevent="navigateSuggestion(-1)"
+          @keydown.enter.prevent="selectSuggestionOrSearch"
+          @keydown.escape="showSuggestions = false"
           type="text"
           :placeholder="$t('grants.searchPlaceholder')"
           :aria-label="$t('grants.searchPlaceholder')"
+          role="combobox"
+          :aria-expanded="showSuggestions"
+          aria-autocomplete="list"
+          aria-controls="search-suggestions"
+          :aria-activedescendant="activeSuggestionIndex >= 0 ? `suggestion-${activeSuggestionIndex}` : undefined"
           class="input w-full pl-12 pr-4 sm:pr-48"
         />
+        <kbd class="hidden sm:inline-flex absolute right-[195px] top-3 items-center px-1.5 py-0.5 bg-navy-100 text-navy-500 rounded text-xs font-mono border border-navy-200">/</kbd>
         <svg class="absolute left-4 top-3.5 w-5 h-5 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
+
+        <!-- Autocomplete Suggestions Dropdown -->
+        <div
+          v-if="showSuggestions && suggestions.length > 0"
+          id="search-suggestions"
+          role="listbox"
+          class="absolute left-0 right-0 top-full mt-1 bg-white border border-navy-200 rounded-xl shadow-lg z-30 max-h-64 overflow-y-auto"
+        >
+          <button
+            v-for="(suggestion, idx) in suggestions"
+            :key="suggestion.id"
+            :id="`suggestion-${idx}`"
+            role="option"
+            :aria-selected="idx === activeSuggestionIndex"
+            @mousedown.prevent="selectSuggestion(suggestion)"
+            class="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-navy-50 transition-colors border-b border-navy-50 last:border-b-0"
+            :class="idx === activeSuggestionIndex ? 'bg-navy-50' : ''"
+          >
+            <svg class="w-4 h-4 text-navy-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-navy-900 truncate">{{ suggestion.title }}</p>
+              <p v-if="suggestion.program_name" class="text-xs text-navy-500 truncate">{{ suggestion.program_name }}</p>
+            </div>
+          </button>
+        </div>
 
         <!-- Search Mode Toggle - Hidden on mobile, shown below search on small screens -->
         <div class="absolute right-3 top-2.5 hidden sm:flex items-center gap-2" role="group" :aria-label="$t('grants.searchMode')">
@@ -146,7 +186,7 @@
           leave-from-class="opacity-100"
           leave-to-class="opacity-0"
         >
-          <div v-if="showMobileFilters" class="fixed inset-0 z-50 sm:hidden" @click.self="showMobileFilters = false">
+          <div v-if="showMobileFilters" class="fixed inset-0 z-50 sm:hidden" @click.self="showMobileFilters = false" @keydown.escape="showMobileFilters = false" role="dialog" aria-modal="true">
             <div class="absolute inset-0 bg-black/40"></div>
             <Transition
               enter-active-class="transition duration-300 ease-out"
@@ -410,16 +450,29 @@
                 {{ grant.program_name || grant.source_id }}
               </p>
             </div>
-            <button
-              @click.stop="toggleSaveGrant(grant.id)"
-              class="ml-2 text-navy-400 hover:text-amber-500 transition-colors flex-shrink-0"
-              :aria-label="savedGrants.includes(grant.id) ? $t('grants.unsaveGrant') : $t('grants.saveGrant')"
-              :aria-pressed="savedGrants.includes(grant.id)"
-            >
-              <svg class="w-5 h-5" :class="savedGrants.includes(grant.id) ? 'fill-amber-500 text-amber-500' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
-              </svg>
-            </button>
+            <div class="flex items-center gap-1 ml-2 flex-shrink-0">
+              <button
+                @click.stop="toggleCompareGrant(grant)"
+                class="text-navy-400 hover:text-blue-500 transition-colors"
+                :class="compareGrants.some(g => g.id === grant.id) ? 'text-blue-500' : ''"
+                :aria-label="$t('grants.compare')"
+                :aria-pressed="compareGrants.some(g => g.id === grant.id)"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+              </button>
+              <button
+                @click.stop="toggleSaveGrant(grant.id)"
+                class="text-navy-400 hover:text-amber-500 transition-colors"
+                :aria-label="savedGrants.includes(grant.id) ? $t('grants.unsaveGrant') : $t('grants.saveGrant')"
+                :aria-pressed="savedGrants.includes(grant.id)"
+              >
+                <svg class="w-5 h-5" :class="savedGrants.includes(grant.id) ? 'fill-amber-500 text-amber-500' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                </svg>
+              </button>
+            </div>
           </div>
 
           <p class="text-sm text-navy-700 line-clamp-3 mb-4">
@@ -565,12 +618,122 @@
         </button>
       </div>
     </div>
+    <!-- Comparison Floating Bar -->
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="translate-y-full opacity-0"
+        enter-to-class="translate-y-0 opacity-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="translate-y-0 opacity-100"
+        leave-to-class="translate-y-full opacity-0"
+      >
+        <div v-if="compareGrants.length > 0" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-navy-900 text-white rounded-2xl shadow-2xl px-5 py-3 flex items-center gap-4">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            <span class="text-sm font-medium">{{ compareGrants.length }}/3 {{ $t('grants.selectedForCompare') }}</span>
+          </div>
+          <button
+            @click="showCompareModal = true"
+            :disabled="compareGrants.length < 2"
+            class="btn btn-secondary btn-sm"
+            :class="compareGrants.length < 2 ? 'opacity-50 cursor-not-allowed' : ''"
+          >
+            {{ $t('grants.compareNow') }}
+          </button>
+          <button @click="compareGrants = []" class="text-white/60 hover:text-white text-sm">
+            {{ $t('common.clear') }}
+          </button>
+        </div>
+      </Transition>
+
+      <!-- Comparison Modal -->
+      <Transition
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div v-if="showCompareModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="showCompareModal = false" @keydown.escape="showCompareModal = false">
+          <div class="absolute inset-0 bg-black/50"></div>
+          <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white px-6 py-4 border-b border-navy-100 flex items-center justify-between rounded-t-2xl z-10">
+              <h2 class="text-xl font-display font-semibold text-navy-900">{{ $t('grants.compareGrants') }}</h2>
+              <button @click="showCompareModal = false" class="p-2 -mr-2 text-navy-400 hover:text-navy-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            <div class="p-6 overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr>
+                    <th class="text-left py-3 px-4 text-navy-500 font-medium w-32"></th>
+                    <th v-for="g in compareGrants" :key="g.id" class="text-left py-3 px-4 text-navy-900 font-semibold">
+                      <div class="max-w-48 truncate">{{ g.title }}</div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-navy-100">
+                  <tr class="bg-navy-50/50">
+                    <td class="py-3 px-4 font-medium text-navy-600">{{ $t('grants.filters.amount') }}</td>
+                    <td v-for="g in compareGrants" :key="g.id" class="py-3 px-4 text-amber-600 font-semibold">
+                      {{ formatAmount(g.amount_min, g.amount_max, g.currency) }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="py-3 px-4 font-medium text-navy-600">{{ $t('grants.deadline') }}</td>
+                    <td v-for="g in compareGrants" :key="g.id" class="py-3 px-4" :class="deadlineColor(g.deadline)">
+                      {{ g.deadline ? formatDate(g.deadline) : '-' }}
+                    </td>
+                  </tr>
+                  <tr class="bg-navy-50/50">
+                    <td class="py-3 px-4 font-medium text-navy-600">{{ $t('grants.category') }}</td>
+                    <td v-for="g in compareGrants" :key="g.id" class="py-3 px-4">
+                      <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full" :class="categoryBadgeClass(g.category)">
+                        {{ categoryIcon(g.category) }} {{ g.category || 'General' }}
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="py-3 px-4 font-medium text-navy-600">{{ $t('grants.filters.country') }}</td>
+                    <td v-for="g in compareGrants" :key="g.id" class="py-3 px-4 text-navy-700">
+                      {{ parseCountries(g.eligible_countries).join(', ') || '-' }}
+                    </td>
+                  </tr>
+                  <tr class="bg-navy-50/50">
+                    <td class="py-3 px-4 font-medium text-navy-600">{{ $t('grants.filters.statusLabel') }}</td>
+                    <td v-for="g in compareGrants" :key="g.id" class="py-3 px-4">
+                      <span :class="statusBadgeClass(g.status)">{{ g.status || 'Open' }}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="py-3 px-4 font-medium text-navy-600">{{ $t('grants.donor') }}</td>
+                    <td v-for="g in compareGrants" :key="g.id" class="py-3 px-4 text-navy-700">
+                      {{ g.donor_name || g.program_name || '-' }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="sticky bottom-0 bg-white px-6 py-4 border-t border-navy-100 flex justify-end gap-3 rounded-b-2xl">
+              <button @click="showCompareModal = false" class="btn btn-outline">{{ $t('common.close') }}</button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
     <ScrollToTop />
   </AppLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/AppLayout.vue'
@@ -586,6 +749,26 @@ const route = useRoute()
 const { t } = useI18n()
 const { trackPageView, trackGrantAction } = useFeedback()
 const toast = useToast()
+
+// Search input ref
+const searchInput = ref<HTMLInputElement | null>(null)
+
+// Global keyboard shortcuts
+function handleGlobalKeydown(e: KeyboardEvent) {
+  // "/" to focus search (when not in an input/textarea)
+  if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
+    e.preventDefault()
+    searchInput.value?.focus()
+  }
+  // Escape to close mobile filters
+  if (e.key === 'Escape' && showMobileFilters.value) {
+    showMobileFilters.value = false
+  }
+}
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeydown)
+})
 
 // State
 const loading = ref(false)
@@ -747,6 +930,64 @@ const activeFiltersCount = computed(() => {
   return count
 })
 
+// Autocomplete suggestions
+const suggestions = ref<any[]>([])
+const showSuggestions = ref(false)
+const activeSuggestionIndex = ref(-1)
+let suggestTimeout: number | null = null
+
+function onSearchInput() {
+  debouncedSearch()
+  // Fetch suggestions after a short delay
+  if (suggestTimeout) clearTimeout(suggestTimeout)
+  if (searchQuery.value.length >= 2) {
+    suggestTimeout = setTimeout(() => fetchSuggestions(), 300) as unknown as number
+  } else {
+    suggestions.value = []
+    showSuggestions.value = false
+  }
+}
+
+async function fetchSuggestions() {
+  try {
+    const response = await api.get('/api/grants', {
+      params: { search: searchQuery.value, limit: 6 }
+    })
+    suggestions.value = (response.data.grants || []).slice(0, 6)
+    activeSuggestionIndex.value = -1
+    showSuggestions.value = suggestions.value.length > 0
+  } catch {
+    suggestions.value = []
+  }
+}
+
+function navigateSuggestion(direction: number) {
+  if (!showSuggestions.value || suggestions.value.length === 0) return
+  activeSuggestionIndex.value = Math.max(-1, Math.min(
+    suggestions.value.length - 1,
+    activeSuggestionIndex.value + direction
+  ))
+}
+
+function selectSuggestion(suggestion: any) {
+  showSuggestions.value = false
+  suggestions.value = []
+  viewGrantDetails(suggestion)
+}
+
+function selectSuggestionOrSearch() {
+  if (activeSuggestionIndex.value >= 0 && suggestions.value[activeSuggestionIndex.value]) {
+    selectSuggestion(suggestions.value[activeSuggestionIndex.value])
+  } else {
+    showSuggestions.value = false
+    searchGrants()
+  }
+}
+
+function hideSuggestionsDelayed() {
+  setTimeout(() => { showSuggestions.value = false }, 200)
+}
+
 // Debounced search
 let searchTimeout: number | null = null
 function debouncedSearch() {
@@ -863,6 +1104,21 @@ function toggleSaveGrant(grantId: string) {
     trackGrantAction(grantId, 'save', { source_page: 'grants' })
   }
   localStorage.setItem('savedGrants', JSON.stringify(savedGrants.value))
+}
+
+// Compare grants
+const compareGrants = ref<any[]>([])
+const showCompareModal = ref(false)
+
+function toggleCompareGrant(grant: any) {
+  const idx = compareGrants.value.findIndex(g => g.id === grant.id)
+  if (idx > -1) {
+    compareGrants.value.splice(idx, 1)
+  } else if (compareGrants.value.length < 3) {
+    compareGrants.value.push(grant)
+  } else {
+    toast.warning(t('grants.maxCompare'))
+  }
 }
 
 // CSV Export
@@ -1017,6 +1273,7 @@ function statusBadgeClass(status: string) {
 
 // Load saved grants from localStorage
 onMounted(() => {
+  window.addEventListener('keydown', handleGlobalKeydown)
   const saved = localStorage.getItem('savedGrants')
   if (saved) {
     savedGrants.value = JSON.parse(saved)
