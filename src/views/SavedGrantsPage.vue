@@ -97,6 +97,108 @@
       </div>
     </div>
 
+    <!-- Deadline Conflicts Panel -->
+    <div v-if="deadlineConflicts.length > 0" class="mb-6 animate-fade-in">
+      <div class="border border-amber-200 rounded-xl overflow-hidden bg-gradient-to-r from-amber-50 to-stone-50">
+        <!-- Collapsible Header -->
+        <button
+          @click="showConflictPanel = !showConflictPanel"
+          class="w-full flex items-center justify-between px-5 py-3 hover:bg-amber-50/50 transition-colors"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+              </svg>
+            </div>
+            <div class="text-left">
+              <span class="text-sm font-semibold text-navy-800">{{ $t('savedGrants.deadlineConflicts.title') }}</span>
+              <span class="ml-2 text-xs font-medium px-2 py-0.5 bg-amber-200 text-amber-800 rounded-full">
+                {{ $t('savedGrants.deadlineConflicts.conflictsDetected', { count: deadlineConflicts.length }) }}
+              </span>
+            </div>
+          </div>
+          <svg
+            class="w-5 h-5 text-navy-400 transition-transform duration-200"
+            :class="{ 'rotate-180': showConflictPanel }"
+            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+
+        <!-- Collapsible Body -->
+        <div v-if="showConflictPanel" class="px-5 pb-4 border-t border-amber-100">
+          <p class="text-xs text-navy-500 mt-3 mb-4">{{ $t('savedGrants.deadlineConflicts.description') }}</p>
+
+          <div class="space-y-4">
+            <div
+              v-for="(conflict, idx) in deadlineConflicts"
+              :key="idx"
+              class="p-4 rounded-lg border"
+              :class="conflictSeverityClass(conflict.severity)"
+            >
+              <!-- Window Header -->
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                  <span class="text-sm font-semibold">
+                    {{ $t('savedGrants.deadlineConflicts.windowLabel', { start: conflict.windowStart, end: conflict.windowEnd }) }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs px-2 py-0.5 rounded-full font-medium" :class="conflictSeverityBadgeClass(conflict.severity)">
+                    {{ conflict.severity === 'critical' ? $t('savedGrants.deadlineConflicts.severityCritical') : $t('savedGrants.deadlineConflicts.severityWarning') }}
+                  </span>
+                  <span class="text-xs font-medium opacity-75">
+                    {{ $t('savedGrants.deadlineConflicts.grantsInWindow', { count: conflict.grants.length }) }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Grants List -->
+              <div class="space-y-2">
+                <router-link
+                  v-for="grant in conflict.grants"
+                  :key="grant.id"
+                  :to="`/grants/${grant.id}`"
+                  class="flex items-center gap-3 p-2.5 rounded-md bg-white/60 hover:bg-white transition-colors group"
+                >
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-navy-800 truncate group-hover:text-amber-700 transition-colors">{{ grant.title }}</p>
+                    <div class="flex items-center gap-3 mt-1">
+                      <span class="text-xs text-navy-500">
+                        {{ new Date(grant.deadline).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) }}
+                      </span>
+                      <span class="text-[10px] px-1.5 py-0.5 rounded bg-stone-100 text-stone-600 capitalize">{{ grant.status }}</span>
+                    </div>
+                  </div>
+                  <!-- Milestone Progress Bar -->
+                  <div class="flex items-center gap-2 flex-shrink-0 w-32">
+                    <div class="flex-1 h-1.5 rounded-full bg-stone-200">
+                      <div
+                        class="h-full rounded-full transition-all duration-300"
+                        :class="grant.milestoneProgress.pct >= 60 ? 'bg-sage-500' : grant.milestoneProgress.pct >= 30 ? 'bg-amber-400' : 'bg-red-400'"
+                        :style="{ width: grant.milestoneProgress.pct + '%' }"
+                      ></div>
+                    </div>
+                    <span class="text-[10px] text-stone-500 whitespace-nowrap">
+                      {{ grant.milestoneProgress.completed }}/{{ grant.milestoneProgress.total }}
+                    </span>
+                  </div>
+                  <svg class="w-4 h-4 text-navy-300 group-hover:text-amber-500 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Outcome Analytics -->
     <div v-if="outcomeStats.won + outcomeStats.lost > 0" class="mb-6 p-4 bg-gradient-to-r from-purple-50 to-amber-50 border border-purple-100 rounded-xl animate-fade-in">
       <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm">
@@ -463,6 +565,75 @@ function removeTag(tag: string) {
     localStorage.setItem('grantTagMap', JSON.stringify(map))
   } catch { /* */ }
   if (activeTagFilter.value === tag) activeTagFilter.value = null
+}
+
+// Deadline Conflict Detector
+const showConflictPanel = ref(true)
+
+const deadlineConflicts = computed(() => {
+  const grantsWithDeadlines = filteredGrants.value.filter((g: any) => g.deadline)
+  if (grantsWithDeadlines.length < 2) return []
+
+  // Sort by deadline
+  const sorted = [...grantsWithDeadlines].sort(
+    (a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
+  )
+
+  // Group into 7-day windows
+  const windows: Array<{
+    windowStart: string
+    windowEnd: string
+    grants: Array<{ id: string; title: string; deadline: string; milestoneProgress: { completed: number; total: number; pct: number }; status: string }>
+    severity: 'warning' | 'critical'
+  }> = []
+
+  let i = 0
+  while (i < sorted.length) {
+    const windowStartDate = new Date(sorted[i]!.deadline)
+    const windowEndDate = new Date(windowStartDate.getTime() + 7 * 24 * 60 * 60 * 1000)
+    const windowGrants: typeof windows[0]['grants'] = []
+
+    let j = i
+    while (j < sorted.length && new Date(sorted[j]!.deadline).getTime() <= windowEndDate.getTime()) {
+      const g = sorted[j]!
+      const grantId = String(g.id)
+      const status = getGrantStatus(grantId)
+      const progress = getMilestoneProgress(grantId, status)
+      windowGrants.push({
+        id: g.id,
+        title: g.title,
+        deadline: g.deadline,
+        milestoneProgress: progress,
+        status
+      })
+      j++
+    }
+
+    if (windowGrants.length >= 2) {
+      const lastDeadline = new Date(windowGrants[windowGrants.length - 1]!.deadline)
+      windows.push({
+        windowStart: windowStartDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }),
+        windowEnd: lastDeadline.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }),
+        grants: windowGrants,
+        severity: windowGrants.length >= 3 ? 'critical' : 'warning'
+      })
+    }
+
+    // Move past this window to avoid duplicating grants across windows
+    i = j > i ? j : i + 1
+  }
+
+  return windows
+})
+
+function conflictSeverityClass(severity: 'warning' | 'critical'): string {
+  if (severity === 'critical') return 'bg-red-100 text-red-700 border-red-300'
+  return 'bg-amber-100 text-amber-700 border-amber-300'
+}
+
+function conflictSeverityBadgeClass(severity: 'warning' | 'critical'): string {
+  if (severity === 'critical') return 'bg-red-600 text-white'
+  return 'bg-amber-500 text-white'
 }
 
 // Workflow statuses

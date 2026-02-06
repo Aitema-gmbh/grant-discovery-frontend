@@ -74,6 +74,104 @@
       </div>
     </div>
 
+    <!-- Content Library -->
+    <div class="mb-8 animate-fade-in">
+      <button @click="contentLibraryOpen = !contentLibraryOpen"
+        class="w-full flex items-center justify-between mb-3 group">
+        <h3 class="text-lg font-display font-semibold text-[#1e3a5f] flex items-center gap-2">
+          <svg class="w-5 h-5 text-[#d4a843]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+          {{ $t('proposals.contentLibrary.title') }}
+          <span v-if="librarySnippets.length > 0" class="text-xs font-normal text-stone-400 ml-1">
+            {{ $t('proposals.contentLibrary.snippetCount', { count: librarySnippets.length }) }}
+          </span>
+        </h3>
+        <svg class="w-4 h-4 text-stone-400 transition-transform" :class="contentLibraryOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+
+      <div v-if="contentLibraryOpen">
+        <!-- Empty State -->
+        <div v-if="librarySnippets.length === 0" class="card p-8 text-center">
+          <div class="inline-flex items-center justify-center w-14 h-14 bg-[#d4a843]/10 rounded-full mb-4">
+            <svg class="w-7 h-7 text-[#d4a843]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+          </div>
+          <p class="text-sm text-stone-600 mb-1">{{ $t('proposals.contentLibrary.empty') }}</p>
+          <p class="text-xs text-stone-400">{{ $t('proposals.contentLibrary.emptyDesc') }}</p>
+        </div>
+
+        <!-- Snippets grouped by category -->
+        <div v-else class="space-y-4">
+          <div v-for="(categorySnippets, category) in snippetsByCategory" :key="category">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-semibold border"
+                :class="snippetCategoryColors[category as SnippetCategory]">
+                {{ $t(`proposals.contentLibrary.categories.${category}`) }}
+              </span>
+              <div class="flex-1 h-px bg-stone-200"></div>
+            </div>
+
+            <div class="space-y-2">
+              <div v-for="snippet in categorySnippets" :key="snippet.id"
+                class="card p-4 hover:shadow-soft transition-all">
+
+                <!-- View Mode -->
+                <div v-if="editingSnippet !== snippet.id">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1 min-w-0 cursor-pointer" @click="toggleExpandSnippet(snippet.id)">
+                      <h4 class="text-sm font-semibold text-[#1e3a5f]">{{ snippet.title }}</h4>
+                      <p class="text-xs text-stone-500 mt-1" :class="expandedSnippet === snippet.id ? '' : 'line-clamp-2'">
+                        {{ expandedSnippet === snippet.id ? snippet.content : snippet.content.substring(0, 100) + (snippet.content.length > 100 ? '...' : '') }}
+                      </p>
+                      <button v-if="snippet.content.length > 100" @click.stop="toggleExpandSnippet(snippet.id)"
+                        class="text-[10px] text-[#d4a843] hover:underline mt-1">
+                        {{ expandedSnippet === snippet.id ? $t('proposals.contentLibrary.collapsePreview') : $t('proposals.contentLibrary.expandPreview') }}
+                      </button>
+                    </div>
+                    <div class="flex items-center gap-1 flex-shrink-0">
+                      <button @click="startEditSnippet(snippet)"
+                        class="p-1.5 text-stone-400 hover:text-[#1e3a5f] hover:bg-stone-100 rounded transition-colors"
+                        :title="$t('proposals.contentLibrary.editSnippet')">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                      </button>
+                      <button @click="deleteLibrarySnippet(snippet.id)"
+                        class="p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                        :title="$t('proposals.contentLibrary.deleteSnippet')">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3 mt-2 pt-2 border-t border-stone-100">
+                    <span class="text-[9px] text-stone-400">{{ $t('proposals.contentLibrary.usageCount', { count: snippet.usageCount }) }}</span>
+                    <span class="text-[9px] text-stone-400">{{ $t('proposals.contentLibrary.createdOn', { date: new Date(snippet.createdAt).toLocaleDateString() }) }}</span>
+                    <span v-if="snippet.sourceGrantTitle" class="text-[9px] text-[#d4a843] truncate max-w-[200px]">
+                      {{ $t('proposals.contentLibrary.source', { title: snippet.sourceGrantTitle }) }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Edit Mode -->
+                <div v-else class="space-y-3">
+                  <input v-model="editTitle" type="text"
+                    class="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:ring-1 focus:ring-[#d4a843] focus:border-transparent" />
+                  <textarea v-model="editContent" rows="6"
+                    class="w-full px-3 py-2 border border-stone-200 rounded-lg text-xs focus:ring-1 focus:ring-[#d4a843] focus:border-transparent resize-y"></textarea>
+                  <div class="flex justify-end gap-2">
+                    <button @click="cancelEditSnippet"
+                      class="px-3 py-1.5 text-xs text-stone-500 hover:text-stone-700 transition-colors">
+                      {{ $t('proposals.contentLibrary.cancelEdit') }}
+                    </button>
+                    <button @click="updateSnippet(snippet.id)"
+                      class="px-3 py-1.5 bg-[#1e3a5f] text-white rounded-lg text-xs font-medium hover:bg-[#2a4d7a] transition-colors">
+                      {{ $t('proposals.contentLibrary.saveChanges') }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Loading state -->
     <div v-if="loading" class="space-y-4">
       <div v-for="i in 4" :key="i" class="card-premium animate-pulse">
@@ -199,6 +297,89 @@ const portfolioMetrics = computed(() => {
   return { total, wonCount, lostCount, winRate, submittedCount, applyingCount, savedGrants: savedGrants.length }
 })
 
+// Content Library (Snippet Management)
+type SnippetCategory = 'organization' | 'methodology' | 'impact' | 'budget' | 'sustainability' | 'other'
+
+interface ProposalSnippet {
+  id: string
+  title: string
+  content: string
+  category: SnippetCategory
+  sourceGrantTitle?: string
+  createdAt: string
+  usageCount: number
+}
+
+const contentLibraryOpen = ref(true)
+const librarySnippets = ref<ProposalSnippet[]>([])
+const expandedSnippet = ref<string | null>(null)
+const editingSnippet = ref<string | null>(null)
+const editTitle = ref('')
+const editContent = ref('')
+
+const snippetCategoryColors: Record<SnippetCategory, string> = {
+  organization: 'bg-[#1e3a5f]/10 text-[#1e3a5f] border-[#1e3a5f]/20',
+  methodology: 'bg-[#7c9a6e]/10 text-[#7c9a6e] border-[#7c9a6e]/20',
+  impact: 'bg-purple-100 text-purple-700 border-purple-200',
+  budget: 'bg-[#d4a843]/10 text-[#d4a843] border-[#d4a843]/20',
+  sustainability: 'bg-teal-100 text-teal-700 border-teal-200',
+  other: 'bg-stone-100 text-stone-600 border-stone-200',
+}
+
+const snippetsByCategory = computed(() => {
+  const grouped: Record<string, ProposalSnippet[]> = {}
+  for (const snippet of librarySnippets.value) {
+    if (!grouped[snippet.category]) grouped[snippet.category] = []
+    grouped[snippet.category]!.push(snippet)
+  }
+  return grouped
+})
+
+function loadLibrarySnippets() {
+  try {
+    const stored = localStorage.getItem('proposalSnippets')
+    if (stored) librarySnippets.value = JSON.parse(stored)
+  } catch { librarySnippets.value = [] }
+}
+
+function saveLibrarySnippets() {
+  localStorage.setItem('proposalSnippets', JSON.stringify(librarySnippets.value))
+}
+
+function startEditSnippet(snippet: ProposalSnippet) {
+  editingSnippet.value = snippet.id
+  editTitle.value = snippet.title
+  editContent.value = snippet.content
+}
+
+function cancelEditSnippet() {
+  editingSnippet.value = null
+  editTitle.value = ''
+  editContent.value = ''
+}
+
+function updateSnippet(id: string) {
+  const snippet = librarySnippets.value.find(s => s.id === id)
+  if (!snippet) return
+  snippet.title = editTitle.value.trim()
+  snippet.content = editContent.value.trim()
+  saveLibrarySnippets()
+  editingSnippet.value = null
+  toast.success(t('proposals.contentLibrary.updatedSuccess'))
+}
+
+function deleteLibrarySnippet(id: string) {
+  librarySnippets.value = librarySnippets.value.filter(s => s.id !== id)
+  saveLibrarySnippets()
+  if (expandedSnippet.value === id) expandedSnippet.value = null
+  if (editingSnippet.value === id) editingSnippet.value = null
+  toast.success(t('proposals.contentLibrary.deletedSuccess'))
+}
+
+function toggleExpandSnippet(id: string) {
+  expandedSnippet.value = expandedSnippet.value === id ? null : id
+}
+
 function loadTemplates() {
   try {
     templates.value = JSON.parse(localStorage.getItem('proposalTemplates') || '[]')
@@ -256,5 +437,6 @@ function statusBadge(status: string) {
 onMounted(() => {
   loadProposals()
   loadTemplates()
+  loadLibrarySnippets()
 })
 </script>

@@ -493,6 +493,37 @@
       </div>
     </div>
 
+    <!-- Deadline Crunch Alert -->
+    <div v-if="deadlineCrunches.count > 0" class="mt-8 animate-fade-in">
+      <div class="card p-5 border-l-4 border-l-amber-400">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+          </div>
+          <h3 class="text-sm font-bold text-amber-800">{{ t('dashboard.deadlineCrunch.title') }}</h3>
+          <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
+            {{ t('dashboard.deadlineCrunch.conflictsDetected', { count: deadlineCrunches.count }) }}
+          </span>
+        </div>
+        <p class="text-xs text-stone-500 mb-3">{{ t('dashboard.deadlineCrunch.description') }}</p>
+        <div v-if="deadlineCrunches.mostUrgent" class="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <span class="text-xs font-medium text-amber-800">
+              {{ t('dashboard.deadlineCrunch.mostUrgent', { count: deadlineCrunches.mostUrgent.count, start: deadlineCrunches.mostUrgent.windowStart, end: deadlineCrunches.mostUrgent.windowEnd }) }}
+            </span>
+          </div>
+          <router-link to="/saved" class="text-xs font-semibold text-amber-600 hover:text-amber-700 transition-colors whitespace-nowrap">
+            {{ t('dashboard.deadlineCrunch.viewSaved') }} &rarr;
+          </router-link>
+        </div>
+      </div>
+    </div>
+
     <!-- At Risk Applications -->
     <div v-if="atRiskGrants.length > 0" class="mt-8 animate-fade-in">
       <div class="card p-5 border-l-4 border-l-red-400">
@@ -764,6 +795,61 @@ const funnelInsight = computed(() => {
     return t('dashboard.funnel.insightApplyStall')
   }
   return t('dashboard.funnel.insightGoodFlow')
+})
+
+// Deadline Crunch Detector (for saved grants with 2+ deadlines in same 7-day window within next 30 days)
+const deadlineCrunches = computed(() => {
+  const savedIds = JSON.parse(localStorage.getItem('savedGrants') || '[]') as string[]
+  if (savedIds.length < 2) return { count: 0, mostUrgent: null as null | { count: number; windowStart: string; windowEnd: string } }
+
+  const now = Date.now()
+  const thirtyDays = 30 * 24 * 60 * 60 * 1000
+
+  // Get saved grants with deadlines in the next 30 days
+  const grantsWithDeadlines = allGrantsForCharts.value
+    .filter((g: any) => {
+      if (!savedIds.includes(String(g.id))) return false
+      if (!g.deadline) return false
+      const dl = new Date(g.deadline).getTime()
+      return dl > now && dl <= now + thirtyDays
+    })
+    .sort((a: any, b: any) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+
+  if (grantsWithDeadlines.length < 2) return { count: 0, mostUrgent: null }
+
+  // Group into 7-day windows
+  const windows: Array<{ count: number; windowStart: string; windowEnd: string; startMs: number }> = []
+  let i = 0
+  while (i < grantsWithDeadlines.length) {
+    const startDate = new Date(grantsWithDeadlines[i]!.deadline)
+    const endMs = startDate.getTime() + 7 * 24 * 60 * 60 * 1000
+    let j = i
+    let lastDeadlineDate = startDate
+    while (j < grantsWithDeadlines.length && new Date(grantsWithDeadlines[j]!.deadline).getTime() <= endMs) {
+      lastDeadlineDate = new Date(grantsWithDeadlines[j]!.deadline)
+      j++
+    }
+    const windowCount = j - i
+    if (windowCount >= 2) {
+      windows.push({
+        count: windowCount,
+        windowStart: startDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }),
+        windowEnd: lastDeadlineDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }),
+        startMs: startDate.getTime()
+      })
+    }
+    i = j > i ? j : i + 1
+  }
+
+  if (windows.length === 0) return { count: 0, mostUrgent: null }
+
+  // Find most urgent (earliest start)
+  const mostUrgent = windows.reduce((a, b) => a.startMs < b.startMs ? a : b)
+
+  return {
+    count: windows.length,
+    mostUrgent: { count: mostUrgent.count, windowStart: mostUrgent.windowStart, windowEnd: mostUrgent.windowEnd }
+  }
 })
 
 // At Risk Applications

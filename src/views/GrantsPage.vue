@@ -543,7 +543,11 @@
                 {{ grant.title }}
               </h3>
               <p class="text-sm text-navy-600 mt-1">
-                {{ grant.program_name || grant.source_id }}
+                <button
+                  @click.stop="filterByFunder(grant.program_name || grant.source_id)"
+                  class="hover:underline hover:text-[#d4a843] transition-colors text-left"
+                  :title="$t('grants.filterByFunder')"
+                >{{ grant.program_name || grant.source_id }}</button>
               </p>
             </div>
             <div class="flex items-center gap-1 ml-2 flex-shrink-0">
@@ -1481,6 +1485,14 @@ async function searchGrants() {
   } finally {
     loading.value = false
   }
+}
+
+// Filter by funder name
+function filterByFunder(funderName: string) {
+  searchQuery.value = funderName
+  searchMode.value = 'text'
+  currentPage.value = 1
+  searchGrants()
 }
 
 // Clear filters

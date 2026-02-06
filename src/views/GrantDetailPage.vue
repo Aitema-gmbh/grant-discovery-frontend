@@ -626,6 +626,92 @@
             </div>
           </div>
 
+          <!-- Funder Intelligence Panel -->
+          <div v-if="funderIntelLoading || funderIntel" class="card border border-stone-200">
+            <button @click="showFunderIntel = !showFunderIntel" class="w-full flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-[#1e3a5f] flex items-center gap-2">
+                <svg class="w-4 h-4 text-[#d4a843]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                {{ $t('grantDetail.funderIntel.title') }}
+              </h3>
+              <svg class="w-4 h-4 text-stone-400 transition-transform" :class="showFunderIntel ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+
+            <div v-if="showFunderIntel" class="mt-4">
+              <!-- Loading state -->
+              <div v-if="funderIntelLoading" class="flex items-center justify-center gap-2 py-6 text-sm text-stone-400">
+                <div class="w-4 h-4 border-2 border-[#d4a843] border-t-transparent rounded-full animate-spin"></div>
+                {{ $t('grantDetail.funderIntel.loading') }}
+              </div>
+
+              <!-- Content -->
+              <div v-else-if="funderIntel" class="space-y-4">
+                <!-- Funder Name -->
+                <p class="text-base font-display font-semibold text-[#1e3a5f]">{{ funderIntel.name }}</p>
+
+                <!-- Grant Count Badges -->
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-[#1e3a5f]/10 text-[#1e3a5f] rounded-full text-xs font-medium">
+                    {{ $t('grantDetail.funderIntel.totalGrants', { count: funderIntel.totalGrants }) }}
+                  </span>
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-[#7c9a6e]/15 text-[#7c9a6e] rounded-full text-xs font-medium">
+                    {{ $t('grantDetail.funderIntel.openGrants', { count: funderIntel.openGrants }) }}
+                  </span>
+                </div>
+
+                <!-- Top Categories -->
+                <div v-if="funderIntel.categories.length > 0">
+                  <p class="text-xs font-medium text-stone-500 mb-2">{{ $t('grantDetail.funderIntel.topCategories') }}</p>
+                  <div class="flex flex-wrap gap-1.5">
+                    <span v-for="cat in funderIntel.categories" :key="cat.name"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 bg-stone-100 text-stone-600 rounded text-[11px] font-medium">
+                      {{ cat.name }}
+                      <span class="text-stone-400">({{ cat.count }})</span>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Funding Range -->
+                <div v-if="funderIntel.fundingRange.max > 0">
+                  <p class="text-xs font-medium text-stone-500 mb-1">{{ $t('grantDetail.funderIntel.fundingRange') }}</p>
+                  <p class="text-sm font-semibold text-[#d4a843]">
+                    {{ funderIntel.fundingRange.min > 0 ? `€${funderIntel.fundingRange.min.toLocaleString()}` : '€0' }}
+                    –
+                    €{{ funderIntel.fundingRange.max.toLocaleString() }}
+                  </p>
+                </div>
+
+                <!-- User Engagement Summary -->
+                <div v-if="funderIntel.userSavedFromFunder > 0 || funderIntel.userAppliedToFunder > 0"
+                  class="p-3 bg-stone-50 rounded-lg space-y-1">
+                  <p v-if="funderIntel.userSavedFromFunder > 0" class="text-xs text-[#1e3a5f]">
+                    {{ $t('grantDetail.funderIntel.userSaved', { count: funderIntel.userSavedFromFunder }) }}
+                  </p>
+                  <p v-if="funderIntel.userAppliedToFunder > 0" class="text-xs text-[#7c9a6e]">
+                    {{ $t('grantDetail.funderIntel.userApplied', { count: funderIntel.userAppliedToFunder }) }}
+                  </p>
+                </div>
+
+                <!-- No data fallback -->
+                <p v-if="funderIntel.totalGrants === 0" class="text-xs text-stone-400 text-center py-2">
+                  {{ $t('grantDetail.funderIntel.noData') }}
+                </p>
+
+                <!-- View All Button -->
+                <button v-if="funderIntel.totalGrants > 0" @click="viewAllFunderGrants"
+                  class="w-full py-2 text-sm font-medium text-[#1e3a5f] bg-[#1e3a5f]/5 hover:bg-[#1e3a5f]/10 rounded-lg transition-colors flex items-center justify-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                  </svg>
+                  {{ $t('grantDetail.funderIntel.viewAllGrants') }}
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Need Help? -->
           <div class="card border-2 border-primary-200 bg-primary-50">
             <div class="flex items-start gap-3">
@@ -842,7 +928,95 @@ const descExpanded = ref(false)
 const descNeedsExpand = ref(false)
 const isReminderSet = ref(false)
 
+// Funder Intelligence Panel
+interface FunderIntelligence {
+  name: string
+  totalGrants: number
+  openGrants: number
+  categories: Array<{ name: string; count: number }>
+  fundingRange: { min: number; max: number; currency: string }
+  userSavedFromFunder: number
+  userAppliedToFunder: number
+  otherGrantIds: string[]
+}
 
+const funderIntel = ref<FunderIntelligence | null>(null)
+const funderIntelLoading = ref(false)
+const showFunderIntel = ref(true)
+
+async function loadFunderIntelligence() {
+  if (!grant.value) return
+  const funderName = grant.value.funder_name || grant.value.program_name || grant.value.source_id
+  if (!funderName) return
+
+  funderIntelLoading.value = true
+  try {
+    const response = await api.get('/api/grants', { params: { search: funderName, limit: 50 } })
+    const allResults = response.data?.grants || []
+    const currentId = String(grant.value.id)
+    const otherGrants = allResults.filter((g: any) => String(g.id) !== currentId)
+
+    // Count open grants
+    const now = new Date()
+    const openGrants = otherGrants.filter((g: any) => {
+      if (!g.deadline) return true
+      return new Date(g.deadline) > now
+    })
+
+    // Compute categories
+    const categoryMap: Record<string, number> = {}
+    otherGrants.forEach((g: any) => {
+      const cat = g.category || 'Other'
+      categoryMap[cat] = (categoryMap[cat] || 0) + 1
+    })
+    const categories = Object.entries(categoryMap)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+
+    // Compute funding range
+    let minAmount = Infinity
+    let maxAmount = 0
+    let currency = 'EUR'
+    otherGrants.forEach((g: any) => {
+      if (g.amount_min && g.amount_min < minAmount) minAmount = g.amount_min
+      if (g.amount_max && g.amount_max > maxAmount) maxAmount = g.amount_max
+      if (g.currency) currency = g.currency
+    })
+    if (minAmount === Infinity) minAmount = 0
+
+    // Cross-reference with user's saved grants and workflow
+    const savedGrantIds: string[] = JSON.parse(localStorage.getItem('savedGrants') || '[]')
+    const workflowData: Record<string, any> = JSON.parse(localStorage.getItem('grantWorkflow') || '{}')
+    const otherIds = otherGrants.map((g: any) => String(g.id))
+    const userSavedFromFunder = otherIds.filter((id: string) => savedGrantIds.includes(id)).length
+    const userAppliedToFunder = otherIds.filter((id: string) => {
+      const wf = workflowData[id]
+      return wf && (wf.status === 'applying' || wf.status === 'submitted')
+    }).length
+
+    funderIntel.value = {
+      name: funderName,
+      totalGrants: otherGrants.length,
+      openGrants: openGrants.length,
+      categories,
+      fundingRange: { min: minAmount, max: maxAmount, currency },
+      userSavedFromFunder,
+      userAppliedToFunder,
+      otherGrantIds: otherIds
+    }
+  } catch {
+    // Non-critical, silently fail
+    funderIntel.value = null
+  } finally {
+    funderIntelLoading.value = false
+  }
+}
+
+function viewAllFunderGrants() {
+  if (!funderIntel.value) return
+  router.push({ path: '/grants', query: { q: funderIntel.value.name } })
+}
 
 
 // Handoff Notes System
@@ -1518,8 +1692,9 @@ async function fetchGrantDetails() {
       } catch { /* ignore - proposals not critical */ }
     }
 
-    // Fetch similar grants (non-blocking)
+    // Fetch similar grants and funder intelligence (non-blocking)
     loadSimilarGrants()
+    loadFunderIntelligence()
 
   } catch (error) {
     console.error('Error fetching grant details:', error)

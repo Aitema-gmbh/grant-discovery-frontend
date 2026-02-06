@@ -35,6 +35,13 @@
 
         <!-- Sync status indicator -->
         <div class="flex items-center gap-2 mb-2">
+          <button @click="showSnippetLibrary = !showSnippetLibrary"
+            class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg transition-colors"
+            :class="showSnippetLibrary ? 'bg-[#1e3a5f] text-white' : 'text-[#1e3a5f] border border-stone-200 hover:bg-stone-50'">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+            {{ showSnippetLibrary ? t('proposalWizard.snippets.hideLibrary') : t('proposalWizard.snippets.snippetLibrary') }}
+            <span v-if="snippets.length > 0" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold" :class="showSnippetLibrary ? 'bg-white/20' : 'bg-[#d4a843]/20 text-[#d4a843]'">{{ snippets.length }}</span>
+          </button>
           <button @click="shareProposal" class="p-2 text-navy-400 hover:text-amber-500 transition-colors rounded-lg hover:bg-amber-50" :title="$t('proposalWizard.shareProposal')">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
           </button>
@@ -213,6 +220,59 @@
           </div>
         </div>
 
+        <!-- Snippet Library Panel -->
+        <div v-if="showSnippetLibrary" class="card border-[#1e3a5f]/20 bg-stone-50 animate-fade-in">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-[#1e3a5f] flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+              {{ t('proposalWizard.snippets.snippetLibrary') }}
+            </h3>
+            <span class="text-[10px] text-stone-400">{{ t('proposalWizard.snippets.matchingSnippets') }}</span>
+          </div>
+
+          <div v-if="filteredSnippets.length === 0" class="text-center py-6">
+            <svg class="w-8 h-8 text-stone-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            <p class="text-xs text-stone-500">{{ t('proposalWizard.snippets.noSnippets') }}</p>
+            <p class="text-[10px] text-stone-400 mt-1">{{ t('proposalWizard.snippets.noSnippetsDesc') }}</p>
+          </div>
+
+          <div v-else class="space-y-2 max-h-64 overflow-y-auto">
+            <div v-for="snippet in filteredSnippets" :key="snippet.id"
+              class="p-3 bg-white rounded-lg border border-stone-200 hover:border-[#d4a843]/40 transition-colors group">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-xs font-medium text-[#1e3a5f] truncate">{{ snippet.title }}</span>
+                    <span class="px-1.5 py-0.5 rounded text-[9px] font-medium"
+                      :class="{
+                        'bg-[#1e3a5f]/10 text-[#1e3a5f]': snippet.category === 'organization',
+                        'bg-[#7c9a6e]/10 text-[#7c9a6e]': snippet.category === 'methodology',
+                        'bg-purple-100 text-purple-700': snippet.category === 'impact',
+                        'bg-[#d4a843]/10 text-[#d4a843]': snippet.category === 'budget',
+                        'bg-teal-100 text-teal-700': snippet.category === 'sustainability',
+                        'bg-stone-100 text-stone-600': snippet.category === 'other',
+                      }">
+                      {{ t(`proposalWizard.snippets.categories.${snippet.category}`) }}
+                    </span>
+                  </div>
+                  <p class="text-[10px] text-stone-500 line-clamp-2">{{ snippet.content.substring(0, 120) }}{{ snippet.content.length > 120 ? '...' : '' }}</p>
+                  <div class="flex items-center gap-3 mt-1.5">
+                    <span class="text-[9px] text-stone-400">{{ t('proposalWizard.snippets.usageCount', { count: snippet.usageCount }) }}</span>
+                    <span v-if="snippet.sourceGrantTitle" class="text-[9px] text-stone-400 truncate max-w-[150px]">{{ snippet.sourceGrantTitle }}</span>
+                  </div>
+                </div>
+                <div class="flex gap-1 flex-shrink-0">
+                  <button @click="deleteSnippetFromWizard(snippet.id)"
+                    class="p-1 rounded text-stone-300 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                    :title="t('proposalWizard.snippets.deleteSnippet')">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Section Cards -->
         <div v-for="sectionType in selectedSections" :key="sectionType" class="card">
           <div class="flex items-center gap-3 mb-4">
@@ -253,13 +313,73 @@
             <span v-if="currentGeneratingSection === sectionType" class="inline-block w-2 h-4 bg-primary-600 animate-pulse ml-1"></span>
           </div>
 
-          <!-- Section Review -->
+          <!-- Section Actions: Review + Save to Library -->
           <div v-if="completedSections.includes(sectionType)" class="mt-4 pt-3 border-t border-stone-100">
-            <button v-if="!sectionReviews[sectionType] && reviewingSection !== sectionType"
-              @click="reviewSection(sectionType)"
-              class="text-xs px-3 py-1.5 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors flex items-center gap-1.5">
-              {{ t('proposalWizard.review.getFeedback') }}
-            </button>
+            <div class="flex items-center gap-2 flex-wrap">
+              <button v-if="!sectionReviews[sectionType] && reviewingSection !== sectionType"
+                @click="reviewSection(sectionType)"
+                class="text-xs px-3 py-1.5 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors flex items-center gap-1.5">
+                {{ t('proposalWizard.review.getFeedback') }}
+              </button>
+
+              <button v-if="snippetSaveSection !== sectionType"
+                @click="openSaveSnippetForm(sectionType)"
+                class="text-xs px-3 py-1.5 border border-[#d4a843]/30 text-[#d4a843] rounded-lg hover:bg-[#d4a843]/5 transition-colors flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                {{ t('proposalWizard.snippets.saveToLibrary') }}
+              </button>
+            </div>
+
+            <!-- Inline Save Snippet Form -->
+            <div v-if="snippetSaveSection === sectionType" class="mt-3 p-3 bg-[#d4a843]/5 border border-[#d4a843]/20 rounded-lg animate-fade-in">
+              <div class="flex items-center gap-2 mb-2">
+                <svg class="w-4 h-4 text-[#d4a843]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                <span class="text-xs font-semibold text-[#1e3a5f]">{{ t('proposalWizard.snippets.saveSnippet') }}</span>
+              </div>
+              <div class="space-y-2">
+                <input v-model="snippetSaveTitle" type="text"
+                  :placeholder="t('proposalWizard.snippets.snippetTitlePlaceholder')"
+                  class="w-full px-3 py-1.5 border border-stone-200 rounded-lg text-xs focus:ring-1 focus:ring-[#d4a843] focus:border-transparent" />
+                <div class="flex items-center gap-2">
+                  <label class="text-[10px] text-stone-500 flex-shrink-0">{{ t('proposalWizard.snippets.category') }}:</label>
+                  <select v-model="snippetSaveCategory"
+                    class="flex-1 px-2 py-1 border border-stone-200 rounded text-[10px] focus:ring-1 focus:ring-[#d4a843] focus:border-transparent bg-white">
+                    <option v-for="cat in snippetCategories" :key="cat" :value="cat">
+                      {{ t(`proposalWizard.snippets.categories.${cat}`) }}
+                    </option>
+                  </select>
+                </div>
+                <div class="flex justify-end gap-2">
+                  <button @click="cancelSaveSnippet"
+                    class="px-3 py-1 text-[10px] text-stone-500 hover:text-stone-700 transition-colors">
+                    {{ t('proposalWizard.snippets.cancelButton') }}
+                  </button>
+                  <button @click="saveAsSnippet(sectionType)"
+                    :disabled="!snippetSaveTitle.trim()"
+                    class="px-3 py-1 bg-[#d4a843] text-white rounded text-[10px] font-medium hover:bg-[#c49a3a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    {{ t('proposalWizard.snippets.saveButton') }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Available Snippets for this Section -->
+            <div v-if="showSnippetLibrary && getSnippetsForSection(sectionType).length > 0" class="mt-3 p-3 bg-stone-50 border border-stone-200 rounded-lg">
+              <p class="text-[10px] font-semibold text-[#1e3a5f] mb-2">{{ t('proposalWizard.snippets.matchingSnippets') }}</p>
+              <div class="space-y-1.5">
+                <div v-for="snippet in getSnippetsForSection(sectionType)" :key="snippet.id"
+                  class="flex items-center justify-between gap-2 p-2 bg-white rounded border border-stone-100 hover:border-[#d4a843]/30 transition-colors">
+                  <div class="flex-1 min-w-0">
+                    <span class="text-[10px] font-medium text-[#1e3a5f] block truncate">{{ snippet.title }}</span>
+                    <span class="text-[9px] text-stone-400">{{ snippet.content.substring(0, 60) }}...</span>
+                  </div>
+                  <button @click="insertSnippet(snippet.id, sectionType)"
+                    class="px-2 py-1 bg-[#1e3a5f] text-white rounded text-[9px] font-medium hover:bg-[#2a4d7a] transition-colors flex-shrink-0">
+                    {{ t('proposalWizard.snippets.insertSnippet') }}
+                  </button>
+                </div>
+              </div>
+            </div>
 
             <div v-if="reviewingSection === sectionType" class="flex items-center gap-2 text-xs text-stone-500">
               <div class="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
@@ -609,6 +729,114 @@ function commentTimeAgo(dateStr: string): string {
   return `${Math.floor(hours / 24)}d ago`
 }
 
+// Proposal Snippet Library
+type SnippetCategory = 'organization' | 'methodology' | 'impact' | 'budget' | 'sustainability' | 'other'
+
+interface ProposalSnippet {
+  id: string
+  title: string
+  content: string
+  category: SnippetCategory
+  sourceGrantTitle?: string
+  createdAt: string
+  usageCount: number
+}
+
+const snippets = ref<ProposalSnippet[]>([])
+const showSnippetLibrary = ref(false)
+const snippetSaveSection = ref<string | null>(null)
+const snippetSaveTitle = ref('')
+const snippetSaveCategory = ref<SnippetCategory>('other')
+
+const sectionToCategory: Record<string, SnippetCategory> = {
+  objectives: 'organization',
+  background: 'organization',
+  methodology: 'methodology',
+  work_plan: 'methodology',
+  impact: 'impact',
+  budget_narrative: 'budget',
+  sustainability: 'sustainability',
+  partners: 'other',
+}
+
+const snippetCategories: SnippetCategory[] = ['organization', 'methodology', 'impact', 'budget', 'sustainability', 'other']
+
+function loadSnippets() {
+  try {
+    const stored = localStorage.getItem('proposalSnippets')
+    if (stored) snippets.value = JSON.parse(stored)
+  } catch { snippets.value = [] }
+}
+
+function saveSnippetsToStorage() {
+  localStorage.setItem('proposalSnippets', JSON.stringify(snippets.value))
+}
+
+function openSaveSnippetForm(sectionKey: string) {
+  snippetSaveSection.value = sectionKey
+  snippetSaveTitle.value = ''
+  snippetSaveCategory.value = sectionToCategory[sectionKey] || 'other'
+}
+
+function cancelSaveSnippet() {
+  snippetSaveSection.value = null
+  snippetSaveTitle.value = ''
+}
+
+function saveAsSnippet(sectionKey: string) {
+  const content = generatedContent.value?.[sectionKey] || ''
+  if (!content || !snippetSaveTitle.value.trim()) return
+
+  const snippet: ProposalSnippet = {
+    id: Date.now().toString(),
+    title: snippetSaveTitle.value.trim(),
+    content,
+    category: snippetSaveCategory.value,
+    sourceGrantTitle: grantTitle.value || undefined,
+    createdAt: new Date().toISOString(),
+    usageCount: 0,
+  }
+
+  snippets.value.push(snippet)
+  saveSnippetsToStorage()
+  snippetSaveSection.value = null
+  snippetSaveTitle.value = ''
+  toast.success(t('proposalWizard.snippets.savedSuccess'))
+}
+
+function insertSnippet(snippetId: string, targetSection: string) {
+  const snippet = snippets.value.find(s => s.id === snippetId)
+  if (!snippet) return
+
+  const existing = generatedContent.value[targetSection] || ''
+  generatedContent.value[targetSection] = existing ? existing + '\n\n' + snippet.content : snippet.content
+
+  snippet.usageCount++
+  saveSnippetsToStorage()
+  toast.success(t('proposalWizard.snippets.insertedSuccess'))
+}
+
+function deleteSnippetFromWizard(snippetId: string) {
+  snippets.value = snippets.value.filter(s => s.id !== snippetId)
+  saveSnippetsToStorage()
+  toast.success(t('proposalWizard.snippets.deletedSuccess'))
+}
+
+const filteredSnippets = computed(() => {
+  // Find the current section being viewed in step 3
+  // Show snippets matching the category of the current step sections
+  const currentSections = selectedSections.value
+  const relevantCategories = new Set(
+    currentSections.map(s => sectionToCategory[s] || 'other')
+  )
+  return snippets.value.filter(s => relevantCategories.has(s.category))
+})
+
+function getSnippetsForSection(sectionKey: string): ProposalSnippet[] {
+  const category = sectionToCategory[sectionKey] || 'other'
+  return snippets.value.filter(s => s.category === category)
+}
+
 // Offline detection
 const isOffline = ref(!navigator.onLine)
 const isSaving = ref(false)
@@ -936,6 +1164,9 @@ onMounted(async () => {
 
   // Load section comments
   loadComments()
+
+  // Load snippet library
+  loadSnippets()
 })
 
 onUnmounted(() => {
