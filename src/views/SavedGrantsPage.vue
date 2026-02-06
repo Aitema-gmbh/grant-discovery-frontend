@@ -236,6 +236,34 @@
           </div>
         </div>
 
+        <!-- Milestone Progress -->
+        <div v-if="getStepsForGrant(String(grant.id)).length > 0" class="mt-3 pt-3 border-t border-stone-100 w-full">
+          <div class="flex items-center gap-2 cursor-pointer" @click.stop="toggleMilestoneExpand(String(grant.id))">
+            <div class="flex-1 h-1.5 rounded-full bg-stone-200">
+              <div class="h-full rounded-full bg-sage-500 transition-all duration-300"
+                :style="{ width: getMilestoneProgress(String(grant.id), getGrantStatus(String(grant.id))).pct + '%' }"></div>
+            </div>
+            <span class="text-[10px] text-stone-400 whitespace-nowrap">
+              {{ getMilestoneProgress(String(grant.id), getGrantStatus(String(grant.id))).completed }}/{{ getMilestoneProgress(String(grant.id), getGrantStatus(String(grant.id))).total }}
+            </span>
+            <span class="text-[10px] text-stone-400">{{ expandedMilestones.has(String(grant.id)) ? '\u25B2' : '\u25BC' }}</span>
+          </div>
+
+          <div v-if="expandedMilestones.has(String(grant.id))" class="mt-2 space-y-1.5">
+            <label v-for="step in getStepsForGrant(String(grant.id))" :key="step.key"
+              class="flex items-center gap-2 text-xs cursor-pointer hover:bg-stone-50 rounded p-1 -mx-1"
+              @click.stop>
+              <input type="checkbox"
+                :checked="getGrantMilestones(String(grant.id))[step.key]"
+                @change="toggleMilestone(String(grant.id), step.key)"
+                class="w-3.5 h-3.5 rounded border-stone-300 text-sage-600 focus:ring-sage-500" />
+              <span :class="getGrantMilestones(String(grant.id))[step.key] ? 'text-stone-400 line-through' : 'text-navy-700'">
+                {{ step.label }}
+              </span>
+            </label>
+          </div>
+        </div>
+
         <!-- Remove -->
         <button
           @click.stop="removeSavedGrant(grant.id)"
@@ -562,6 +590,71 @@ const filteredGrants = computed(() => {
   }
   return grants
 })
+
+// Milestone Progress Tracker
+const expandedMilestones = ref<Set<string>>(new Set())
+
+const stageSteps: Record<string, { key: string; label: string }[]> = {
+  interested: [
+    { key: 'read_call', label: 'Read full grant call' },
+    { key: 'check_eligibility', label: 'Check eligibility criteria' },
+    { key: 'discuss_team', label: 'Discuss with team' },
+  ],
+  researching: [
+    { key: 'gather_docs', label: 'Gather required documents' },
+    { key: 'find_partners', label: 'Identify potential partners' },
+    { key: 'review_budget', label: 'Review budget requirements' },
+    { key: 'confirm_cofin', label: 'Confirm co-financing' },
+  ],
+  applying: [
+    { key: 'draft_proposal', label: 'Draft proposal narrative' },
+    { key: 'prepare_budget', label: 'Prepare budget breakdown' },
+    { key: 'collect_annexes', label: 'Collect annexes & attachments' },
+    { key: 'internal_review', label: 'Internal review & sign-off' },
+    { key: 'submit', label: 'Submit application' },
+  ],
+  submitted: [
+    { key: 'confirmation', label: 'Submission confirmation received' },
+    { key: 'clarifications', label: 'Respond to clarifications (if any)' },
+  ]
+}
+
+function getGrantMilestones(grantId: string): Record<string, boolean> {
+  try {
+    const all = JSON.parse(localStorage.getItem('grantMilestones') || '{}')
+    return all[grantId] || {}
+  } catch { return {} }
+}
+
+function toggleMilestone(grantId: string, stepKey: string) {
+  try {
+    const all = JSON.parse(localStorage.getItem('grantMilestones') || '{}')
+    if (!all[grantId]) all[grantId] = {}
+    all[grantId][stepKey] = !all[grantId][stepKey]
+    localStorage.setItem('grantMilestones', JSON.stringify(all))
+  } catch { /* storage full */ }
+}
+
+function getMilestoneProgress(grantId: string, stage: string): { completed: number; total: number; pct: number } {
+  const steps = stageSteps[stage] || []
+  if (steps.length === 0) return { completed: 0, total: 0, pct: 100 }
+  const milestones = getGrantMilestones(grantId)
+  const completed = steps.filter(s => milestones[s.key]).length
+  return { completed, total: steps.length, pct: Math.round(completed / steps.length * 100) }
+}
+
+function toggleMilestoneExpand(grantId: string) {
+  if (expandedMilestones.value.has(grantId)) {
+    expandedMilestones.value.delete(grantId)
+  } else {
+    expandedMilestones.value.add(grantId)
+  }
+}
+
+function getStepsForGrant(grantId: string): { key: string; label: string }[] {
+  const stage = getGrantStatus(grantId)
+  return stageSteps[stage] || []
+}
 
 // Kanban drag-and-drop
 const dragOverColumn = ref('')

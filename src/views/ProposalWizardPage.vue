@@ -252,6 +252,43 @@
             <div v-html="formatContent(generatedContent[sectionType] || '')"></div>
             <span v-if="currentGeneratingSection === sectionType" class="inline-block w-2 h-4 bg-primary-600 animate-pulse ml-1"></span>
           </div>
+
+          <!-- Section Review -->
+          <div v-if="completedSections.includes(sectionType)" class="mt-4 pt-3 border-t border-stone-100">
+            <button v-if="!sectionReviews[sectionType] && reviewingSection !== sectionType"
+              @click="reviewSection(sectionType)"
+              class="text-xs px-3 py-1.5 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors flex items-center gap-1.5">
+              {{ t('proposalWizard.review.getFeedback') }}
+            </button>
+
+            <div v-if="reviewingSection === sectionType" class="flex items-center gap-2 text-xs text-stone-500">
+              <div class="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+              {{ t('proposalWizard.review.analyzing') }}
+            </div>
+
+            <div v-if="sectionReviews[sectionType]" class="space-y-3">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-stone-600">{{ t('proposalWizard.review.qualityScore') }}:</span>
+                <span class="px-2 py-0.5 rounded-full text-xs font-bold" :class="getScoreColor(sectionReviews[sectionType].score)">
+                  {{ sectionReviews[sectionType].score }}/10
+                </span>
+              </div>
+
+              <div v-if="sectionReviews[sectionType].strengths.length" class="space-y-1">
+                <p class="text-[11px] font-semibold text-green-700">{{ t('proposalWizard.review.strengths') }}</p>
+                <p v-for="s in sectionReviews[sectionType].strengths" :key="s" class="text-[11px] text-green-600 pl-2">+ {{ s }}</p>
+              </div>
+
+              <div v-if="sectionReviews[sectionType].suggestions.length" class="space-y-1">
+                <p class="text-[11px] font-semibold text-amber-700">{{ t('proposalWizard.review.suggestions') }}</p>
+                <p v-for="s in sectionReviews[sectionType].suggestions" :key="s" class="text-[11px] text-amber-600 pl-2">&rarr; {{ s }}</p>
+              </div>
+
+              <button @click="clearReview(sectionType)" class="text-[10px] text-stone-400 hover:text-stone-600 transition-colors">
+                {{ t('proposalWizard.review.dismiss') }}
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Completion Actions -->
@@ -329,6 +366,112 @@ const currentGeneratingSection = ref<SectionType | null>(null)
 const completedSections = ref<SectionType[]>([])
 const generatedContent = ref<Record<string, string>>({})
 const generationComplete = computed(() => completedSections.value.length === selectedSections.value.length && selectedSections.value.length > 0)
+
+// Section Quality Review
+interface SectionReview {
+  score: number
+  strengths: string[]
+  suggestions: string[]
+}
+
+const sectionReviews = ref<Record<string, SectionReview>>({})
+const reviewingSection = ref<string | null>(null)
+
+function reviewSection(sectionKey: string) {
+  const content = generatedContent.value?.[sectionKey] || ''
+  if (!content || content.length < 20) return
+
+  reviewingSection.value = sectionKey
+
+  // Client-side quality analysis
+  setTimeout(() => {
+    const words = content.split(/\s+/).length
+    const sentences = content.split(/[.!?]+/).filter(Boolean).length
+    const paragraphs = content.split(/\n\n+/).filter(Boolean).length
+    const hasNumbers = /\d+/.test(content)
+    const hasMetrics = /\d+%|\d+\s*(people|organizations|participants|beneficiaries|months|years|EUR|USD|UAH)/i.test(content)
+    const hasStructure = paragraphs > 1
+    const hasBullets = /[-•*]\s/.test(content)
+
+    let score = 5 // base score
+    const strengths: string[] = []
+    const suggestions: string[] = []
+
+    // Length analysis
+    if (words > 200) { score += 1; strengths.push('Good level of detail') }
+    else if (words < 50) { score -= 1; suggestions.push('Section is quite short — consider adding more detail') }
+
+    // Structure
+    if (hasStructure) { score += 0.5; strengths.push('Well-structured with multiple paragraphs') }
+    else { suggestions.push('Consider breaking into multiple paragraphs for readability') }
+
+    if (hasBullets) { score += 0.5; strengths.push('Uses bullet points for clarity') }
+
+    // Specificity
+    if (hasMetrics) { score += 1; strengths.push('Includes measurable indicators') }
+    else { suggestions.push('Add specific numbers, percentages, or measurable targets') }
+
+    if (hasNumbers) { score += 0.5 }
+    else { suggestions.push('Include quantitative data to strengthen the proposal') }
+
+    // Section-specific checks
+    if (sectionKey === 'methodology' || sectionKey === 'activities') {
+      if (/timeline|phase|stage|month|week/i.test(content)) {
+        score += 0.5; strengths.push('Includes timeline or phasing')
+      } else {
+        suggestions.push('Consider adding a timeline or phases to the methodology')
+      }
+    }
+
+    if (sectionKey === 'impact' || sectionKey === 'results') {
+      if (/indicator|outcome|result|change|impact/i.test(content)) {
+        score += 0.5; strengths.push('References outcomes and impact')
+      } else {
+        suggestions.push('Explicitly state expected outcomes and how impact will be measured')
+      }
+    }
+
+    if (sectionKey === 'budget' || sectionKey === 'budget_narrative') {
+      if (/co-financ|match|own contribution|in-kind/i.test(content)) {
+        score += 0.5; strengths.push('Addresses co-financing')
+      } else {
+        suggestions.push('Mention co-financing or own contribution if applicable')
+      }
+    }
+
+    if (sectionKey === 'sustainability') {
+      if (/after|beyond|long-term|continue|maintain/i.test(content)) {
+        score += 0.5; strengths.push('Addresses long-term sustainability')
+      } else {
+        suggestions.push('Explain how project results will be sustained after funding ends')
+      }
+    }
+
+    // Sentence quality
+    const avgWordsPerSentence = words / Math.max(sentences, 1)
+    if (avgWordsPerSentence > 30) {
+      suggestions.push('Some sentences are very long — consider simplifying for clarity')
+    } else if (avgWordsPerSentence > 15 && avgWordsPerSentence < 25) {
+      strengths.push('Good sentence length for readability')
+    }
+
+    // Cap score
+    score = Math.max(1, Math.min(10, Math.round(score)))
+
+    sectionReviews.value[sectionKey] = { score, strengths: strengths.slice(0, 3), suggestions: suggestions.slice(0, 3) }
+    reviewingSection.value = null
+  }, 1200) // Simulate analysis time
+}
+
+function getScoreColor(score: number): string {
+  if (score >= 8) return 'bg-green-100 text-green-700'
+  if (score >= 5) return 'bg-amber-100 text-amber-700'
+  return 'bg-red-100 text-red-700'
+}
+
+function clearReview(sectionKey: string) {
+  delete sectionReviews.value[sectionKey]
+}
 
 // Offline detection
 const isOffline = ref(!navigator.onLine)

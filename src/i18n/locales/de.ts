@@ -154,6 +154,10 @@ export default {
             proposalStarted: 'Antrag gestartet',
             outcomeRecorded: 'Ergebnis erfasst',
         },
+        atRisk: {
+            title: 'Gefährdete Anträge',
+            desc: 'Förderungen mit Fristen in 14 Tagen und unvollständigen Vorbereitungsschritten',
+        },
         portfolio: {
             title: 'Förderportfolio',
             totalPotential: 'Gesamtes potenzielles Fördervolumen',
@@ -315,6 +319,7 @@ export default {
         batchSaveAll: 'Alle speichern',
         batchSaved: '{count} Förderungen gespeichert!',
         batchAlreadySaved: 'Alle Förderungen bereits gespeichert',
+        findSimilar: 'Ähnliche finden',
     },
 
     // Grant Detail
@@ -360,7 +365,10 @@ export default {
         runCheck: 'Prüfung starten',
         signInForEligibility: 'Melden Sie sich an, um Ihre Förderfähigkeit zu prüfen',
         signIn: 'Anmelden',
-        similarGrants: 'Ähnliche Förderungen',
+        similarGrants: {
+            title: 'Ähnliche Förderungen',
+            loading: 'Ähnliche Förderungen werden gesucht...',
+        },
         quickFacts: 'Auf einen Blick',
         grantAmount: 'Fördersumme',
         fundingRateLabel: 'Förderquote: {rate}%',
@@ -860,6 +868,9 @@ export default {
             tagName: 'Tag-Name...',
             noTags: 'Erstellen Sie zuerst Tags',
         },
+        milestones: {
+            title: 'Antragsschritte',
+        },
     },
 
     // Footer
@@ -1101,6 +1112,14 @@ export default {
         shareProposal: 'Antrag teilen',
         shareCopied: 'Antragslink in die Zwischenablage kopiert!',
         shareError: 'Link konnte nicht erstellt werden',
+        review: {
+            getFeedback: 'KI-Feedback erhalten',
+            analyzing: 'Abschnittsqualität wird analysiert...',
+            qualityScore: 'Qualität',
+            strengths: 'Stärken',
+            suggestions: 'Vorschläge',
+            dismiss: 'Feedback schließen',
+        },
     },
 
     // Proposal Detail

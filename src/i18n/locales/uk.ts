@@ -154,6 +154,10 @@ export default {
             proposalStarted: 'Розпочато заявку',
             outcomeRecorded: 'Записано результат',
         },
+        atRisk: {
+            title: 'Заявки під загрозою',
+            desc: 'Гранти з дедлайнами протягом 14 днів та незавершеними кроками підготовки',
+        },
         portfolio: {
             title: 'Портфоліо фінансування',
             totalPotential: 'Загальне потенційне фінансування',
@@ -315,6 +319,7 @@ export default {
         batchSaveAll: 'Зберегти все',
         batchSaved: '{count} грантів збережено!',
         batchAlreadySaved: 'Усі гранти вже збережені',
+        findSimilar: 'Знайти схожі',
     },
 
     // Grant Detail
@@ -360,7 +365,10 @@ export default {
         runCheck: 'Перевірити',
         signInForEligibility: 'Увійдіть, щоб перевірити відповідність для цього гранту',
         signIn: 'Увійти',
-        similarGrants: 'Схожі гранти',
+        similarGrants: {
+            title: 'Схожі гранти',
+            loading: 'Пошук схожих грантів...',
+        },
         quickFacts: 'Ключова інформація',
         grantAmount: 'Сума гранту',
         fundingRateLabel: 'Рівень фінансування: {rate}%',
@@ -872,6 +880,9 @@ export default {
             tagName: 'Назва тегу...',
             noTags: 'Спочатку створіть теги',
         },
+        milestones: {
+            title: 'Кроки подання заявки',
+        },
     },
 
     // Footer
@@ -1113,6 +1124,14 @@ export default {
         shareProposal: 'Поділитися заявкою',
         shareCopied: 'Посилання на заявку скопійовано!',
         shareError: 'Не вдалося створити посилання',
+        review: {
+            getFeedback: 'Отримати відгук ШІ',
+            analyzing: 'Аналіз якості розділу...',
+            qualityScore: 'Якість',
+            strengths: 'Сильні сторони',
+            suggestions: 'Рекомендації',
+            dismiss: 'Закрити відгук',
+        },
     },
 
     // Proposal Detail

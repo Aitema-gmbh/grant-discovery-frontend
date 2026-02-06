@@ -933,6 +933,9 @@
             <button @click="toggleSaveGrant(previewGrant.id); closePreview()" class="btn btn-outline btn-sm">
               {{ $t('grants.quickPeekSave') }}
             </button>
+            <button @click="findSimilarFromPreview()" class="px-3 py-1.5 border border-stone-200 rounded-lg text-xs hover:bg-stone-50 transition-colors">
+              {{ $t('grants.findSimilar') }}
+            </button>
           </div>
         </div>
       </div>
@@ -972,6 +975,14 @@ function openPreview(grant: any, event: Event) {
 
 function closePreview() {
   previewGrant.value = null
+}
+
+function findSimilarFromPreview() {
+  if (previewGrant.value) {
+    searchQuery.value = previewGrant.value.title || ''
+    previewGrant.value = null // close preview
+    debouncedSearch()
+  }
 }
 
 // Search input ref

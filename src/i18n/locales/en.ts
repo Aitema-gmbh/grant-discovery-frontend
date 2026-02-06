@@ -154,6 +154,10 @@ export default {
             proposalStarted: 'Proposal started',
             outcomeRecorded: 'Outcome recorded',
         },
+        atRisk: {
+            title: 'At Risk Applications',
+            desc: 'Grants with deadlines in 14 days and incomplete preparation steps',
+        },
         portfolio: {
             title: 'Funding Portfolio',
             totalPotential: 'Total Potential Funding',
@@ -316,6 +320,7 @@ export default {
         batchSaveAll: 'Save All',
         batchSaved: '{count} grants saved!',
         batchAlreadySaved: 'All grants already saved',
+        findSimilar: 'Find Similar',
     },
 
     // Grant Detail
@@ -361,7 +366,10 @@ export default {
         runCheck: 'Run Check',
         signInForEligibility: 'Sign in to check your eligibility for this grant',
         signIn: 'Sign In',
-        similarGrants: 'Similar Grants',
+        similarGrants: {
+            title: 'Similar Grants',
+            loading: 'Finding similar grants...',
+        },
         quickFacts: 'Quick Facts',
         grantAmount: 'Grant Amount',
         fundingRateLabel: 'Funding rate: {rate}%',
@@ -857,6 +865,9 @@ export default {
             tagName: 'Tag name...',
             noTags: 'Create tags first',
         },
+        milestones: {
+            title: 'Application Steps',
+        },
     },
 
     // Footer
@@ -1098,6 +1109,14 @@ export default {
         shareProposal: 'Share Proposal',
         shareCopied: 'Proposal link copied to clipboard!',
         shareError: 'Could not generate share link',
+        review: {
+            getFeedback: 'Get AI feedback',
+            analyzing: 'Analyzing section quality...',
+            qualityScore: 'Quality',
+            strengths: 'Strengths',
+            suggestions: 'Suggestions',
+            dismiss: 'Dismiss feedback',
+        },
     },
 
     // Proposal Detail

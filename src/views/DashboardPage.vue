@@ -456,6 +456,28 @@
       </div>
     </div>
 
+    <!-- At Risk Applications -->
+    <div v-if="atRiskGrants.length > 0" class="mt-8 animate-fade-in">
+      <div class="card p-5 border-l-4 border-l-red-400">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-lg">&#x26A0;&#xFE0F;</span>
+          <h3 class="text-sm font-bold text-red-700">{{ t('dashboard.atRisk.title') }}</h3>
+          <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">{{ atRiskGrants.length }}</span>
+        </div>
+        <p class="text-xs text-stone-500 mb-3">{{ t('dashboard.atRisk.desc') }}</p>
+        <div class="space-y-2">
+          <router-link v-for="g in atRiskGrants" :key="g.id" :to="`/grants/${g.id}`"
+            class="flex items-center justify-between p-2 rounded-lg hover:bg-red-50 transition-colors">
+            <div>
+              <span class="text-sm font-medium text-navy-800">{{ g.title }}</span>
+              <span class="text-xs text-stone-400 ml-2">{{ g.funder_name }}</span>
+            </div>
+            <span class="text-xs text-red-600 font-medium">{{ Math.ceil((new Date(g.deadline).getTime() - Date.now()) / (24*60*60*1000)) }}d left</span>
+          </router-link>
+        </div>
+      </div>
+    </div>
+
     <!-- Charts Section -->
     <div v-if="allGrantsForCharts.length > 0" class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in" style="animation-delay: 0.4s">
       <!-- Deadline Timeline -->
@@ -655,6 +677,38 @@ const fundingGap = computed(() => {
   if (!annualBudget) return null
   const diff = portfolioStats.value.totalPotential - annualBudget
   return { diff, annualBudget, isSurplus: diff >= 0 }
+})
+
+// At Risk Applications
+const atRiskGrants = computed(() => {
+  const savedIds = JSON.parse(localStorage.getItem('savedGrants') || '[]') as string[]
+  const workflows = JSON.parse(localStorage.getItem('grantWorkflow') || '{}') as Record<string, string>
+  const milestones = JSON.parse(localStorage.getItem('grantMilestones') || '{}') as Record<string, Record<string, boolean>>
+
+  const stageStepCounts: Record<string, number> = {
+    interested: 3, researching: 4, applying: 5, submitted: 2
+  }
+
+  const now = Date.now()
+  const twoWeeks = 14 * 24 * 60 * 60 * 1000
+
+  return allGrantsForCharts.value
+    .filter((g: any) => {
+      if (!savedIds.includes(String(g.id))) return false
+      if (!g.deadline) return false
+      const daysLeft = new Date(g.deadline).getTime() - now
+      if (daysLeft < 0 || daysLeft > twoWeeks) return false
+
+      const stage = workflows[String(g.id)] || 'interested'
+      const totalSteps = stageStepCounts[stage] || 0
+      if (totalSteps === 0) return false
+
+      const grantMilestones = milestones[String(g.id)] || {}
+      const completed = Object.values(grantMilestones).filter(Boolean).length
+      const pct = completed / totalSteps * 100
+      return pct < 60
+    })
+    .slice(0, 3)
 })
 
 const stageColors: Record<string, string> = {

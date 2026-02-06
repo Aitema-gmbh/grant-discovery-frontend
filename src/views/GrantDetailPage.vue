@@ -392,20 +392,29 @@
           </div>
 
           <!-- Similar Grants -->
-          <div v-if="similarGrants.length > 0" class="card">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ $t('grantDetail.similarGrants') }}</h2>
-            <div class="space-y-3">
-              <router-link
-                v-for="similar in similarGrants"
-                :key="similar.id"
-                :to="`/grants/${similar.id}`"
-                class="block p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-gray-50 transition-colors"
-              >
-                <h3 class="font-medium text-gray-900 mb-1">{{ similar.title }}</h3>
-                <p class="text-sm text-gray-600 line-clamp-2">{{ similar.description }}</p>
-                <div v-if="similar.amount_min || similar.amount_max" class="text-sm text-primary-600 font-medium mt-2">
-                  {{ formatAmount(similar.amount_min, similar.amount_max, similar.currency) }}
+          <div class="mt-8" v-if="similarGrants.length > 0 || similarLoading">
+            <h3 class="text-lg font-bold text-navy-900 mb-4">{{ t('grantDetail.similarGrants.title') }}</h3>
+
+            <div v-if="similarLoading" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div v-for="i in 2" :key="i" class="card p-4 animate-pulse">
+                <div class="h-4 bg-stone-200 rounded w-3/4 mb-2"></div>
+                <div class="h-3 bg-stone-100 rounded w-1/2 mb-3"></div>
+                <div class="h-3 bg-stone-100 rounded w-full"></div>
+              </div>
+            </div>
+
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <router-link v-for="sg in similarGrants" :key="sg.id" :to="`/grants/${sg.id}`"
+                class="card p-4 hover:shadow-md transition-shadow group">
+                <h4 class="font-semibold text-navy-900 text-sm group-hover:text-amber-600 transition-colors line-clamp-2">{{ sg.title }}</h4>
+                <p class="text-xs text-stone-500 mt-1">{{ sg.funder_name }}</p>
+                <div class="flex items-center gap-3 mt-2">
+                  <span v-if="sg.amount_max" class="text-xs font-medium text-amber-600">
+                    {{ sg.amount_min ? `€${sg.amount_min.toLocaleString()} – ` : '' }}€{{ sg.amount_max.toLocaleString() }}
+                  </span>
+                  <span v-if="sg.category" class="text-xs bg-navy-50 text-navy-600 px-2 py-0.5 rounded-full">{{ sg.category }}</span>
                 </div>
+                <p class="text-xs text-stone-400 mt-2 line-clamp-2">{{ sg.description }}</p>
               </router-link>
             </div>
           </div>
@@ -822,6 +831,7 @@ usePageTitle(pageTitle)
 const loading = ref(true)
 const grant = ref<any>(null)
 const similarGrants = ref<any[]>([])
+const similarLoading = ref(false)
 const aiSummary = ref('')
 const isSaved = ref(false)
 const linkCopied = ref(false)
@@ -1431,6 +1441,44 @@ function startApplication() {
   })
 }
 
+async function loadSimilarGrants() {
+  if (!grant.value) return
+  similarLoading.value = true
+  try {
+    const g = grant.value
+    const allGrants = (await api.get('/api/grants')).data?.grants || []
+    const currentId = String(g.id)
+
+    // Score grants by similarity (category match, funder match, amount range overlap)
+    const scored = allGrants
+      .filter((other: any) => String(other.id) !== currentId)
+      .map((other: any) => {
+        let score = 0
+        // Category match
+        if (other.category && g.category && other.category === g.category) score += 3
+        // Funder match
+        if (other.funder_name && g.funder_name && other.funder_name === g.funder_name) score += 2
+        // Topic/keyword overlap
+        const gWords = new Set((g.description || '').toLowerCase().split(/\s+/).filter((w: string) => w.length > 5))
+        const oWords = (other.description || '').toLowerCase().split(/\s+/).filter((w: string) => w.length > 5)
+        const overlap = oWords.filter((w: string) => gWords.has(w)).length
+        score += Math.min(overlap / 10, 2) // max 2 points for keyword overlap
+        // Amount range proximity
+        if (g.amount_max && other.amount_max) {
+          const ratio = Math.min(g.amount_max, other.amount_max) / Math.max(g.amount_max, other.amount_max)
+          score += ratio // 0-1 points
+        }
+        return { ...other, _similarity: score }
+      })
+      .filter((g: any) => g._similarity > 1)
+      .sort((a: any, b: any) => b._similarity - a._similarity)
+      .slice(0, 4)
+
+    similarGrants.value = scored
+  } catch { /* non-critical */ }
+  similarLoading.value = false
+}
+
 async function fetchGrantDetails() {
   loading.value = true
   try {
@@ -1470,13 +1518,8 @@ async function fetchGrantDetails() {
       } catch { /* ignore - proposals not critical */ }
     }
 
-    // Fetch similar grants
-    try {
-      const similarResponse = await api.get(`/api/grants/${grantId}/similar?limit=3`)
-      similarGrants.value = similarResponse.data.similarGrants || []
-    } catch (error) {
-      console.error('Error fetching similar grants:', error)
-    }
+    // Fetch similar grants (non-blocking)
+    loadSimilarGrants()
 
   } catch (error) {
     console.error('Error fetching grant details:', error)
