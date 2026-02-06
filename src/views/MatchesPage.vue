@@ -103,7 +103,48 @@
                 {{ $t('matches.budgetFit') }}: {{ Math.round(match.budget_fit_score * 100) }}%
                 <HelpTooltip :content="$t('matches.help.budgetFit')" position="bottom" />
               </span>
+              <button
+                @click.stop="toggleRadar(match.grant_id)"
+                class="text-xs text-navy-400 hover:text-amber-500 transition-colors ml-auto"
+                :aria-label="$t('matches.showRadar')"
+              >
+                <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                </svg>
+                {{ $t('matches.showRadar') }}
+              </button>
             </div>
+
+            <!-- Radar Chart (expandable) -->
+            <Transition name="slide">
+              <div v-if="expandedRadar === match.grant_id" class="mt-4 flex justify-center" @click.stop>
+                <svg viewBox="0 0 200 200" class="w-48 h-48" role="img" :aria-label="$t('matches.radarChart')">
+                  <!-- Grid lines -->
+                  <polygon v-for="level in [0.25, 0.5, 0.75, 1]" :key="level"
+                    :points="radarGridPoints(level)" fill="none" stroke="#e2e8f0" stroke-width="0.5" />
+                  <!-- Axes -->
+                  <line v-for="(_, i) in 4" :key="'ax'+i"
+                    x1="100" y1="100"
+                    :x2="100 + 80 * Math.cos((i * Math.PI / 2) - Math.PI / 2)"
+                    :y2="100 + 80 * Math.sin((i * Math.PI / 2) - Math.PI / 2)"
+                    stroke="#cbd5e1" stroke-width="0.5" />
+                  <!-- Data polygon -->
+                  <polygon
+                    :points="radarDataPoints(match)"
+                    fill="rgba(245, 158, 11, 0.2)" stroke="#f59e0b" stroke-width="2"
+                  />
+                  <!-- Data dots -->
+                  <circle v-for="(pt, i) in radarDataPointsArray(match)" :key="'dot'+i"
+                    :cx="pt.x" :cy="pt.y" r="3" fill="#f59e0b" />
+                  <!-- Labels -->
+                  <text x="100" y="10" text-anchor="middle" class="text-[9px] fill-navy-600">{{ $t('matches.semantic') }}</text>
+                  <text x="190" y="104" text-anchor="start" class="text-[9px] fill-navy-600">{{ $t('matches.eligibilityScore') }}</text>
+                  <text x="100" y="198" text-anchor="middle" class="text-[9px] fill-navy-600">{{ $t('matches.thematic') }}</text>
+                  <text x="10" y="104" text-anchor="end" class="text-[9px] fill-navy-600">{{ $t('matches.budgetFit') }}</text>
+                </svg>
+              </div>
+            </Transition>
 
             <!-- Issues -->
             <div v-if="match.eligibility_issues?.length" class="mt-2">
@@ -261,7 +302,7 @@ async function loadMatches() {
   } catch (error) {
     console.error('Error loading matches:', error)
     matches.value = []
-    toast.error('Failed to load matches. Please try again.')
+    toast.error(t('errors.loadMatches'))
   } finally {
     loading.value = false
   }
@@ -304,8 +345,59 @@ function scoreClass(score: number) {
   return 'bg-navy-100 text-navy-700'
 }
 
+// Radar chart
+const expandedRadar = ref<string | null>(null)
+
+function toggleRadar(grantId: string) {
+  expandedRadar.value = expandedRadar.value === grantId ? null : grantId
+}
+
+function radarPoint(value: number, index: number, radius = 80): { x: number; y: number } {
+  const angle = (index * Math.PI / 2) - Math.PI / 2
+  return {
+    x: 100 + radius * value * Math.cos(angle),
+    y: 100 + radius * value * Math.sin(angle)
+  }
+}
+
+function radarGridPoints(level: number): string {
+  return [0, 1, 2, 3].map(i => {
+    const pt = radarPoint(level, i)
+    return `${pt.x},${pt.y}`
+  }).join(' ')
+}
+
+function radarDataPointsArray(match: any): { x: number; y: number }[] {
+  const scores = [
+    match.semantic_score || 0,
+    match.eligibility_score || 0,
+    match.thematic_score || 0,
+    match.budget_fit_score || 0
+  ]
+  return scores.map((s, i) => radarPoint(s, i))
+}
+
+function radarDataPoints(match: any): string {
+  return radarDataPointsArray(match).map(pt => `${pt.x},${pt.y}`).join(' ')
+}
+
 onMounted(() => {
   trackPageView('matches')
   loadCsoProfiles()
 })
 </script>
+
+<style scoped>
+.slide-enter-active, .slide-leave-active {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+.slide-enter-from, .slide-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+.slide-enter-to, .slide-leave-from {
+  opacity: 1;
+  max-height: 300px;
+}
+</style>

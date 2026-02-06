@@ -106,12 +106,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/AppLayout.vue'
 import api from '@/services/api'
 import { useToast } from '@/lib/useToast'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const { t } = useI18n()
 const toast = useToast()
 const authStore = useAuthStore()
 const loading = ref(true)
@@ -134,7 +136,7 @@ async function loadProfiles() {
     csoProfiles.value = profiles
   } catch (error) {
     console.error('Error loading CSO profiles:', error)
-    toast.error('Failed to load organizations. Please try again.')
+    toast.error(t('errors.loadOrganizations'))
     csoProfiles.value = []
   } finally {
     loading.value = false

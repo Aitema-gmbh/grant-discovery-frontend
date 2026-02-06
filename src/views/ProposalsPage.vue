@@ -91,11 +91,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/AppLayout.vue'
 import api from '@/services/api'
 import { useToast } from '@/lib/useToast'
 
 const router = useRouter()
+const { t } = useI18n()
 const toast = useToast()
 const loading = ref(true)
 const proposals = ref<any[]>([])
@@ -107,7 +109,7 @@ async function loadProposals() {
     proposals.value = response.data.proposals || []
   } catch (error) {
     console.error('Error loading proposals:', error)
-    toast.error('Failed to load proposals. Please try again.')
+    toast.error(t('errors.loadProposals'))
     proposals.value = []
   } finally {
     loading.value = false

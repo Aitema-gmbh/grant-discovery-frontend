@@ -31,6 +31,7 @@ export default {
         day: 'Tag',
         thisMonth: 'diesen Monat',
         noResults: 'Keine Ergebnisse gefunden',
+        saved: 'Erfolgreich gespeichert',
         tryAgain: 'Erneut versuchen',
         unsavedChanges: 'Sie haben ungespeicherte Änderungen. Sind Sie sicher, dass Sie die Seite verlassen möchten?',
         generationInProgress: 'Die KI-Generierung läuft noch. Sind Sie sicher, dass Sie die Seite verlassen möchten? Der Fortschritt geht verloren.'
@@ -300,6 +301,8 @@ export default {
         reminderSet: 'Erinnerung gesetzt',
         reminderAdded: 'Fristerinnerung gesetzt! Sie sehen sie in Ihren Benachrichtigungen.',
         reminderRemoved: 'Fristerinnerung entfernt.',
+        notes: 'Meine Notizen',
+        notesPlaceholder: 'Fügen Sie Ihre Notizen zu diesem Grant hinzu — Gedanken, Fragen, Aufgaben...',
         exportDetails: 'Details exportieren',
         sourceInfo: 'Quellinformationen',
         source: 'Quelle:',
@@ -369,6 +372,8 @@ export default {
         checkEligibility: 'Förderfähigkeit prüfen',
         exportCsv: 'Als CSV exportieren',
         csvExported: 'Übereinstimmungen als CSV exportiert',
+        showRadar: 'Score-Diagramm',
+        radarChart: 'Radar-Diagramm der Match-Scores',
         selectAnOrg: 'Organisation auswählen',
         selectAnOrgDesc: 'Wählen Sie eine Ihrer Organisationen, um passende Förderungen basierend auf Ihrem Profil zu finden.',
         createOrgFirst: 'Erstellen Sie zuerst eine Organisation',
@@ -637,7 +642,16 @@ export default {
         network: 'Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.',
         notFound: 'Seite nicht gefunden',
         unauthorized: 'Bitte melden Sie sich an, um fortzufahren',
-        forbidden: 'Sie haben keine Berechtigung, darauf zuzugreifen'
+        forbidden: 'Sie haben keine Berechtigung, darauf zuzugreifen',
+        loadProposals: 'Fehler beim Laden der Anträge. Bitte versuchen Sie es erneut.',
+        loadMatches: 'Fehler beim Laden der Übereinstimmungen. Bitte versuchen Sie es erneut.',
+        loadOrganizations: 'Fehler beim Laden der Organisationen. Bitte versuchen Sie es erneut.',
+        loadOrganization: 'Fehler beim Laden des Organisationsprofils.',
+        loadGrant: 'Fehler beim Laden der Grant-Details.',
+        createProposal: 'Fehler beim Erstellen des Antrags. Bitte versuchen Sie es erneut.',
+        setupFailed: 'Einrichtung fehlgeschlagen. Bitte versuchen Sie es erneut.',
+        authFailed: 'Authentifizierung fehlgeschlagen. Bitte melden Sie sich erneut an.',
+        noSession: 'Keine aktive Sitzung gefunden. Bitte melden Sie sich erneut an.'
     },
 
     // Setup Wizard
@@ -834,7 +848,12 @@ export default {
             generationComplete: 'Generierung abgeschlossen!',
             generationCompleteDesc: 'Ihre Antragsabschnitte wurden erfolgreich generiert.',
             viewProposal: 'Antrag ansehen'
-        }
+        },
+        autoSaved: 'Automatisch gespeichert um {time}',
+        draftFound: 'Sie haben einen unvollständigen Entwurf für diesen Grant. Möchten Sie ihn wiederherstellen?',
+        restoreDraft: 'Wiederherstellen',
+        discardDraft: 'Verwerfen',
+        draftRestored: 'Entwurf erfolgreich wiederhergestellt'
     },
 
     // Proposal Detail

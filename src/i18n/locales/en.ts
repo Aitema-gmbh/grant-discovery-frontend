@@ -31,6 +31,7 @@ export default {
         day: 'day',
         thisMonth: 'this month',
         noResults: 'No results found',
+        saved: 'Saved successfully',
         tryAgain: 'Try again',
         unsavedChanges: 'You have unsaved changes. Are you sure you want to leave?',
         generationInProgress: 'AI generation is in progress. Are you sure you want to leave? Progress will be lost.'
@@ -303,6 +304,8 @@ export default {
         reminderSet: 'Reminder Set',
         reminderAdded: 'Deadline reminder set! You will see it in your notifications.',
         reminderRemoved: 'Deadline reminder removed.',
+        notes: 'My Notes',
+        notesPlaceholder: 'Add your notes about this grant — thoughts, questions, action items...',
         exportDetails: 'Export Details',
         sourceInfo: 'Source Information',
         source: 'Source:',
@@ -370,6 +373,8 @@ export default {
         checkEligibility: 'Check eligibility',
         exportCsv: 'Export as CSV',
         csvExported: 'Matches exported to CSV',
+        showRadar: 'Score chart',
+        radarChart: 'Match score radar chart',
         selectAnOrg: 'Select an organization',
         selectAnOrgDesc: 'Choose one of your organizations above to discover matching grants based on your profile.',
         createOrgFirst: 'Create an organization first',
@@ -634,7 +639,16 @@ export default {
         network: 'Network error. Please check your connection.',
         notFound: 'Page not found',
         unauthorized: 'Please login to continue',
-        forbidden: 'You do not have permission to access this'
+        forbidden: 'You do not have permission to access this',
+        loadProposals: 'Failed to load proposals. Please try again.',
+        loadMatches: 'Failed to load matches. Please try again.',
+        loadOrganizations: 'Failed to load organizations. Please try again.',
+        loadOrganization: 'Failed to load organization profile.',
+        loadGrant: 'Failed to load grant details.',
+        createProposal: 'Failed to create proposal. Please try again.',
+        setupFailed: 'Failed to complete setup. Please try again.',
+        authFailed: 'Authentication failed. Please try signing in again.',
+        noSession: 'No active session found. Please try signing in again.'
     },
 
     // Setup Wizard
@@ -831,7 +845,12 @@ export default {
             generationComplete: 'Generation Complete!',
             generationCompleteDesc: 'Your proposal sections have been generated successfully.',
             viewProposal: 'View Proposal'
-        }
+        },
+        autoSaved: 'Auto-saved at {time}',
+        draftFound: 'You have an unfinished draft for this grant. Would you like to restore it?',
+        restoreDraft: 'Restore',
+        discardDraft: 'Discard',
+        draftRestored: 'Draft restored successfully'
     },
 
     // Proposal Detail

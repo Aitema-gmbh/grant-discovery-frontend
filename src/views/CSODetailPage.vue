@@ -216,6 +216,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/AppLayout.vue'
 import BreadcrumbNav from '@/components/BreadcrumbNav.vue'
 import api from '@/services/api'
@@ -223,6 +224,7 @@ import { useToast } from '@/lib/useToast'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const toast = useToast()
 
 const loading = ref(true)
@@ -253,7 +255,7 @@ async function loadProfile() {
     profile.value = response.data.cso || response.data.profile || response.data
   } catch (error) {
     console.error('Error loading CSO profile:', error)
-    toast.error('Failed to load organization profile.')
+    toast.error(t('errors.loadOrganization'))
     profile.value = null
   } finally {
     loading.value = false

@@ -95,6 +95,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/AppLayout.vue'
 import BreadcrumbNav from '@/components/BreadcrumbNav.vue'
 import api from '@/services/api'
@@ -102,6 +103,7 @@ import { useFeedback } from '@/lib/useFeedback'
 import { useToast } from '@/lib/useToast'
 
 const route = useRoute()
+const { t } = useI18n()
 const { trackPageView, recordOutcome } = useFeedback()
 const toast = useToast()
 
@@ -140,12 +142,12 @@ async function submitOutcome() {
       feedbackFromFunder: outcomeForm.value.feedbackFromFunder || undefined,
       lessonsLearned: outcomeForm.value.lessonsLearned || undefined
     })
-    toast.success('Outcome saved successfully')
+    toast.success(t('common.saved'))
     // Reload to show updated status
     await loadProposal()
   } catch (error) {
     console.error('Error recording outcome:', error)
-    toast.error('Failed to save outcome. Please try again.')
+    toast.error(t('errors.generic'))
   } finally {
     submittingOutcome.value = false
   }

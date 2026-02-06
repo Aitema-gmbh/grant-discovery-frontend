@@ -1,10 +1,32 @@
 <template>
   <AppLayout>
     <div class="max-w-4xl mx-auto">
+      <!-- Draft Restore Banner -->
+      <div v-if="showDraftBanner" class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-sm text-navy-700">{{ $t('proposalWizard.draftFound') }}</p>
+        </div>
+        <div class="flex gap-2">
+          <button @click="restoreDraft" class="btn btn-sm btn-primary">{{ $t('proposalWizard.restoreDraft') }}</button>
+          <button @click="discardDraft" class="btn btn-sm btn-outline">{{ $t('proposalWizard.discardDraft') }}</button>
+        </div>
+      </div>
+
       <!-- Header with Progress -->
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $t('proposalWizard.title') }}</h1>
         <p class="text-gray-600 mb-6">{{ grantTitle }}</p>
+
+        <!-- Auto-save indicator -->
+        <div v-if="lastSavedAt" class="text-xs text-navy-400 mb-2 flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          {{ $t('proposalWizard.autoSaved', { time: lastSavedAt }) }}
+        </div>
 
         <!-- Progress Steps -->
         <div class="flex items-center gap-4">
@@ -267,6 +289,57 @@ const completedSections = ref<SectionType[]>([])
 const generatedContent = ref<Record<string, string>>({})
 const generationComplete = computed(() => completedSections.value.length === selectedSections.value.length && selectedSections.value.length > 0)
 
+// Auto-save state
+const lastSavedAt = ref('')
+const showDraftBanner = ref(false)
+let autoSaveInterval: ReturnType<typeof setInterval> | null = null
+const DRAFT_KEY = computed(() => `proposalDraft_${grantId.value}`)
+
+function saveDraft() {
+  if (!grantId.value || generationComplete.value) return
+  const draft = {
+    grantId: grantId.value,
+    grantTitle: grantTitle.value,
+    selectedCsoId: selectedCsoId.value,
+    selectedSections: selectedSections.value,
+    currentStep: currentStep.value,
+    generatedContent: generatedContent.value,
+    completedSections: completedSections.value,
+    proposalId: proposalId.value,
+    savedAt: new Date().toISOString()
+  }
+  try {
+    localStorage.setItem(DRAFT_KEY.value, JSON.stringify(draft))
+    const now = new Date()
+    lastSavedAt.value = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  } catch { /* storage full */ }
+}
+
+function restoreDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY.value)
+    if (!raw) return
+    const draft = JSON.parse(raw)
+    selectedCsoId.value = draft.selectedCsoId || ''
+    selectedSections.value = draft.selectedSections || ['objectives', 'methodology', 'impact', 'work_plan']
+    currentStep.value = Math.min(draft.currentStep || 0, 1) // Don't restore to generation step
+    generatedContent.value = draft.generatedContent || {}
+    completedSections.value = draft.completedSections || []
+    proposalId.value = draft.proposalId || ''
+    toast.success(t('proposalWizard.draftRestored'))
+  } catch { /* ignore */ }
+  showDraftBanner.value = false
+}
+
+function discardDraft() {
+  try { localStorage.removeItem(DRAFT_KEY.value) } catch { /* ignore */ }
+  showDraftBanner.value = false
+}
+
+function clearDraft() {
+  try { localStorage.removeItem(DRAFT_KEY.value) } catch { /* ignore */ }
+}
+
 // Unsaved form warning
 const isGenerating = computed(() => currentGeneratingSection.value !== null)
 
@@ -375,11 +448,12 @@ async function startGeneration() {
     }
   } catch (error) {
     console.error('Error creating proposal:', error)
-    toast.error('Failed to create proposal. Please try again.')
+    toast.error(t('errors.createProposal'))
   }
 }
 
 function viewProposal() {
+  clearDraft()
   router.push(`/proposals/${proposalId.value}`)
 }
 
@@ -393,6 +467,22 @@ onMounted(async () => {
     router.push('/grants')
     return
   }
+
+  // Check for existing draft
+  try {
+    const raw = localStorage.getItem(`proposalDraft_${grantId.value}`)
+    if (raw) {
+      const draft = JSON.parse(raw)
+      const savedTime = new Date(draft.savedAt)
+      const hoursAgo = (Date.now() - savedTime.getTime()) / (1000 * 60 * 60)
+      if (hoursAgo < 48 && draft.currentStep > 0) {
+        showDraftBanner.value = true
+      }
+    }
+  } catch { /* ignore */ }
+
+  // Start auto-save every 30 seconds
+  autoSaveInterval = setInterval(saveDraft, 30000)
 
   // Load grant details
   try {
@@ -412,7 +502,7 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Error loading CSOs:', error)
-    toast.error('Failed to load organizations.')
+    toast.error(t('errors.loadOrganizations'))
   } finally {
     loadingCsos.value = false
   }
@@ -420,5 +510,10 @@ onMounted(async () => {
 
 onUnmounted(() => {
   window.removeEventListener('beforeunload', beforeUnloadHandler)
+  if (autoSaveInterval) clearInterval(autoSaveInterval)
+  // Final save on leave (unless complete)
+  if (!generationComplete.value && currentStep.value > 0) {
+    saveDraft()
+  }
 })
 </script>

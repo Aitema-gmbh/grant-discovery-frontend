@@ -435,6 +435,26 @@
           </div>
         </div>
       </div>
+
+      <!-- Personal Notes -->
+      <div class="card mt-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-semibold text-navy-900 flex items-center gap-2">
+            <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+            {{ $t('grantDetail.notes') }}
+          </h2>
+          <span v-if="noteLastSaved" class="text-xs text-navy-400">{{ noteLastSaved }}</span>
+        </div>
+        <textarea
+          v-model="grantNote"
+          @input="debounceSaveNote"
+          :placeholder="$t('grantDetail.notesPlaceholder')"
+          class="input w-full min-h-[100px] text-sm resize-y"
+          rows="4"
+        ></textarea>
+      </div>
     </div>
 
     <!-- Error State -->
@@ -488,6 +508,37 @@ const checkingEligibility = ref(false)
 const descExpanded = ref(false)
 const descNeedsExpand = ref(false)
 const isReminderSet = ref(false)
+
+// Grant notes
+const grantNote = ref('')
+const noteLastSaved = ref('')
+let noteSaveTimeout: ReturnType<typeof setTimeout> | null = null
+
+function loadNote(grantId: string) {
+  try {
+    const notes = JSON.parse(localStorage.getItem('grantNotes') || '{}')
+    grantNote.value = notes[grantId] || ''
+  } catch { grantNote.value = '' }
+}
+
+function saveNote() {
+  const id = route.params.id as string
+  try {
+    const notes = JSON.parse(localStorage.getItem('grantNotes') || '{}')
+    if (grantNote.value.trim()) {
+      notes[id] = grantNote.value
+    } else {
+      delete notes[id]
+    }
+    localStorage.setItem('grantNotes', JSON.stringify(notes))
+    noteLastSaved.value = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  } catch { /* storage full */ }
+}
+
+function debounceSaveNote() {
+  if (noteSaveTimeout) clearTimeout(noteSaveTimeout)
+  noteSaveTimeout = setTimeout(saveNote, 1000)
+}
 const descriptionEl = ref<HTMLElement | null>(null)
 
 // Computed properties
@@ -779,6 +830,9 @@ async function fetchGrantDetails() {
     // Check if reminder is set
     const reminders = JSON.parse(localStorage.getItem('grantReminders') || '[]')
     isReminderSet.value = reminders.some((r: any) => r.grantId === grantId)
+
+    // Load notes
+    loadNote(grantId)
 
     // Check for existing proposals for this grant
     if (authStore.isAuthenticated) {

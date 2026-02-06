@@ -591,7 +591,7 @@ async function completeSetup() {
     router.push('/dashboard?welcome=true')
   } catch (error) {
     console.error('Setup failed:', error)
-    toast.error('Failed to complete setup. Please try again.')
+    toast.error(t('errors.setupFailed'))
   } finally {
     loading.value = false
   }
