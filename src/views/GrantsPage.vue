@@ -9,6 +9,10 @@
         <p class="text-lg text-white/90 font-sans max-w-2xl">
           {{ $t('grants.subtitle') }}
         </p>
+        <button @click="showGrantFinder = true"
+          class="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-white/20 backdrop-blur-sm text-white rounded-lg text-sm font-medium hover:bg-white/30 transition-colors border border-white/30">
+          ✨ {{ $t('grants.finder.button') }}
+        </button>
       </div>
     </div>
 
@@ -940,6 +944,88 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Grant Finder Wizard -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div v-if="showGrantFinder" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-navy-900/60 backdrop-blur-sm" @click="skipGrantFinder"></div>
+          <div class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 animate-slide-up">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-lg font-bold text-navy-900">{{ $t('grants.finder.title') }}</h2>
+              <div class="flex gap-1">
+                <div v-for="s in 3" :key="s" class="w-2 h-2 rounded-full"
+                  :class="s - 1 <= grantFinderStep ? 'bg-amber-400' : 'bg-stone-200'"></div>
+              </div>
+            </div>
+
+            <!-- Step 1: Sectors -->
+            <div v-if="grantFinderStep === 0">
+              <h3 class="text-sm font-semibold text-navy-800 mb-1">{{ $t('grants.finder.step1Title') }}</h3>
+              <p class="text-xs text-stone-500 mb-4">{{ $t('grants.finder.step1Subtitle') }}</p>
+              <div class="grid grid-cols-2 gap-2">
+                <button v-for="cat in sectorChips" :key="cat.value"
+                  @click="toggleFinderSector(cat.value)"
+                  class="p-3 rounded-lg border-2 text-left text-sm transition-all"
+                  :class="grantFinderAnswers.sectors.includes(cat.value) ? 'border-amber-400 bg-amber-50 text-amber-800' : 'border-stone-200 hover:border-stone-300 text-stone-600'">
+                  {{ cat.icon }} {{ cat.label }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 2: Budget -->
+            <div v-if="grantFinderStep === 1">
+              <h3 class="text-sm font-semibold text-navy-800 mb-1">{{ $t('grants.finder.step2Title') }}</h3>
+              <p class="text-xs text-stone-500 mb-4">{{ $t('grants.finder.step2Subtitle') }}</p>
+              <div class="space-y-2">
+                <button v-for="opt in budgetOptions" :key="opt.label"
+                  @click="selectBudget(opt.min, opt.max)"
+                  class="w-full p-3 rounded-lg border-2 text-left text-sm transition-all"
+                  :class="grantFinderAnswers.budgetMin === opt.min ? 'border-amber-400 bg-amber-50 text-amber-800' : 'border-stone-200 hover:border-stone-300 text-stone-600'">
+                  {{ $t(opt.label) }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 3: Timeline -->
+            <div v-if="grantFinderStep === 2">
+              <h3 class="text-sm font-semibold text-navy-800 mb-1">{{ $t('grants.finder.step3Title') }}</h3>
+              <p class="text-xs text-stone-500 mb-4">{{ $t('grants.finder.step3Subtitle') }}</p>
+              <div class="space-y-2">
+                <button v-for="opt in timelineOptions" :key="opt.label"
+                  @click="selectTimeline(opt.weeks)"
+                  class="w-full p-3 rounded-lg border-2 text-left text-sm transition-all"
+                  :class="grantFinderAnswers.deadlineWeeks === opt.weeks ? 'border-amber-400 bg-amber-50 text-amber-800' : 'border-stone-200 hover:border-stone-300 text-stone-600'">
+                  {{ $t(opt.label) }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex items-center justify-between mt-6 pt-4 border-t border-stone-100">
+              <button @click="skipGrantFinder" class="text-xs text-stone-400 hover:text-stone-600 transition-colors">
+                {{ $t('grants.finder.skip') }}
+              </button>
+              <div class="flex gap-2">
+                <button v-if="grantFinderStep > 0" @click="grantFinderStep--"
+                  class="px-4 py-2 text-sm border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors">
+                  {{ $t('grants.finder.back') }}
+                </button>
+                <button v-if="grantFinderStep < 2" @click="grantFinderStep++"
+                  class="px-4 py-2 text-sm bg-navy-800 text-white rounded-lg hover:bg-navy-700 transition-colors">
+                  {{ $t('grants.finder.next') }}
+                </button>
+                <button v-if="grantFinderStep === 2" @click="applyGrantFinder"
+                  class="px-5 py-2 text-sm bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium">
+                  ✨ {{ $t('grants.finder.findGrants') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </AppLayout>
 </template>
 
@@ -1039,6 +1125,80 @@ const sectorChips = computed(() => [
   { value: 'infrastructure', icon: '🏗️', label: t('grants.sectors.infrastructure') },
   { value: 'economic', icon: '💼', label: t('grants.sectors.economic') },
 ])
+
+// Grant Finder Wizard
+const showGrantFinder = ref(false)
+const grantFinderStep = ref(0)
+const grantFinderAnswers = ref({
+  sectors: [] as string[],
+  budgetMin: null as number | null,
+  budgetMax: null as number | null,
+  deadlineWeeks: null as number | null,
+})
+
+const budgetOptions = [
+  { label: 'grants.finder.under50k', min: 0, max: 50000 },
+  { label: 'grants.finder.range50to200', min: 50000, max: 200000 },
+  { label: 'grants.finder.range200to1m', min: 200000, max: 1000000 },
+  { label: 'grants.finder.over1m', min: 1000000, max: null },
+]
+
+const timelineOptions = [
+  { label: 'grants.finder.urgent', weeks: 2 },
+  { label: 'grants.finder.soon', weeks: 4 },
+  { label: 'grants.finder.planning', weeks: 12 },
+  { label: 'grants.finder.noRush', weeks: null },
+]
+
+function toggleFinderSector(cat: string) {
+  const idx = grantFinderAnswers.value.sectors.indexOf(cat)
+  if (idx >= 0) {
+    grantFinderAnswers.value.sectors.splice(idx, 1)
+  } else {
+    grantFinderAnswers.value.sectors.push(cat)
+  }
+}
+
+function selectBudget(min: number | null, max: number | null) {
+  grantFinderAnswers.value.budgetMin = min
+  grantFinderAnswers.value.budgetMax = max
+}
+
+function selectTimeline(weeks: number | null) {
+  grantFinderAnswers.value.deadlineWeeks = weeks
+}
+
+function applyGrantFinder() {
+  // Apply sector filter
+  if (grantFinderAnswers.value.sectors.length > 0) {
+    filters.value.category = grantFinderAnswers.value.sectors[0] ?? ''
+  }
+
+  // Apply budget filter
+  if (grantFinderAnswers.value.budgetMin !== null) {
+    filters.value.amountMin = grantFinderAnswers.value.budgetMin
+  }
+  if (grantFinderAnswers.value.budgetMax !== null) {
+    filters.value.amountMax = grantFinderAnswers.value.budgetMax
+  }
+
+  // Apply deadline filter (convert weeks to days string to match filter format)
+  if (grantFinderAnswers.value.deadlineWeeks !== null) {
+    const days = grantFinderAnswers.value.deadlineWeeks * 7
+    filters.value.deadline = String(days)
+  }
+
+  showGrantFinder.value = false
+  grantFinderStep.value = 0
+
+  // Trigger search
+  searchGrants()
+}
+
+function skipGrantFinder() {
+  showGrantFinder.value = false
+  grantFinderStep.value = 0
+}
 
 // Filter presets
 const activePreset = ref<string | null>(null)

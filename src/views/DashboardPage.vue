@@ -427,6 +427,43 @@
       </div>
     </div>
 
+    <!-- Discovery Funnel -->
+    <div v-if="funnelData.viewed > 0" class="mt-8 animate-fade-in">
+      <h2 class="text-xl font-bold text-navy-900 mb-6">{{ t('dashboard.funnel.title') }}</h2>
+
+      <div class="card p-5">
+        <div class="space-y-3">
+          <div v-for="stage in funnelStages" :key="stage.key" class="flex items-center gap-3">
+            <div class="w-24 text-right">
+              <span class="text-xs font-medium text-stone-600">{{ stage.label }}</span>
+            </div>
+            <div class="flex-1 relative">
+              <div class="h-7 rounded-lg overflow-hidden bg-stone-100">
+                <div class="h-full rounded-lg transition-all duration-700 flex items-center justify-end pr-2"
+                  :class="stage.color"
+                  :style="{ width: Math.max(stage.pct, 8) + '%' }">
+                  <span class="text-[11px] font-bold text-white drop-shadow-sm">{{ stage.value }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="w-16 text-left">
+              <span v-if="stage.conversion !== null" class="text-[10px] text-stone-400">
+                {{ stage.conversion }}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Insight -->
+        <div v-if="funnelInsight" class="mt-4 pt-4 border-t border-stone-100">
+          <p class="text-xs text-stone-500 flex items-center gap-2">
+            <span>&#x1F4A1;</span>
+            {{ funnelInsight }}
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- Grant Readiness Overview -->
     <div v-if="readinessData.length > 0" class="mt-8 animate-fade-in" style="animation-delay: 0.38s">
       <div class="card">
@@ -677,6 +714,56 @@ const fundingGap = computed(() => {
   if (!annualBudget) return null
   const diff = portfolioStats.value.totalPotential - annualBudget
   return { diff, annualBudget, isSurplus: diff >= 0 }
+})
+
+// Discovery Funnel Analytics
+const funnelData = computed(() => {
+  const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]').length
+  const savedIds = JSON.parse(localStorage.getItem('savedGrants') || '[]') as string[]
+  const saved = savedIds.length
+  const workflows = JSON.parse(localStorage.getItem('grantWorkflow') || '{}') as Record<string, string>
+  const outcomes = JSON.parse(localStorage.getItem('grantOutcomes') || '{}') as Record<string, string>
+
+  let inProgress = 0
+  let submitted = 0
+  Object.values(workflows).forEach(stage => {
+    if (stage === 'researching' || stage === 'applying') inProgress++
+    if (stage === 'submitted') submitted++
+  })
+
+  const won = Object.values(outcomes).filter(o => o === 'won').length
+
+  return { viewed, saved, inProgress, submitted, won }
+})
+
+const funnelStages = computed(() => {
+  const d = funnelData.value
+  const maxVal = Math.max(d.viewed, d.saved, d.inProgress, d.submitted, d.won, 1)
+
+  return [
+    { key: 'viewed', label: t('dashboard.funnel.viewed'), value: d.viewed, pct: d.viewed / maxVal * 100, color: 'bg-stone-400', conversion: null as number | null },
+    { key: 'saved', label: t('dashboard.funnel.saved'), value: d.saved, pct: d.saved / maxVal * 100, color: 'bg-amber-400', conversion: d.viewed > 0 ? Math.round(d.saved / d.viewed * 100) : null },
+    { key: 'inProgress', label: t('dashboard.funnel.inProgress'), value: d.inProgress, pct: d.inProgress / maxVal * 100, color: 'bg-indigo-500', conversion: d.saved > 0 ? Math.round(d.inProgress / d.saved * 100) : null },
+    { key: 'submitted', label: t('dashboard.funnel.submitted'), value: d.submitted, pct: d.submitted / maxVal * 100, color: 'bg-sage-500', conversion: d.inProgress > 0 ? Math.round(d.submitted / d.inProgress * 100) : null },
+    { key: 'won', label: t('dashboard.funnel.won'), value: d.won, pct: d.won / maxVal * 100, color: 'bg-green-500', conversion: d.submitted > 0 ? Math.round(d.won / d.submitted * 100) : null },
+  ]
+})
+
+const funnelInsight = computed(() => {
+  const d = funnelData.value
+  if (d.viewed === 0) return null
+
+  const saveRate = d.viewed > 0 ? d.saved / d.viewed : 1
+  const progressRate = d.saved > 0 ? d.inProgress / d.saved : 1
+  const submitRate = d.inProgress > 0 ? d.submitted / d.inProgress : 1
+
+  if (progressRate < saveRate && progressRate < submitRate) {
+    return t('dashboard.funnel.insightSaveStall')
+  }
+  if (submitRate < progressRate) {
+    return t('dashboard.funnel.insightApplyStall')
+  }
+  return t('dashboard.funnel.insightGoodFlow')
 })
 
 // At Risk Applications

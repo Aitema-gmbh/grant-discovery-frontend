@@ -169,6 +169,17 @@ export default {
             fundingGap: 'Finanzierungslücken-Analyse',
             vsAnnualBudget: 'vom Jahresbudget',
         },
+        funnel: {
+            title: 'Entdeckungstrichter',
+            viewed: 'Angesehen',
+            saved: 'Gespeichert',
+            inProgress: 'In Bearbeitung',
+            submitted: 'Eingereicht',
+            won: 'Gewonnen',
+            insightSaveStall: 'Die meisten Förderungen stagnieren nach dem Speichern. Überprüfen Sie wöchentlich Ihre gespeicherten Förderungen.',
+            insightApplyStall: 'Förderungen stecken in der Vorbereitung fest. Nutzen Sie den Antragsassistenten zur Beschleunigung.',
+            insightGoodFlow: 'Ihre Pipeline läuft gut. Weiter so!',
+        },
     },
 
     // Grants
@@ -320,6 +331,28 @@ export default {
         batchSaved: '{count} Förderungen gespeichert!',
         batchAlreadySaved: 'Alle Förderungen bereits gespeichert',
         findSimilar: 'Ähnliche finden',
+        finder: {
+            button: 'Hilfe bei der Suche',
+            title: 'Förderungs-Finder',
+            step1Title: 'In welchen Bereichen arbeitet Ihre Organisation?',
+            step1Subtitle: 'Wählen Sie einen oder mehrere Sektoren',
+            step2Title: 'Welchen Förderumfang suchen Sie?',
+            step2Subtitle: 'Wählen Sie die passende Fördergröße',
+            step3Title: 'Wie dringend benötigen Sie die Förderung?',
+            step3Subtitle: 'Dies hilft bei der Priorisierung nach Frist',
+            under50k: 'Unter €50.000',
+            range50to200: '€50.000 – €200.000',
+            range200to1m: '€200.000 – €1.000.000',
+            over1m: 'Über €1.000.000',
+            urgent: 'Dringend (2 Wochen)',
+            soon: 'Bald (1 Monat)',
+            planning: 'Vorausplanung (3 Monate)',
+            noRush: 'Nicht eilig',
+            findGrants: 'Förderungen finden',
+            skip: 'Überspringen, alles anzeigen',
+            back: 'Zurück',
+            next: 'Weiter',
+        },
     },
 
     // Grant Detail
@@ -541,6 +574,21 @@ export default {
             eligibility: 'Ob Ihre Organisation die formalen Anforderungen wie Land, Organisationstyp und Budgetrahmen erfüllt.',
             thematic: 'Wie gut Ihre Schwerpunktbereiche und Sektoren mit den Förderthemen übereinstimmen.',
             budgetFit: 'Ob Ihr Jahresbudget und die Fördersumme gut zueinander passen.'
+        },
+        improve: {
+            title: 'Match verbessern',
+            goodFit: 'Gute Passung',
+            semantic: 'Semantische Übereinstimmung',
+            eligibility: 'Förderfähigkeit',
+            thematic: 'Thematische Passung',
+            budget: 'Budgetpassung',
+            semanticTip: 'Fügen Sie mehr Details zu Ihrer Mission und Aktivitäten in Ihrem Organisationsprofil hinzu.',
+            eligibilityTip: 'Überprüfen Sie die Fördervoraussetzungen \u2014 Ihre Organisation erfüllt möglicherweise nicht alle Kriterien.',
+            thematicTip: 'Aktualisieren Sie Ihre Schwerpunktbereiche und Sektoren in Ihrem Profil für eine bessere Übereinstimmung.',
+            budgetTip: 'Ihr Jahresbudget und der Förderrahmen stimmen möglicherweise nicht überein. Passen Sie Ihr Profil an.',
+            updateProfile: 'Profil aktualisieren',
+            reviewGrant: 'Anforderungen prüfen',
+            adjustBudget: 'Budget anpassen',
         }
     },
 

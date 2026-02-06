@@ -141,17 +141,26 @@
                 {{ $t('matches.budgetFit') }}: {{ Math.round(match.budget_fit_score * 100) }}%
                 <HelpTooltip :content="$t('matches.help.budgetFit')" position="bottom" />
               </span>
-              <button
-                @click.stop="toggleRadar(match.grant_id)"
-                class="text-xs text-navy-400 hover:text-amber-500 transition-colors ml-auto"
-                :aria-label="$t('matches.showRadar')"
-              >
-                <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
-                </svg>
-                {{ $t('matches.showRadar') }}
-              </button>
+              <div class="flex items-center gap-2 ml-auto">
+                <button
+                  @click.stop="toggleImprove(match.grant_id)"
+                  class="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-colors"
+                  :class="expandedImprove === match.grant_id ? 'bg-amber-100 text-amber-700' : 'text-stone-500 hover:bg-stone-100'"
+                >
+                  &#x1F4A1; {{ t('matches.improve.title') }}
+                </button>
+                <button
+                  @click.stop="toggleRadar(match.grant_id)"
+                  class="text-xs text-navy-400 hover:text-amber-500 transition-colors"
+                  :aria-label="$t('matches.showRadar')"
+                >
+                  <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                  </svg>
+                  {{ $t('matches.showRadar') }}
+                </button>
+              </div>
             </div>
 
             <!-- Radar Chart (expandable) -->
@@ -181,6 +190,30 @@
                   <text x="100" y="198" text-anchor="middle" class="text-[9px] fill-navy-600">{{ $t('matches.thematic') }}</text>
                   <text x="10" y="104" text-anchor="end" class="text-[9px] fill-navy-600">{{ $t('matches.budgetFit') }}</text>
                 </svg>
+              </div>
+            </Transition>
+
+            <!-- Improvement Tips (expandable) -->
+            <Transition name="expand">
+              <div v-if="expandedImprove === match.grant_id" class="mt-4 pt-4 border-t border-stone-100" @click.stop>
+                <div class="space-y-3">
+                  <div v-for="tip in getImprovementTips(match)" :key="tip.dimension"
+                    class="flex items-start gap-3 p-3 rounded-lg border" :class="getStatusColor(tip.status)">
+                    <span class="text-sm mt-0.5">{{ getStatusIcon(tip.status) }}</span>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs font-semibold">{{ t(tip.labelKey) }}</span>
+                        <span class="text-xs font-bold">{{ tip.score }}%</span>
+                        <span v-if="tip.status === 'good'" class="text-[10px]">{{ t('matches.improve.goodFit') }}</span>
+                      </div>
+                      <p v-if="tip.status !== 'good'" class="text-[11px] opacity-80 mb-2">{{ t(tip.tipKey) }}</p>
+                      <router-link v-if="tip.status !== 'good'" :to="tip.actionTo"
+                        class="text-[11px] font-medium underline hover:no-underline">
+                        {{ t(tip.actionLabel) }} &rarr;
+                      </router-link>
+                    </div>
+                  </div>
+                </div>
               </div>
             </Transition>
 
@@ -390,6 +423,67 @@ function scoreClass(score: number) {
   return 'bg-navy-100 text-navy-700'
 }
 
+// Match Score Drill-Down
+const expandedImprove = ref<string | null>(null)
+
+function toggleImprove(matchId: string) {
+  expandedImprove.value = expandedImprove.value === matchId ? null : matchId
+}
+
+interface ImproveTip {
+  dimension: string
+  labelKey: string
+  score: number
+  status: 'good' | 'warning' | 'critical'
+  tipKey: string
+  actionLabel: string
+  actionTo: string
+}
+
+function getImprovementTips(match: any): ImproveTip[] {
+  const tips: ImproveTip[] = []
+  const csoId = selectedCsoId.value || ''
+
+  const dims = [
+    { key: 'semantic_score', label: 'matches.improve.semantic', tip: 'matches.improve.semanticTip', action: 'matches.improve.updateProfile', to: `/cso/${csoId}` },
+    { key: 'eligibility_score', label: 'matches.improve.eligibility', tip: 'matches.improve.eligibilityTip', action: 'matches.improve.reviewGrant', to: `/grants/${match.grant_id}` },
+    { key: 'thematic_score', label: 'matches.improve.thematic', tip: 'matches.improve.thematicTip', action: 'matches.improve.updateProfile', to: `/cso/${csoId}` },
+    { key: 'budget_fit_score', label: 'matches.improve.budget', tip: 'matches.improve.budgetTip', action: 'matches.improve.adjustBudget', to: `/cso/${csoId}` },
+  ]
+
+  dims.forEach(d => {
+    const score = match[d.key] ?? 0
+    const pct = Math.round(score * 100)
+    let status: 'good' | 'warning' | 'critical' = 'good'
+    if (pct < 40) status = 'critical'
+    else if (pct < 70) status = 'warning'
+
+    tips.push({
+      dimension: d.key,
+      labelKey: d.label,
+      score: pct,
+      status,
+      tipKey: d.tip,
+      actionLabel: d.action,
+      actionTo: d.to
+    })
+  })
+
+  return tips
+}
+
+function getStatusColor(status: string): string {
+  if (status === 'good') return 'bg-green-100 text-green-700 border-green-200'
+  if (status === 'warning') return 'bg-amber-100 text-amber-700 border-amber-200'
+  return 'bg-red-100 text-red-700 border-red-200'
+}
+
+function getStatusIcon(status: string): string {
+  if (status === 'good') return '\u2705'
+  if (status === 'warning') return '\u26A0\uFE0F'
+  return '\uD83D\uDEAB'
+}
+
 // Radar chart
 const expandedRadar = ref<string | null>(null)
 
@@ -444,5 +538,17 @@ onMounted(() => {
 .slide-enter-to, .slide-leave-from {
   opacity: 1;
   max-height: 300px;
+}
+.expand-enter-active, .expand-leave-active {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+.expand-enter-from, .expand-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+.expand-enter-to, .expand-leave-from {
+  opacity: 1;
+  max-height: 600px;
 }
 </style>
