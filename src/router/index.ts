@@ -122,6 +122,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/workspace',
+    name: 'workspace',
+    component: () => import('@/views/WorkspacePage.vue'),
+    meta: { requiresAuth: false },
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: () => import('@/views/NotFoundPage.vue'),

@@ -226,6 +226,7 @@ function buildCommandIndex(): CommandItem[] {
     { id: 'page-settings', title: t('nav.settings'), subtitle: t('settings.description'), route: '/settings' },
     { id: 'page-profile', title: t('nav.profile'), subtitle: t('profile.description'), route: '/profile' },
     { id: 'page-cso', title: t('nav.organizations'), subtitle: t('cso.subtitle'), route: '/cso' },
+    { id: 'page-workspace', title: t('nav.workspace'), subtitle: t('workspace.description'), route: '/workspace' },
   ]
   for (const page of pages) {
     items.push({ ...page, type: 'page' })
@@ -331,6 +332,33 @@ function buildCommandIndex(): CommandItem[] {
     action: () => {
       localStorage.removeItem('recentSearches')
       localStorage.removeItem('recentlyViewedGrants')
+    }
+  })
+
+  items.push({
+    id: 'action-strategy-planner',
+    type: 'action',
+    title: t('commandPalette.actionOpenStrategyPlanner'),
+    action: () => {
+      router.push('/dashboard')
+      setTimeout(() => {
+        const el = document.getElementById('scenario-planner')
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          // Also expand it if collapsed
+          const expandBtn = el.querySelector('[data-scenario-expand]')
+          if (expandBtn) (expandBtn as HTMLButtonElement).click()
+        }
+      }, 300)
+    }
+  })
+
+  items.push({
+    id: 'action-open-comparison',
+    type: 'action',
+    title: t('commandPalette.actionOpenComparison'),
+    action: () => {
+      router.push('/saved')
     }
   })
 

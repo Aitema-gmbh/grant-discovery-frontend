@@ -427,6 +427,278 @@
       </div>
     </div>
 
+    <!-- Funding Strategy Scenario Planner -->
+    <div id="scenario-planner" class="mt-12 animate-fade-in" style="animation-delay: 0.36s">
+      <div class="card-premium">
+        <!-- Collapsible Header -->
+        <button
+          data-scenario-expand
+          @click="scenarioPlannerOpen = !scenarioPlannerOpen"
+          class="w-full flex items-center justify-between group"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+              <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+            </div>
+            <div class="text-left">
+              <h2 class="text-lg font-bold text-navy-900">{{ t('dashboard.scenarios.title') }}</h2>
+              <p class="text-xs text-stone-500">{{ t('dashboard.scenarios.description') }}</p>
+            </div>
+          </div>
+          <svg class="w-5 h-5 text-navy-400 transition-transform duration-200" :class="scenarioPlannerOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+
+        <!-- Collapsible Content -->
+        <div v-if="scenarioPlannerOpen" class="mt-6">
+          <!-- No Saved Grants State -->
+          <div v-if="scenarioSavedGrants.length === 0" class="text-center py-10">
+            <div class="w-14 h-14 mx-auto mb-3 bg-stone-100 rounded-full flex items-center justify-center">
+              <svg class="w-7 h-7 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+              </svg>
+            </div>
+            <p class="text-sm font-medium text-navy-700">{{ t('dashboard.scenarios.noGrants') }}</p>
+            <p class="text-xs text-stone-500 mt-1 max-w-xs mx-auto">{{ t('dashboard.scenarios.noGrantsDesc') }}</p>
+            <router-link to="/grants" class="inline-flex items-center gap-1 text-sm font-medium text-amber-600 hover:text-amber-700 mt-3 transition-colors">
+              {{ t('dashboard.browseGrants') }} &rarr;
+            </router-link>
+          </div>
+
+          <template v-else>
+            <!-- Compare Mode Toggle -->
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <!-- Scenario Tabs -->
+                <div class="flex flex-wrap gap-1.5">
+                  <button
+                    v-for="scenario in fundingScenarios"
+                    :key="scenario.id"
+                    @click="!compareMode ? (activeScenarioId = scenario.id) : toggleCompareScenario(scenario.id)"
+                    class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all border"
+                    :class="!compareMode
+                      ? (activeScenarioId === scenario.id ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-navy-700 border-stone-200 hover:border-indigo-300')
+                      : (compareScenarioIds.includes(scenario.id) ? 'bg-indigo-100 text-indigo-700 border-indigo-300 ring-1 ring-indigo-200' : 'bg-white text-navy-700 border-stone-200 hover:border-indigo-300')
+                    "
+                  >
+                    {{ scenario.name }}
+                  </button>
+                  <button @click="createScenario" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-stone-50 text-stone-600 border border-dashed border-stone-300 hover:bg-stone-100 transition-colors">
+                    + {{ t('dashboard.scenarios.createScenario') }}
+                  </button>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  v-if="fundingScenarios.length >= 2"
+                  @click="compareMode = !compareMode; if (compareMode && compareScenarioIds.length === 0) compareScenarioIds = fundingScenarios.slice(0, 2).map(s => s.id)"
+                  class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all border"
+                  :class="compareMode ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-white text-navy-600 border-stone-200 hover:bg-stone-50'"
+                >
+                  {{ t('dashboard.scenarios.compareMode') }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Empty Scenarios State -->
+            <div v-if="fundingScenarios.length === 0" class="text-center py-10">
+              <div class="w-14 h-14 mx-auto mb-3 bg-amber-50 rounded-full flex items-center justify-center">
+                <svg class="w-7 h-7 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+              </div>
+              <p class="text-sm font-medium text-navy-700">{{ t('dashboard.scenarios.emptyState') }}</p>
+              <p class="text-xs text-stone-500 mt-1 max-w-sm mx-auto">{{ t('dashboard.scenarios.emptyStateDesc') }}</p>
+              <button @click="createScenario" class="mt-4 btn btn-primary text-sm">
+                {{ t('dashboard.scenarios.createScenario') }}
+              </button>
+            </div>
+
+            <!-- Single Scenario View -->
+            <div v-if="!compareMode && activeScenario" class="space-y-6">
+              <!-- Scenario Actions -->
+              <div class="flex items-center gap-2">
+                <div class="flex-1">
+                  <input
+                    v-if="renamingScenarioId === activeScenario.id"
+                    v-model="renameValue"
+                    @blur="finishRename"
+                    @keyup.enter="finishRename"
+                    @keyup.escape="renamingScenarioId = ''"
+                    class="text-sm font-semibold text-navy-900 bg-transparent border-b border-indigo-300 outline-none px-1 py-0.5 w-64"
+                    :placeholder="t('dashboard.scenarios.scenarioNamePlaceholder')"
+                  />
+                  <h3 v-else class="text-sm font-semibold text-navy-900">{{ activeScenario.name }}</h3>
+                </div>
+                <button @click="startRename(activeScenario)" class="text-xs text-stone-400 hover:text-indigo-600 transition-colors" :title="t('dashboard.scenarios.renameScenario')">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </button>
+                <button @click="deleteScenario(activeScenario.id)" class="text-xs text-stone-400 hover:text-red-500 transition-colors" :title="t('dashboard.scenarios.deleteScenario')">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+
+              <!-- Grant Toggles -->
+              <div class="bg-stone-50 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-xs font-semibold text-navy-700 uppercase tracking-wider">{{ t('dashboard.scenarios.toggleGrant') }}</span>
+                  <button @click="toggleAllGrants(activeScenario)" class="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+                    {{ t('dashboard.scenarios.toggleAll') }}
+                  </button>
+                </div>
+                <div class="space-y-1.5 max-h-48 overflow-y-auto">
+                  <label
+                    v-for="grant in scenarioSavedGrants"
+                    :key="grant.id"
+                    class="flex items-center gap-3 p-2 rounded-lg hover:bg-white transition-colors cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="activeScenario.grantIds.includes(String(grant.id))"
+                      @change="toggleGrantInScenario(activeScenario, String(grant.id))"
+                      class="w-4 h-4 rounded border-stone-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium text-navy-800 truncate">{{ grant.title }}</p>
+                      <p class="text-[10px] text-stone-400">{{ grant.funder_name || grant.program_name || '' }} &middot; {{ formatCurrency(grant.amount_max || grant.amount_min || 0) }}</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Projection Summary Cards -->
+              <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="bg-white border border-stone-200 rounded-xl p-4 text-center">
+                  <div class="text-xl font-bold text-navy-900">{{ formatCurrency(scenarioProjections.total) }}</div>
+                  <div class="text-[10px] text-stone-500 mt-1">{{ t('dashboard.scenarios.totalFunding') }}</div>
+                </div>
+                <div class="bg-white border border-emerald-200 rounded-xl p-4 text-center">
+                  <div class="text-xl font-bold text-emerald-600">{{ formatCurrency(scenarioProjections.bestCase) }}</div>
+                  <div class="text-[10px] text-stone-500 mt-1">{{ t('dashboard.scenarios.bestCase') }}</div>
+                </div>
+                <div class="bg-white border border-amber-200 rounded-xl p-4 text-center">
+                  <div class="text-xl font-bold text-amber-600">{{ formatCurrency(scenarioProjections.worstCase) }}</div>
+                  <div class="text-[10px] text-stone-500 mt-1">{{ t('dashboard.scenarios.worstCase') }}</div>
+                </div>
+                <div class="bg-white border border-stone-200 rounded-xl p-4 text-center">
+                  <div class="text-xl font-bold text-indigo-600">{{ scenarioProjections.grantCount }}</div>
+                  <div class="text-[10px] text-stone-500 mt-1">{{ t('dashboard.scenarios.grantCount') }}</div>
+                </div>
+              </div>
+
+              <!-- Cash Flow Timeline -->
+              <div v-if="scenarioProjections.grantCount > 0" class="bg-white border border-stone-200 rounded-xl p-4">
+                <h4 class="text-xs font-semibold text-navy-800 mb-1">{{ t('dashboard.scenarios.cashFlow') }}</h4>
+                <p class="text-[10px] text-stone-400 mb-3">{{ t('dashboard.scenarios.cashFlowDesc') }}</p>
+                <div class="flex items-end gap-1" style="height: 120px;">
+                  <div
+                    v-for="bar in scenarioCashFlow"
+                    :key="bar.month"
+                    class="flex-1 flex flex-col items-center justify-end"
+                  >
+                    <span v-if="bar.amount > 0" class="text-[9px] font-medium text-navy-700 mb-0.5">{{ formatCurrencyShort(bar.amount) }}</span>
+                    <div
+                      class="w-full rounded-t-md transition-all duration-300"
+                      :class="bar.amount > 0 ? 'bg-indigo-400' : 'bg-stone-100'"
+                      :style="{ height: Math.max(bar.percent, bar.amount > 0 ? 8 : 2) + '%' }"
+                    ></div>
+                    <span class="text-[9px] text-stone-400 mt-1">{{ bar.label }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Co-Financing & Workload Row -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <!-- Co-Financing -->
+                <div class="bg-white border border-stone-200 rounded-xl p-4">
+                  <h4 class="text-xs font-semibold text-navy-800 mb-3">{{ t('dashboard.scenarios.coFinancing') }}</h4>
+                  <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                      <span class="text-stone-500">{{ t('dashboard.scenarios.coFinancingTotal') }}</span>
+                      <span class="font-semibold text-amber-600">{{ formatCurrency(scenarioCoFinancing.totalRequired) }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                      <span class="text-stone-500">{{ t('dashboard.scenarios.coFinancingGrants') }}</span>
+                      <span class="font-semibold text-navy-800">{{ scenarioCoFinancing.grantsWithCoFinancing }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                      <span class="text-stone-500">{{ t('dashboard.scenarios.coFinancingPercent') }}</span>
+                      <span class="font-semibold text-navy-800">{{ scenarioCoFinancing.avgRate }}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Workload Distribution -->
+                <div class="bg-white border border-stone-200 rounded-xl p-4">
+                  <h4 class="text-xs font-semibold text-navy-800 mb-1">{{ t('dashboard.scenarios.workloadTitle') }}</h4>
+                  <p class="text-[10px] text-stone-400 mb-3">{{ t('dashboard.scenarios.workloadDesc') }}</p>
+                  <div class="flex gap-1">
+                    <div v-for="m in scenarioWorkload" :key="m.month" class="flex-1 text-center">
+                      <div class="h-8 rounded-md flex items-center justify-center text-xs font-medium"
+                        :class="m.count === 0 ? 'bg-stone-100 text-stone-400' : m.count <= 1 ? 'bg-emerald-100 text-emerald-700' : m.count <= 2 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'">
+                        {{ m.count || '' }}
+                      </div>
+                      <div class="text-[9px] text-stone-400 mt-1">{{ m.label }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Compare Mode View -->
+            <div v-if="compareMode && compareScenariosData.length > 0" class="space-y-6">
+              <p class="text-xs text-stone-500">{{ t('dashboard.scenarios.compareModeDesc') }}</p>
+              <div class="grid gap-4" :class="compareScenariosData.length === 3 ? 'grid-cols-3' : compareScenariosData.length === 2 ? 'grid-cols-2' : 'grid-cols-1'">
+                <div v-for="sc in compareScenariosData" :key="sc.id" class="bg-white border border-stone-200 rounded-xl p-4 space-y-3">
+                  <h4 class="text-sm font-bold text-navy-900 text-center border-b border-stone-100 pb-2">{{ sc.name }}</h4>
+                  <div class="text-center">
+                    <div class="text-lg font-bold text-navy-900">{{ formatCurrency(sc.projections.total) }}</div>
+                    <div class="text-[10px] text-stone-500">{{ t('dashboard.scenarios.totalFunding') }}</div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-2 text-center">
+                    <div>
+                      <div class="text-sm font-semibold text-emerald-600">{{ formatCurrency(sc.projections.bestCase) }}</div>
+                      <div class="text-[9px] text-stone-400">{{ t('dashboard.scenarios.bestCase') }}</div>
+                    </div>
+                    <div>
+                      <div class="text-sm font-semibold text-amber-600">{{ formatCurrency(sc.projections.worstCase) }}</div>
+                      <div class="text-[9px] text-stone-400">{{ t('dashboard.scenarios.worstCase') }}</div>
+                    </div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-sm font-semibold text-indigo-600">{{ sc.projections.grantCount }}</div>
+                    <div class="text-[9px] text-stone-400">{{ t('dashboard.scenarios.grantCount') }}</div>
+                  </div>
+                  <!-- Mini Cash Flow -->
+                  <div class="flex items-end gap-px" style="height: 60px;">
+                    <div v-for="bar in sc.cashFlow" :key="bar.month" class="flex-1 flex flex-col items-center justify-end">
+                      <div
+                        class="w-full rounded-t-sm"
+                        :class="bar.amount > 0 ? 'bg-indigo-300' : 'bg-stone-100'"
+                        :style="{ height: Math.max(bar.percent, bar.amount > 0 ? 8 : 2) + '%' }"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="flex justify-between text-[9px] text-stone-400">
+                    <span>{{ sc.cashFlow[0]?.label }}</span>
+                    <span>{{ sc.cashFlow[sc.cashFlow.length - 1]?.label }}</span>
+                  </div>
+                  <!-- Co-Financing Summary -->
+                  <div class="text-center pt-2 border-t border-stone-100">
+                    <div class="text-sm font-semibold text-amber-600">{{ formatCurrency(sc.coFinancing.totalRequired) }}</div>
+                    <div class="text-[9px] text-stone-400">{{ t('dashboard.scenarios.coFinancingTotal') }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
     <!-- Discovery Funnel -->
     <div v-if="funnelData.viewed > 0" class="mt-8 animate-fade-in">
       <h2 class="text-xl font-bold text-navy-900 mb-6">{{ t('dashboard.funnel.title') }}</h2>
@@ -899,6 +1171,293 @@ function formatCurrency(amount: number): string {
   return `€${amount}`
 }
 
+function formatCurrencyShort(amount: number): string {
+  if (amount >= 1000000) return `${(amount / 1000000).toFixed(1)}M`
+  if (amount >= 1000) return `${(amount / 1000).toFixed(0)}K`
+  return `${amount}`
+}
+
+// --- Funding Strategy Scenario Planner ---
+
+interface FundingScenario {
+  id: string
+  name: string
+  grantIds: string[]
+  createdAt: string
+}
+
+interface ScenarioProjections {
+  total: number
+  bestCase: number
+  worstCase: number
+  average: number
+  grantCount: number
+}
+
+interface CashFlowBar {
+  month: string
+  label: string
+  amount: number
+  percent: number
+}
+
+interface CoFinancingSummary {
+  totalRequired: number
+  grantsWithCoFinancing: number
+  avgRate: number
+}
+
+interface WorkloadMonth {
+  month: string
+  label: string
+  count: number
+}
+
+// State
+const scenarioPlannerOpen = ref(false)
+const activeScenarioId = ref('')
+const compareMode = ref(false)
+const compareScenarioIds = ref<string[]>([])
+const renamingScenarioId = ref('')
+const renameValue = ref('')
+
+// Load scenarios from localStorage
+const fundingScenarios = ref<FundingScenario[]>([])
+
+function loadScenarios() {
+  try {
+    const raw = localStorage.getItem('fundingScenarios')
+    if (raw) {
+      fundingScenarios.value = JSON.parse(raw)
+    }
+  } catch { /* ignore */ }
+}
+
+function saveScenarios() {
+  localStorage.setItem('fundingScenarios', JSON.stringify(fundingScenarios.value))
+}
+
+// Saved grants that exist in allGrantsForCharts
+const scenarioSavedGrants = computed(() => {
+  const savedIds: string[] = JSON.parse(localStorage.getItem('savedGrants') || '[]')
+  return allGrantsForCharts.value.filter((g: any) => savedIds.includes(String(g.id)))
+})
+
+// Active scenario
+const activeScenario = computed(() => {
+  return fundingScenarios.value.find(s => s.id === activeScenarioId.value) || null
+})
+
+// Create a new scenario
+function createScenario() {
+  const id = `sc_${Date.now()}`
+  const n = fundingScenarios.value.length + 1
+  const allGrantIds = scenarioSavedGrants.value.map((g: any) => String(g.id))
+  const scenario: FundingScenario = {
+    id,
+    name: t('dashboard.scenarios.defaultName', { n }),
+    grantIds: [...allGrantIds],
+    createdAt: new Date().toISOString()
+  }
+  fundingScenarios.value.push(scenario)
+  activeScenarioId.value = id
+  compareMode.value = false
+  saveScenarios()
+}
+
+function deleteScenario(id: string) {
+  fundingScenarios.value = fundingScenarios.value.filter(s => s.id !== id)
+  if (activeScenarioId.value === id) {
+    activeScenarioId.value = fundingScenarios.value.length > 0 ? fundingScenarios.value[0]!.id : ''
+  }
+  compareScenarioIds.value = compareScenarioIds.value.filter(sid => sid !== id)
+  saveScenarios()
+}
+
+function startRename(scenario: FundingScenario) {
+  renamingScenarioId.value = scenario.id
+  renameValue.value = scenario.name
+}
+
+function finishRename() {
+  if (renamingScenarioId.value && renameValue.value.trim()) {
+    const sc = fundingScenarios.value.find(s => s.id === renamingScenarioId.value)
+    if (sc) {
+      sc.name = renameValue.value.trim()
+      saveScenarios()
+    }
+  }
+  renamingScenarioId.value = ''
+  renameValue.value = ''
+}
+
+function toggleGrantInScenario(scenario: FundingScenario, grantId: string) {
+  const idx = scenario.grantIds.indexOf(grantId)
+  if (idx >= 0) {
+    scenario.grantIds.splice(idx, 1)
+  } else {
+    scenario.grantIds.push(grantId)
+  }
+  saveScenarios()
+}
+
+function toggleAllGrants(scenario: FundingScenario) {
+  const allIds = scenarioSavedGrants.value.map((g: any) => String(g.id))
+  if (scenario.grantIds.length === allIds.length) {
+    scenario.grantIds = []
+  } else {
+    scenario.grantIds = [...allIds]
+  }
+  saveScenarios()
+}
+
+function toggleCompareScenario(id: string) {
+  const idx = compareScenarioIds.value.indexOf(id)
+  if (idx >= 0) {
+    compareScenarioIds.value.splice(idx, 1)
+  } else if (compareScenarioIds.value.length < 3) {
+    compareScenarioIds.value.push(id)
+  }
+}
+
+// Compute projections for a given scenario
+function computeProjections(scenario: FundingScenario): ScenarioProjections {
+  const grants = allGrantsForCharts.value.filter((g: any) => scenario.grantIds.includes(String(g.id)))
+  let total = 0
+  let bestCase = 0
+  let worstCase = 0
+
+  grants.forEach((g: any) => {
+    const maxAmt = g.amount_max || g.amount_min || 0
+    const minAmt = g.amount_min || g.amount_max || 0
+    total += maxAmt
+    bestCase += maxAmt
+    worstCase += minAmt
+  })
+
+  const grantCount = grants.length
+  const average = grantCount > 0 ? Math.round((bestCase + worstCase) / 2) : 0
+
+  return { total, bestCase, worstCase, average, grantCount }
+}
+
+// Compute cash flow for a given scenario
+function computeCashFlow(scenario: FundingScenario): CashFlowBar[] {
+  const grants = allGrantsForCharts.value.filter((g: any) => scenario.grantIds.includes(String(g.id)))
+  const now = new Date()
+  const monthlyAmounts: Record<string, number> = {}
+
+  // Build 6-month range
+  const months: Array<{ key: string; label: string }> = []
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1)
+    const key = d.toISOString().substring(0, 7)
+    const label = d.toLocaleDateString(undefined, { month: 'short' })
+    months.push({ key, label })
+    monthlyAmounts[key] = 0
+  }
+
+  grants.forEach((g: any) => {
+    if (!g.deadline) return
+    const month = g.deadline.substring(0, 7)
+    if (monthlyAmounts[month] !== undefined) {
+      monthlyAmounts[month] += g.amount_max || g.amount_min || 0
+    }
+  })
+
+  const maxAmount = Math.max(...Object.values(monthlyAmounts), 1)
+
+  return months.map(m => ({
+    month: m.key,
+    label: m.label,
+    amount: monthlyAmounts[m.key] || 0,
+    percent: Math.round(((monthlyAmounts[m.key] || 0) / maxAmount) * 100)
+  }))
+}
+
+// Compute co-financing for a given scenario
+function computeCoFinancing(scenario: FundingScenario): CoFinancingSummary {
+  const grants = allGrantsForCharts.value.filter((g: any) => scenario.grantIds.includes(String(g.id)))
+  let totalRequired = 0
+  let grantsWithCoFinancing = 0
+  let sumRates = 0
+
+  grants.forEach((g: any) => {
+    const fundingRate = g.funding_rate || g.co_financing_rate || 0
+    if (fundingRate > 0 && fundingRate < 100) {
+      const maxAmt = g.amount_max || g.amount_min || 0
+      // total project = grant / (rate/100), co-financing = total - grant
+      const totalProject = fundingRate > 0 ? Math.round(maxAmt / (fundingRate / 100)) : maxAmt
+      const coFin = totalProject - maxAmt
+      if (coFin > 0) {
+        totalRequired += coFin
+        grantsWithCoFinancing++
+        sumRates += fundingRate
+      }
+    }
+  })
+
+  const avgRate = grantsWithCoFinancing > 0 ? Math.round(sumRates / grantsWithCoFinancing) : 0
+
+  return { totalRequired, grantsWithCoFinancing, avgRate }
+}
+
+// Compute workload for a given scenario
+function computeWorkload(scenario: FundingScenario): WorkloadMonth[] {
+  const grants = allGrantsForCharts.value.filter((g: any) => scenario.grantIds.includes(String(g.id)))
+  const now = new Date()
+  const months: WorkloadMonth[] = []
+
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1)
+    const key = d.toISOString().substring(0, 7)
+    const label = d.toLocaleDateString(undefined, { month: 'short' })
+    let count = 0
+    grants.forEach((g: any) => {
+      if (g.deadline && g.deadline.startsWith(key)) count++
+    })
+    months.push({ month: key, label, count })
+  }
+
+  return months
+}
+
+// Active scenario computed data
+const scenarioProjections = computed<ScenarioProjections>(() => {
+  if (!activeScenario.value) return { total: 0, bestCase: 0, worstCase: 0, average: 0, grantCount: 0 }
+  return computeProjections(activeScenario.value)
+})
+
+const scenarioCashFlow = computed<CashFlowBar[]>(() => {
+  if (!activeScenario.value) return []
+  return computeCashFlow(activeScenario.value)
+})
+
+const scenarioCoFinancing = computed<CoFinancingSummary>(() => {
+  if (!activeScenario.value) return { totalRequired: 0, grantsWithCoFinancing: 0, avgRate: 0 }
+  return computeCoFinancing(activeScenario.value)
+})
+
+const scenarioWorkload = computed<WorkloadMonth[]>(() => {
+  if (!activeScenario.value) return []
+  return computeWorkload(activeScenario.value)
+})
+
+// Compare mode data
+const compareScenariosData = computed(() => {
+  return compareScenarioIds.value
+    .map(id => fundingScenarios.value.find(s => s.id === id))
+    .filter((s): s is FundingScenario => !!s)
+    .map(s => ({
+      id: s.id,
+      name: s.name,
+      projections: computeProjections(s),
+      cashFlow: computeCashFlow(s),
+      coFinancing: computeCoFinancing(s),
+      workload: computeWorkload(s)
+    }))
+})
+
 const totalFundingAllStages = computed(() => {
   return Object.values(portfolioStats.value.fundingByStage).reduce((a, b) => a + b, 0)
 })
@@ -1265,6 +1824,12 @@ async function fetchDashboardData() {
 }
 
 onMounted(async () => {
+  // Load funding scenarios from localStorage
+  loadScenarios()
+  if (fundingScenarios.value.length > 0) {
+    activeScenarioId.value = fundingScenarios.value[0]!.id
+  }
+
   await fetchDashboardData()
 
   // Seed activity log from existing saved grants if empty

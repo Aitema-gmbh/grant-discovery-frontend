@@ -43,6 +43,12 @@
           </svg>
           iCal
         </button>
+        <button v-if="compareGrants.length >= 2" @click="showCompareModal = true" class="btn btn-primary btn-sm flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          {{ $t('comparison.compareNow') }} ({{ compareGrants.length }})
+        </button>
         <button v-if="allGrants.length > 0" @click="shareGrantList" class="btn btn-outline btn-sm flex items-center gap-1.5" :title="$t('savedGrants.shareList')">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
@@ -371,6 +377,19 @@
           </div>
         </div>
 
+        <!-- Compare -->
+        <button
+          @click.stop="toggleComparison(grant)"
+          class="flex-shrink-0 p-1.5 transition-colors"
+          :class="isInComparison(grant.id) ? 'text-blue-500' : 'text-navy-400 hover:text-blue-500'"
+          :aria-label="isInComparison(grant.id) ? $t('comparison.removeFromCompare') : $t('comparison.addToCompare')"
+          :title="isInComparison(grant.id) ? $t('comparison.removeFromCompare') : $t('comparison.addToCompare')"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </button>
+
         <!-- Remove -->
         <button
           @click.stop="removeSavedGrant(grant.id)"
@@ -503,6 +522,56 @@
         {{ $t('savedGrants.browseGrants') }}
       </router-link>
     </div>
+
+    <!-- Floating Comparison Bar -->
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="translate-y-full opacity-0"
+        enter-to-class="translate-y-0 opacity-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="translate-y-0 opacity-100"
+        leave-to-class="translate-y-full opacity-0"
+      >
+        <div v-if="compareGrants.length > 0 && !showCompareModal" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-navy-900 text-white rounded-2xl shadow-2xl px-5 py-3 max-w-2xl">
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+              <span class="text-sm font-medium">{{ compareGrants.length }}/4</span>
+            </div>
+            <div class="hidden sm:flex items-center gap-2">
+              <div v-for="cg in compareGrants" :key="cg.id" class="flex items-center gap-2 bg-white/10 rounded-lg px-2.5 py-1.5 max-w-[140px]">
+                <p class="text-xs font-medium truncate flex-1 min-w-0">{{ cg.title }}</p>
+                <button @click="toggleComparison(cg)" class="text-white/40 hover:text-white flex-shrink-0">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                </button>
+              </div>
+            </div>
+            <button
+              @click="showCompareModal = true"
+              :disabled="compareGrants.length < 2"
+              class="btn btn-secondary btn-sm whitespace-nowrap"
+              :class="compareGrants.length < 2 ? 'opacity-50 cursor-not-allowed' : ''"
+            >
+              {{ $t('comparison.compareNow') }}
+            </button>
+            <button @click="compareGrants = []" class="text-white/60 hover:text-white text-sm whitespace-nowrap">
+              {{ $t('common.clear') }}
+            </button>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Grant Comparison Matrix -->
+    <GrantComparisonMatrix
+      :grants="compareGrants"
+      v-model="showCompareModal"
+      @close="showCompareModal = false"
+      @clear="compareGrants = []; showCompareModal = false"
+    />
   </AppLayout>
 </template>
 
@@ -510,6 +579,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/AppLayout.vue'
+import GrantComparisonMatrix from '@/components/GrantComparisonMatrix.vue'
 import api from '@/services/api'
 import { useToast } from '@/lib/useToast'
 import { usePageTitle } from '@/lib/usePageTitle'
@@ -524,6 +594,25 @@ const activeStatusFilter = ref<string | null>(null)
 const loadError = ref(false)
 const viewMode = ref<'cards' | 'timeline' | 'kanban'>('cards')
 const sortMode = ref('default')
+
+// Comparison
+const compareGrants = ref<any[]>([])
+const showCompareModal = ref(false)
+
+function isInComparison(grantId: string): boolean {
+  return compareGrants.value.some((g: any) => String(g.id) === String(grantId))
+}
+
+function toggleComparison(grant: any) {
+  const idx = compareGrants.value.findIndex((g: any) => String(g.id) === String(grant.id))
+  if (idx > -1) {
+    compareGrants.value.splice(idx, 1)
+  } else if (compareGrants.value.length < 4) {
+    compareGrants.value.push(grant)
+  } else {
+    toast.warning(t('comparison.maxReached'))
+  }
+}
 
 // Grant Dependency Mapper
 interface GrantDependency {

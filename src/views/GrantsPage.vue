@@ -769,7 +769,7 @@
               <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
               </svg>
-              <span class="text-sm font-medium">{{ compareGrants.length }}/3</span>
+              <span class="text-sm font-medium">{{ compareGrants.length }}/4</span>
             </div>
             <button
               @click="showCompareModal = true"
@@ -821,85 +821,15 @@
         </div>
       </Transition>
 
-      <!-- Comparison Modal -->
-      <Transition
-        enter-active-class="transition duration-300 ease-out"
-        enter-from-class="opacity-0"
-        enter-to-class="opacity-100"
-        leave-active-class="transition duration-200 ease-in"
-        leave-from-class="opacity-100"
-        leave-to-class="opacity-0"
-      >
-        <div v-if="showCompareModal" ref="compareModalRef" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="showCompareModal = false" @keydown.escape="showCompareModal = false">
-          <div class="absolute inset-0 bg-black/50"></div>
-          <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-y-auto">
-            <div class="sticky top-0 bg-white px-6 py-4 border-b border-navy-100 flex items-center justify-between rounded-t-2xl z-10">
-              <h2 class="text-xl font-display font-semibold text-navy-900">{{ $t('grants.compareGrants') }}</h2>
-              <button @click="showCompareModal = false" class="p-2 -mr-2 text-navy-400 hover:text-navy-700">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              </button>
-            </div>
-            <div class="p-6 overflow-x-auto">
-              <table class="w-full text-sm">
-                <thead>
-                  <tr>
-                    <th class="text-left py-3 px-4 text-navy-500 font-medium w-32"></th>
-                    <th v-for="g in compareGrants" :key="g.id" class="text-left py-3 px-4 text-navy-900 font-semibold">
-                      <div class="max-w-48 truncate">{{ g.title }}</div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-navy-100">
-                  <tr class="bg-navy-50/50">
-                    <td class="py-3 px-4 font-medium text-navy-600">{{ $t('grants.filters.amount') }}</td>
-                    <td v-for="g in compareGrants" :key="g.id" class="py-3 px-4 text-amber-600 font-semibold">
-                      {{ formatAmount(g.amount_min, g.amount_max, g.currency) }}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="py-3 px-4 font-medium text-navy-600">{{ $t('grants.deadline') }}</td>
-                    <td v-for="g in compareGrants" :key="g.id" class="py-3 px-4" :class="deadlineColor(g.deadline)">
-                      {{ g.deadline ? formatDate(g.deadline) : '-' }}
-                    </td>
-                  </tr>
-                  <tr class="bg-navy-50/50">
-                    <td class="py-3 px-4 font-medium text-navy-600">{{ $t('grants.category') }}</td>
-                    <td v-for="g in compareGrants" :key="g.id" class="py-3 px-4">
-                      <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full" :class="categoryBadgeClass(g.category)">
-                        {{ categoryIcon(g.category) }} {{ g.category || 'General' }}
-                      </span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="py-3 px-4 font-medium text-navy-600">{{ $t('grants.filters.country') }}</td>
-                    <td v-for="g in compareGrants" :key="g.id" class="py-3 px-4 text-navy-700">
-                      {{ parseCountries(g.eligible_countries).join(', ') || '-' }}
-                    </td>
-                  </tr>
-                  <tr class="bg-navy-50/50">
-                    <td class="py-3 px-4 font-medium text-navy-600">{{ $t('grants.filters.statusLabel') }}</td>
-                    <td v-for="g in compareGrants" :key="g.id" class="py-3 px-4">
-                      <span :class="statusBadgeClass(g.status)">{{ g.status || 'Open' }}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="py-3 px-4 font-medium text-navy-600">{{ $t('grants.donor') }}</td>
-                    <td v-for="g in compareGrants" :key="g.id" class="py-3 px-4 text-navy-700">
-                      {{ g.donor_name || g.program_name || '-' }}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="sticky bottom-0 bg-white px-6 py-4 border-t border-navy-100 flex justify-end gap-3 rounded-b-2xl">
-              <button @click="showCompareModal = false" class="btn btn-outline">{{ $t('common.close') }}</button>
-            </div>
-          </div>
-        </div>
-      </Transition>
     </Teleport>
+
+    <!-- Grant Comparison Matrix -->
+    <GrantComparisonMatrix
+      :grants="compareGrants"
+      v-model="showCompareModal"
+      @close="showCompareModal = false"
+      @clear="compareGrants = []; showCompareModal = false"
+    />
     <ScrollToTop />
 
     <!-- Quick Preview Popover -->
@@ -1041,6 +971,7 @@ import AppLayout from '@/components/AppLayout.vue'
 import HelpTooltip from '@/components/HelpTooltip.vue'
 import ScrollToTop from '@/components/ScrollToTop.vue'
 import SkeletonCard from '@/components/SkeletonCard.vue'
+import GrantComparisonMatrix from '@/components/GrantComparisonMatrix.vue'
 import api from '@/services/api'
 import { useToast } from '@/lib/useToast'
 import { useFeedback } from '@/lib/useFeedback'
@@ -1638,19 +1569,24 @@ function batchExportCsv() {
 // Compare grants
 const compareGrants = ref<any[]>([])
 const showCompareModal = ref(false)
-const compareModalRef = ref<HTMLElement | null>(null)
 const mobileFilterRef = ref<HTMLElement | null>(null)
-useFocusTrap(showCompareModal, compareModalRef)
 useFocusTrap(showMobileFilters, mobileFilterRef)
+
+// Sync comparison list to localStorage
+watch(compareGrants, (val) => {
+  try {
+    localStorage.setItem('comparisonList', JSON.stringify(val.map((g: any) => g.id)))
+  } catch { /* storage full */ }
+}, { deep: true })
 
 function toggleCompareGrant(grant: any) {
   const idx = compareGrants.value.findIndex(g => g.id === grant.id)
   if (idx > -1) {
     compareGrants.value.splice(idx, 1)
-  } else if (compareGrants.value.length < 3) {
+  } else if (compareGrants.value.length < 4) {
     compareGrants.value.push(grant)
   } else {
-    toast.warning(t('grants.maxCompare'))
+    toast.warning(t('comparison.maxReached'))
   }
 }
 
