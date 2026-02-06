@@ -138,6 +138,12 @@ export default {
             applying: 'Applying',
             submitted: 'Submitted',
             outcome: 'Outcome'
+        },
+        readiness: {
+            title: 'Grant Readiness',
+            notReady: 'Not Ready',
+            inProgress: 'In Progress',
+            ready: 'Ready',
         }
     },
 
@@ -759,6 +765,13 @@ export default {
         },
         noDeadlines: 'No grants with deadlines to export',
         icalExported: 'Calendar file exported successfully',
+        sort: {
+            default: 'Sort: Default',
+            urgent: 'Sort: Most Urgent',
+            budget: 'Sort: Highest Budget',
+            readiness: 'Sort: Most Ready',
+            newest: 'Sort: Newest First',
+        },
     },
 
     // Footer
@@ -992,6 +1005,7 @@ export default {
         offlineDesc: 'Changes are saved locally and will be available when you reconnect.',
         saving: 'Saving...',
         savedLocally: 'Saved locally at {time}',
+        prefilledFromProfile: 'Pre-filled from your CSO profile. You can edit any field.',
     },
 
     // Proposal Detail

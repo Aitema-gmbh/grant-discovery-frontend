@@ -338,6 +338,35 @@
       </div>
     </div>
 
+    <!-- Grant Readiness Overview -->
+    <div v-if="readinessData.length > 0" class="mt-8 animate-fade-in" style="animation-delay: 0.38s">
+      <div class="card">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="section-title">{{ $t('dashboard.readiness.title') }}</h3>
+          <router-link to="/saved" class="text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors">
+            {{ $t('common.viewAll') }} →
+          </router-link>
+        </div>
+        <div class="flex flex-wrap gap-1.5">
+          <router-link
+            v-for="item in readinessData"
+            :key="item.id"
+            :to="`/grants/${item.id}`"
+            class="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold transition-all hover:scale-110 hover:shadow-md"
+            :class="item.colorClass"
+            :title="item.title + ' — ' + item.score + '%'"
+          >
+            {{ item.score }}
+          </router-link>
+        </div>
+        <div class="flex items-center gap-4 mt-3 text-[10px] text-navy-500">
+          <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-red-100 border border-red-300"></span> {{ $t('dashboard.readiness.notReady') }}</span>
+          <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-amber-100 border border-amber-300"></span> {{ $t('dashboard.readiness.inProgress') }}</span>
+          <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-green-100 border border-green-300"></span> {{ $t('dashboard.readiness.ready') }}</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Charts Section -->
     <div v-if="allGrantsForCharts.length > 0" class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in" style="animation-delay: 0.4s">
       <!-- Deadline Timeline -->
@@ -485,6 +514,50 @@ const pipelineCounts = computed((): { interested: number; researching: number; a
     counts.total++
   })
   return counts
+})
+
+// Grant readiness heatmap
+const readinessData = computed(() => {
+  const savedIds: string[] = JSON.parse(localStorage.getItem('savedGrants') || '[]')
+  const workflow: Record<string, string> = JSON.parse(localStorage.getItem('grantWorkflow') || '{}')
+
+  return savedIds.map(id => {
+    let score = 0
+    // Status progress
+    const status = workflow[id] || 'interested'
+    const statusScores: Record<string, number> = { interested: 10, researching: 30, applying: 55, submitted: 85, outcome: 100 }
+    score += statusScores[status] || 10
+
+    // Prep checklist
+    try {
+      const items = JSON.parse(localStorage.getItem(`grantPrep_${id}`) || '[]')
+      if (items.length > 0) {
+        const checked = items.filter((i: any) => i.checked).length
+        score = Math.min(100, score + Math.round((checked / items.length) * 20))
+      }
+    } catch { /* */ }
+
+    // Has budget plan
+    try {
+      if (localStorage.getItem(`grantBudget_${id}`)) score = Math.min(100, score + 5)
+    } catch { /* */ }
+
+    // Has notes
+    try {
+      const notes = localStorage.getItem(`grantNotes_${id}`)
+      if (notes && notes.length > 2) score = Math.min(100, score + 5)
+    } catch { /* */ }
+
+    // Find grant title
+    const grant = allGrantsForCharts.value.find((g: any) => g.id === id || String(g.id) === id)
+    const title = grant?.title || `Grant ${id}`
+
+    let colorClass = 'bg-red-100 text-red-700 border border-red-200'
+    if (score >= 60) colorClass = 'bg-green-100 text-green-700 border border-green-200'
+    else if (score >= 30) colorClass = 'bg-amber-100 text-amber-700 border border-amber-200'
+
+    return { id, title, score, colorClass }
+  }).sort((a, b) => a.score - b.score)
 })
 
 // Display name

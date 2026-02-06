@@ -85,6 +85,11 @@
         <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ $t('proposalWizard.step1.title') }}</h2>
         <p class="text-gray-600 mb-6">{{ $t('proposalWizard.step1.subtitle') }}</p>
 
+        <div v-if="profilePreFilled" class="flex items-center gap-2 mb-4 px-3 py-2 bg-sage-50 border border-sage-200 rounded-lg text-xs text-sage-700">
+          <svg class="w-4 h-4 text-sage-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          {{ $t('proposalWizard.prefilledFromProfile') }}
+        </div>
+
         <div v-if="loadingCsos" class="animate-pulse space-y-3">
           <div class="h-20 bg-gray-200 rounded-lg"></div>
           <div class="h-20 bg-gray-200 rounded-lg"></div>
@@ -281,6 +286,9 @@ const router = useRouter()
 const { t } = useI18n()
 const toast = useToast()
 
+// Profile prefill state
+const profilePreFilled = ref(false)
+
 // Wizard state
 const steps = computed(() => [t('proposalWizard.steps.selectOrg'), t('proposalWizard.steps.chooseSections'), t('proposalWizard.steps.generate')])
 const currentStep = ref(0)
@@ -390,6 +398,31 @@ onBeforeRouteLeave(() => {
   }
   return true
 })
+
+// CSO Profile prefill
+async function prefillFromProfile() {
+  try {
+    // Try localStorage cache first
+    let profiles = JSON.parse(localStorage.getItem('csoProfiles') || '[]')
+    if (profiles.length === 0) {
+      // Try API
+      const { csos } = await csoApi.getAll()
+      if (csos?.length > 0) {
+        profiles = csos
+      }
+    }
+    if (profiles.length > 0) {
+      const profile = profiles[0]
+      // Auto-select CSO if not already selected
+      if (profile.id && !selectedCsoId.value) {
+        selectedCsoId.value = profile.id
+      }
+      profilePreFilled.value = true
+    }
+  } catch {
+    // Silent fail - profile prefill is optional
+  }
+}
 
 // Methods
 function nextStep() {
@@ -540,6 +573,9 @@ onMounted(async () => {
   } finally {
     loadingCsos.value = false
   }
+
+  // Pre-fill from CSO profile if available
+  await prefillFromProfile()
 })
 
 onUnmounted(() => {

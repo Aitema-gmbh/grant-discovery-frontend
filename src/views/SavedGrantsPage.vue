@@ -19,6 +19,13 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
           </button>
         </div>
+        <select v-if="allGrants.length > 0" v-model="sortMode" class="text-xs border border-navy-200 rounded-lg px-3 py-1.5 text-navy-700 bg-white focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none">
+          <option value="default">{{ $t('savedGrants.sort.default') }}</option>
+          <option value="urgent">{{ $t('savedGrants.sort.urgent') }}</option>
+          <option value="budget">{{ $t('savedGrants.sort.budget') }}</option>
+          <option value="readiness">{{ $t('savedGrants.sort.readiness') }}</option>
+          <option value="newest">{{ $t('savedGrants.sort.newest') }}</option>
+        </select>
         <button v-if="allGrants.length > 0" @click="exportSavedCsv" class="btn btn-outline btn-sm flex items-center gap-1.5">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -274,6 +281,7 @@ const allGrants = ref<any[]>([])
 const activeStatusFilter = ref<string | null>(null)
 const loadError = ref(false)
 const viewMode = ref<'cards' | 'timeline' | 'kanban'>('cards')
+const sortMode = ref('default')
 
 // Workflow statuses
 const workflowStatuses = computed(() => [
@@ -304,9 +312,56 @@ function grantsForStatus(statusId: string): any[] {
   return allGrants.value.filter(g => getGrantStatus(g.id) === statusId)
 }
 
+function getReadinessScore(grantId: string): number {
+  let score = 0
+  const status = getGrantStatus(grantId)
+  // Status progress score
+  const statusScores: Record<string, number> = { interested: 0, researching: 20, applying: 50, submitted: 80, outcome: 100 }
+  score += statusScores[status] || 0
+  // Prep checklist progress
+  try {
+    const items = JSON.parse(localStorage.getItem(`grantPrep_${grantId}`) || '[]')
+    if (items.length > 0) {
+      const checked = items.filter((i: any) => i.checked).length
+      score += Math.round((checked / items.length) * 30)
+    }
+  } catch { /* ignore */ }
+  // Has notes
+  try {
+    const notes = localStorage.getItem(`grantNotes_${grantId}`)
+    if (notes && notes.length > 2) score += 10
+  } catch { /* ignore */ }
+  // Has budget plan
+  try {
+    const budget = localStorage.getItem(`grantBudget_${grantId}`)
+    if (budget) score += 10
+  } catch { /* ignore */ }
+  return score
+}
+
 const filteredGrants = computed(() => {
-  if (!activeStatusFilter.value) return allGrants.value
-  return allGrants.value.filter(g => getGrantStatus(g.id) === activeStatusFilter.value)
+  let grants = activeStatusFilter.value
+    ? allGrants.value.filter(g => getGrantStatus(g.id) === activeStatusFilter.value)
+    : [...allGrants.value]
+
+  if (sortMode.value === 'urgent') {
+    grants.sort((a, b) => {
+      const da = a.deadline ? new Date(a.deadline).getTime() : Infinity
+      const db = b.deadline ? new Date(b.deadline).getTime() : Infinity
+      return da - db
+    })
+  } else if (sortMode.value === 'budget') {
+    grants.sort((a, b) => (b.amount_max || b.amount_min || 0) - (a.amount_max || a.amount_min || 0))
+  } else if (sortMode.value === 'readiness') {
+    grants.sort((a, b) => getReadinessScore(b.id) - getReadinessScore(a.id))
+  } else if (sortMode.value === 'newest') {
+    grants.sort((a, b) => {
+      const da = a.created_at ? new Date(a.created_at).getTime() : 0
+      const db = b.created_at ? new Date(b.created_at).getTime() : 0
+      return db - da
+    })
+  }
+  return grants
 })
 
 // Kanban drag-and-drop

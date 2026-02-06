@@ -138,6 +138,12 @@ export default {
             applying: 'Bewerbung',
             submitted: 'Eingereicht',
             outcome: 'Ergebnis'
+        },
+        readiness: {
+            title: 'Förderungsbereitschaft',
+            notReady: 'Nicht bereit',
+            inProgress: 'In Bearbeitung',
+            ready: 'Bereit',
         }
     },
 
@@ -762,6 +768,13 @@ export default {
         },
         noDeadlines: 'Keine Förderungen mit Fristen zum Exportieren',
         icalExported: 'Kalenderdatei erfolgreich exportiert',
+        sort: {
+            default: 'Sortierung: Standard',
+            urgent: 'Sortierung: Dringendste',
+            budget: 'Sortierung: Höchstes Budget',
+            readiness: 'Sortierung: Am besten vorbereitet',
+            newest: 'Sortierung: Neueste zuerst',
+        },
     },
 
     // Footer
@@ -995,6 +1008,7 @@ export default {
         offlineDesc: 'Änderungen werden lokal gespeichert und sind nach Wiederverbindung verfügbar.',
         saving: 'Wird gespeichert...',
         savedLocally: 'Lokal gespeichert um {time}',
+        prefilledFromProfile: 'Vorausgefüllt aus Ihrem CSO-Profil. Sie können jedes Feld bearbeiten.',
     },
 
     // Proposal Detail
