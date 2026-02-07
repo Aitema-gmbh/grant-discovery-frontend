@@ -1041,7 +1041,17 @@ export default {
         joinOrgs: 'Join 500+ organizations finding funding opportunities',
         termsPrefix: 'I agree to the',
         termsOfService: 'Terms of Service',
-        privacyPolicy: 'Privacy Policy'
+        privacyPolicy: 'Privacy Policy',
+        resetPasswordTitle: 'Reset Your Password',
+        resetPasswordSubtitle: 'Enter your new password below',
+        newPassword: 'New Password',
+        newPasswordPlaceholder: 'Enter new password',
+        confirmNewPassword: 'Confirm New Password',
+        confirmNewPasswordPlaceholder: 'Confirm new password',
+        updatePasswordButton: 'Update Password',
+        updating: 'Updating...',
+        passwordUpdated: 'Your password has been updated successfully!',
+        backToLogin: 'Back to Login',
     },
 
     // Settings

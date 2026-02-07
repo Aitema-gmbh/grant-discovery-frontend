@@ -1039,7 +1039,17 @@ export default {
         joinOrgs: 'Приєднуйтесь до 500+ організацій, які знаходять фінансування',
         termsPrefix: 'Я погоджуюся з',
         termsOfService: 'Умовами використання',
-        privacyPolicy: 'Політикою конфіденційності'
+        privacyPolicy: 'Політикою конфіденційності',
+        resetPasswordTitle: 'Скидання пароля',
+        resetPasswordSubtitle: 'Введіть новий пароль нижче',
+        newPassword: 'Новий пароль',
+        newPasswordPlaceholder: 'Введіть новий пароль',
+        confirmNewPassword: 'Підтвердіть новий пароль',
+        confirmNewPasswordPlaceholder: 'Підтвердіть новий пароль',
+        updatePasswordButton: 'Оновити пароль',
+        updating: 'Оновлення...',
+        passwordUpdated: 'Ваш пароль успішно оновлено!',
+        backToLogin: 'Повернутися до входу',
     },
 
     // Settings

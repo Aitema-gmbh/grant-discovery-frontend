@@ -1039,7 +1039,17 @@ export default {
         joinOrgs: 'Schließen Sie sich 500+ Organisationen an, die Fördermittel finden',
         termsPrefix: 'Ich stimme den',
         termsOfService: 'Nutzungsbedingungen',
-        privacyPolicy: 'Datenschutzerklärung'
+        privacyPolicy: 'Datenschutzerklärung',
+        resetPasswordTitle: 'Passwort zurücksetzen',
+        resetPasswordSubtitle: 'Geben Sie Ihr neues Passwort ein',
+        newPassword: 'Neues Passwort',
+        newPasswordPlaceholder: 'Neues Passwort eingeben',
+        confirmNewPassword: 'Passwort bestätigen',
+        confirmNewPasswordPlaceholder: 'Neues Passwort bestätigen',
+        updatePasswordButton: 'Passwort aktualisieren',
+        updating: 'Wird aktualisiert...',
+        passwordUpdated: 'Ihr Passwort wurde erfolgreich aktualisiert!',
+        backToLogin: 'Zurück zum Login',
     },
 
     // Settings
