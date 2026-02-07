@@ -122,6 +122,60 @@
       </button>
     </div>
 
+    <!-- Team Capacity Widget -->
+    <div v-if="capacityWidget.totalGrants > 0" class="mb-8 animate-fade-in" style="animation-delay: 0.12s">
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+              <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <h3 class="text-sm font-semibold text-navy-900">{{ $t('dashboard.capacity.title') }}</h3>
+          </div>
+          <div class="flex items-center gap-3">
+            <label class="text-[10px] text-stone-400 flex items-center gap-1.5">
+              {{ $t('dashboard.capacity.weeklyHours') }}
+              <input
+                type="number"
+                min="1"
+                max="168"
+                :value="teamCapacityHours"
+                @change="updateTeamCapacity(($event.target as HTMLInputElement).value)"
+                class="w-14 text-xs border border-stone-200 rounded px-1.5 py-0.5 text-center text-navy-800 focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 outline-none"
+              />
+            </label>
+          </div>
+        </div>
+        <!-- Progress bar -->
+        <div class="h-3 rounded-full overflow-hidden bg-stone-100">
+          <div
+            class="h-full rounded-full transition-all duration-500"
+            :class="capacityWidget.pct > 100 ? 'bg-red-500' : capacityWidget.pct >= 80 ? 'bg-amber-400' : 'bg-green-400'"
+            :style="{ width: Math.min(capacityWidget.pct, 100) + '%' }"
+          ></div>
+        </div>
+        <div class="flex items-center justify-between mt-2">
+          <span class="text-xs text-stone-500">
+            {{ $t('dashboard.capacity.monthlyCommitted', { hours: capacityWidget.committed }) }}
+          </span>
+          <span class="text-xs" :class="capacityWidget.pct > 100 ? 'text-red-600 font-semibold' : 'text-stone-500'">
+            {{ capacityWidget.pct > 100
+              ? $t('dashboard.capacity.overloaded')
+              : $t('dashboard.capacity.monthlyAvailable', { hours: capacityWidget.available - capacityWidget.committed })
+            }}
+          </span>
+        </div>
+        <!-- Overloaded warning -->
+        <div v-if="capacityWidget.pct > 100" class="mt-3 p-2.5 bg-red-50 rounded-lg border border-red-100">
+          <p class="text-xs text-red-700">
+            {{ $t('dashboard.capacity.overloadedWarning', { hours: capacityWidget.committed - capacityWidget.available }) }}
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- Smart Insights -->
     <div v-if="insights.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12 animate-fade-in" style="animation-delay: 0.15s">
       <div
@@ -350,6 +404,52 @@
             :class="stage.barColor"
             :style="`width: ${pipelineCounts.total > 0 ? (pipelineCounts[stage.id] || 0) / pipelineCounts.total * 100 : 0}%`"
           ></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- At Risk Applications -->
+    <div v-if="atRiskGrants.length > 0" data-at-risk class="mt-8 animate-fade-in" style="animation-delay: 0.37s">
+      <div class="card border-l-4 border-l-red-400">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-navy-900">{{ t('dashboard.atRisk.title') }}</h3>
+              <p class="text-xs text-navy-500">{{ t('dashboard.atRisk.desc') }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <router-link
+            v-for="rg in atRiskGrants"
+            :key="rg.id"
+            :to="`/grants/${rg.id}`"
+            class="flex items-center gap-3 p-3 rounded-lg bg-red-50/50 hover:bg-red-50 border border-red-100 transition-colors group"
+          >
+            <div
+              class="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+              :class="rg.readiness >= 40 ? 'bg-amber-500' : 'bg-red-500'"
+            >
+              {{ rg.readiness }}%
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-navy-800 truncate group-hover:text-red-700 transition-colors">{{ rg.title }}</p>
+              <div class="flex items-center gap-3 mt-0.5">
+                <span class="text-[10px] text-navy-500">{{ t('dashboard.atRisk.readiness') }}: {{ rg.readiness }}%</span>
+                <span class="text-[10px] font-bold" :class="rg.daysLeft <= 7 ? 'text-red-600' : 'text-amber-600'">
+                  {{ t('dashboard.atRisk.daysLeft', { count: rg.daysLeft }) }}
+                </span>
+              </div>
+            </div>
+            <span class="text-xs font-medium text-red-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              {{ t('dashboard.atRisk.viewRoadmap') }} &rarr;
+            </span>
+          </router-link>
         </div>
       </div>
     </div>
@@ -796,28 +896,6 @@
       </div>
     </div>
 
-    <!-- At Risk Applications -->
-    <div v-if="atRiskGrants.length > 0" class="mt-8 animate-fade-in">
-      <div class="card p-5 border-l-4 border-l-red-400">
-        <div class="flex items-center gap-2 mb-3">
-          <span class="text-lg">&#x26A0;&#xFE0F;</span>
-          <h3 class="text-sm font-bold text-red-700">{{ t('dashboard.atRisk.title') }}</h3>
-          <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">{{ atRiskGrants.length }}</span>
-        </div>
-        <p class="text-xs text-stone-500 mb-3">{{ t('dashboard.atRisk.desc') }}</p>
-        <div class="space-y-2">
-          <router-link v-for="g in atRiskGrants" :key="g.id" :to="`/grants/${g.id}`"
-            class="flex items-center justify-between p-2 rounded-lg hover:bg-red-50 transition-colors">
-            <div>
-              <span class="text-sm font-medium text-navy-800">{{ g.title }}</span>
-              <span class="text-xs text-stone-400 ml-2">{{ g.funder_name }}</span>
-            </div>
-            <span class="text-xs text-red-600 font-medium">{{ Math.ceil((new Date(g.deadline).getTime() - Date.now()) / (24*60*60*1000)) }}d left</span>
-          </router-link>
-        </div>
-      </div>
-    </div>
-
     <!-- Charts Section -->
     <div v-if="allGrantsForCharts.length > 0" class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in" style="animation-delay: 0.4s">
       <!-- Deadline Timeline -->
@@ -1019,6 +1097,156 @@ const fundingGap = computed(() => {
   return { diff, annualBudget, isSurplus: diff >= 0 }
 })
 
+// Team Capacity Widget
+const teamCapacityHours = ref(parseInt(localStorage.getItem('teamCapacityHours') || '40', 10))
+
+function updateTeamCapacity(val: string) {
+  const num = parseInt(val, 10)
+  if (num > 0 && num <= 168) {
+    teamCapacityHours.value = num
+    localStorage.setItem('teamCapacityHours', String(num))
+  }
+}
+
+function calculateGrantEffortForDashboard(g: any): number {
+  // Check stored override first
+  try {
+    const allEstimates = JSON.parse(localStorage.getItem('grantEffortEstimates') || '{}')
+    const stored = allEstimates[String(g.id)]
+    if (stored?.override) return stored.override
+    if (stored?.total) return stored.total
+  } catch { /* ignore */ }
+
+  // Auto-calculate
+  const maxAmount = g.amount_max || g.amount_min || 0
+  let baseHours = 20
+  if (maxAmount > 1000000) baseHours = 80
+  else if (maxAmount > 500000) baseHours = 60
+  else if (maxAmount > 200000) baseHours = 45
+  else if (maxAmount > 50000) baseHours = 30
+
+  const category = (g.category || '').toLowerCase()
+  let funderMultiplier = 1.0
+  if (category.includes('eu') || category.includes('european')) funderMultiplier = 1.4
+  else if (category.includes('government') || category.includes('bilateral')) funderMultiplier = 1.2
+  else if (category.includes('foundation') || category.includes('private')) funderMultiplier = 0.85
+
+  const fundingRate = g.funding_rate || 100
+  const coFinancingMultiplier = fundingRate < 80 ? 1.15 : 1.0
+
+  const descLength = (g.description || '').length
+  let complexityMultiplier = 1.0
+  if (descLength > 3000) complexityMultiplier = 1.2
+  else if (descLength > 1500) complexityMultiplier = 1.1
+
+  return Math.round(baseHours * funderMultiplier * coFinancingMultiplier * complexityMultiplier)
+}
+
+const capacityWidget = computed(() => {
+  const savedIds = JSON.parse(localStorage.getItem('savedGrants') || '[]') as string[]
+  const grants = allGrantsForCharts.value.filter((g: any) => savedIds.includes(String(g.id)))
+  let totalCommitted = 0
+  grants.forEach((g: any) => {
+    totalCommitted += calculateGrantEffortForDashboard(g)
+  })
+  const monthlyAvailable = teamCapacityHours.value * 4
+  const pct = monthlyAvailable > 0 ? Math.round((totalCommitted / monthlyAvailable) * 100) : 0
+  return {
+    committed: totalCommitted,
+    available: monthlyAvailable,
+    pct,
+    totalGrants: grants.length,
+  }
+})
+
+// At Risk Applications - grants with readiness < 50% and deadline < 30 days
+const atRiskGrants = computed(() => {
+  const savedIds = JSON.parse(localStorage.getItem('savedGrants') || '[]') as string[]
+  const workflows = JSON.parse(localStorage.getItem('grantWorkflow') || '{}') as Record<string, string>
+  const now = Date.now()
+
+  return allGrantsForCharts.value
+    .filter((g: any) => {
+      if (!savedIds.includes(String(g.id))) return false
+      if (!g.deadline) return false
+      const dl = new Date(g.deadline).getTime()
+      const daysLeft = Math.ceil((dl - now) / (1000 * 60 * 60 * 24))
+      if (daysLeft < 0 || daysLeft > 30) return false
+      const readiness = computeGrantReadiness(String(g.id), g, workflows[String(g.id)] || 'interested')
+      return readiness < 50
+    })
+    .map((g: any) => {
+      const daysLeft = Math.ceil((new Date(g.deadline).getTime() - now) / (1000 * 60 * 60 * 24))
+      return {
+        id: g.id,
+        title: g.title,
+        daysLeft,
+        readiness: computeGrantReadiness(String(g.id), g, workflows[String(g.id)] || 'interested')
+      }
+    })
+    .sort((a, b) => a.readiness - b.readiness)
+    .slice(0, 5)
+})
+
+function computeGrantReadiness(grantId: string, grant: any, status: string): number {
+  const dims: number[] = []
+
+  // Document readiness
+  try {
+    const stored = JSON.parse(localStorage.getItem(`grantReadiness_${grantId}`) || '{}')
+    if (stored.documents && Array.isArray(stored.documents) && stored.documents.length > 0) {
+      const checked = stored.documents.filter((d: any) => d.checked).length
+      dims.push(Math.round((checked / stored.documents.length) * 100))
+    } else {
+      dims.push(0)
+    }
+  } catch { dims.push(0) }
+
+  // Budget readiness
+  try {
+    const data = JSON.parse(localStorage.getItem(`grantBudget_${grantId}`) || '{}')
+    if (data.requested && data.requested > 0 && data.fundingRate) dims.push(100)
+    else if (data.requested && data.requested > 0) dims.push(60)
+    else dims.push(0)
+  } catch { dims.push(0) }
+
+  // Narrative
+  let narr = 0
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith('proposal_')) {
+        const raw = localStorage.getItem(key)
+        if (raw) {
+          const proposal = JSON.parse(raw)
+          if (String(proposal.grant_id) === grantId) {
+            narr = proposal.status === 'submitted' ? 100 : proposal.status === 'in_review' ? 80 : 50
+            break
+          }
+        }
+      }
+    }
+  } catch { /* ignore */ }
+  dims.push(narr)
+
+  // Timeline readiness
+  if (grant && grant.deadline) {
+    const days = Math.ceil((new Date(grant.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    if (days < 0) dims.push(0)
+    else if (days <= 3) dims.push(10)
+    else if (days <= 7) dims.push(30)
+    else if (days <= 14) dims.push(50)
+    else if (days <= 30) dims.push(70)
+    else dims.push(90)
+  } else { dims.push(50) }
+
+  // Compliance
+  const statusScores: Record<string, number> = { interested: 10, researching: 30, applying: 60, submitted: 90, outcome: 100 }
+  dims.push(statusScores[status] || 0)
+
+  return dims.length > 0 ? Math.round(dims.reduce((a, b) => a + b, 0) / dims.length) : 0
+}
+
 // Discovery Funnel Analytics
 const funnelData = computed(() => {
   const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]').length
@@ -1122,38 +1350,6 @@ const deadlineCrunches = computed(() => {
     count: windows.length,
     mostUrgent: { count: mostUrgent.count, windowStart: mostUrgent.windowStart, windowEnd: mostUrgent.windowEnd }
   }
-})
-
-// At Risk Applications
-const atRiskGrants = computed(() => {
-  const savedIds = JSON.parse(localStorage.getItem('savedGrants') || '[]') as string[]
-  const workflows = JSON.parse(localStorage.getItem('grantWorkflow') || '{}') as Record<string, string>
-  const milestones = JSON.parse(localStorage.getItem('grantMilestones') || '{}') as Record<string, Record<string, boolean>>
-
-  const stageStepCounts: Record<string, number> = {
-    interested: 3, researching: 4, applying: 5, submitted: 2
-  }
-
-  const now = Date.now()
-  const twoWeeks = 14 * 24 * 60 * 60 * 1000
-
-  return allGrantsForCharts.value
-    .filter((g: any) => {
-      if (!savedIds.includes(String(g.id))) return false
-      if (!g.deadline) return false
-      const daysLeft = new Date(g.deadline).getTime() - now
-      if (daysLeft < 0 || daysLeft > twoWeeks) return false
-
-      const stage = workflows[String(g.id)] || 'interested'
-      const totalSteps = stageStepCounts[stage] || 0
-      if (totalSteps === 0) return false
-
-      const grantMilestones = milestones[String(g.id)] || {}
-      const completed = Object.values(grantMilestones).filter(Boolean).length
-      const pct = completed / totalSteps * 100
-      return pct < 60
-    })
-    .slice(0, 3)
 })
 
 const stageColors: Record<string, string> = {

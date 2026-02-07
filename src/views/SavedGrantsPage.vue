@@ -108,6 +108,36 @@
       </div>
     </div>
 
+    <!-- Effort Capacity Overview Bar -->
+    <div v-if="allGrants.length > 0" class="mb-6 animate-fade-in">
+      <div class="p-4 rounded-xl border" :class="effortCapacity.overloaded ? 'border-red-200 bg-red-50' : 'border-stone-200 bg-white'">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4" :class="effortCapacity.overloaded ? 'text-red-500' : 'text-indigo-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="text-sm font-semibold text-navy-800">{{ $t('savedGrants.effort.capacityTitle') }}</span>
+          </div>
+          <span class="text-xs font-medium" :class="effortCapacity.overloaded ? 'text-red-600' : 'text-stone-500'">
+            {{ $t('savedGrants.effort.committedVsAvailable', { committed: effortCapacity.committed, available: effortCapacity.available }) }}
+          </span>
+        </div>
+        <div class="h-2.5 rounded-full overflow-hidden bg-stone-100">
+          <div
+            class="h-full rounded-full transition-all duration-500"
+            :class="effortCapacity.pct > 100 ? 'bg-red-500' : effortCapacity.pct >= 80 ? 'bg-amber-400' : 'bg-green-400'"
+            :style="{ width: Math.min(effortCapacity.pct, 100) + '%' }"
+          ></div>
+        </div>
+        <div v-if="effortCapacity.overloaded" class="mt-1.5 text-xs text-red-600 font-medium">
+          {{ $t('savedGrants.effort.overloaded', { hours: effortCapacity.committed - effortCapacity.available }) }}
+        </div>
+        <div v-else class="mt-1.5 text-xs text-stone-400">
+          {{ $t('savedGrants.effort.onTrack') }}
+        </div>
+      </div>
+    </div>
+
     <!-- Deadline Conflicts Panel -->
     <div v-if="deadlineConflicts.length > 0" class="mb-6 animate-fade-in">
       <div class="border border-amber-200 rounded-xl overflow-hidden bg-gradient-to-r from-amber-50 to-stone-50">
@@ -307,9 +337,37 @@
               :class="getHandoffNoteCount(grant.id).hasUrgent ? 'bg-red-100 text-red-600' : 'bg-stone-100 text-stone-500'">
               &#x1F4DD; {{ getHandoffNoteCount(grant.id).count }}
             </span>
+            <!-- Annotation Count Badges -->
+            <span v-if="getAnnotationCounts(grant.id).total > 0" class="inline-flex items-center gap-0.5 ml-1.5">
+              <span v-if="getAnnotationCounts(grant.id).yellow > 0" class="w-4 h-4 rounded-full bg-yellow-400 text-[9px] text-yellow-900 font-bold flex items-center justify-center" :title="$t('grantDetail.annotations.colors.keyRequirement')">{{ getAnnotationCounts(grant.id).yellow }}</span>
+              <span v-if="getAnnotationCounts(grant.id).green > 0" class="w-4 h-4 rounded-full bg-green-400 text-[9px] text-green-900 font-bold flex items-center justify-center" :title="$t('grantDetail.annotations.colors.weMeetThis')">{{ getAnnotationCounts(grant.id).green }}</span>
+              <span v-if="getAnnotationCounts(grant.id).red > 0" class="w-4 h-4 rounded-full bg-red-400 text-[9px] text-white font-bold flex items-center justify-center" :title="$t('grantDetail.annotations.colors.gapRisk')">{{ getAnnotationCounts(grant.id).red }}</span>
+              <span v-if="getAnnotationCounts(grant.id).blue > 0" class="w-4 h-4 rounded-full bg-blue-400 text-[9px] text-white font-bold flex items-center justify-center" :title="$t('grantDetail.annotations.colors.question')">{{ getAnnotationCounts(grant.id).blue }}</span>
+            </span>
           </h3>
           <p class="text-sm text-navy-600 mt-0.5">{{ grant.program_name || grant.source_id || '' }}</p>
         </router-link>
+
+        <!-- Readiness Score Badge -->
+        <div class="flex-shrink-0" :title="$t('grantDetail.readiness.overallScore')">
+          <div
+            class="relative w-9 h-9 flex items-center justify-center"
+          >
+            <svg class="w-9 h-9 -rotate-90" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15" fill="none" stroke="#e5e7eb" stroke-width="3" />
+              <circle cx="18" cy="18" r="15" fill="none"
+                :stroke="getReadinessRingColor(getReadinessScore(String(grant.id)))"
+                stroke-width="3"
+                stroke-linecap="round"
+                :stroke-dasharray="`${getReadinessScore(String(grant.id)) * 0.942} 94.2`"
+              />
+            </svg>
+            <span class="absolute text-[9px] font-bold"
+              :class="getReadinessScore(String(grant.id)) >= 70 ? 'text-green-600' : getReadinessScore(String(grant.id)) >= 40 ? 'text-amber-600' : 'text-red-600'">
+              {{ getReadinessScore(String(grant.id)) }}
+            </span>
+          </div>
+        </div>
 
         <!-- Meta -->
         <div class="flex items-center gap-4 flex-shrink-0 text-sm">
@@ -319,6 +377,24 @@
           <span v-if="grant.deadline" :class="deadlineColor(grant.deadline)" class="whitespace-nowrap">
             {{ formatDeadline(grant.deadline) }}
           </span>
+        </div>
+
+        <!-- Effort Badge -->
+        <div class="flex-shrink-0 relative group">
+          <span class="px-2 py-1 bg-stone-100 text-stone-600 text-[11px] font-medium rounded-full whitespace-nowrap cursor-default">
+            {{ $t('savedGrants.effort.badge', { hours: getGrantEffortHours(grant) }) }}
+          </span>
+          <!-- Tooltip with phase breakdown -->
+          <div class="hidden group-hover:block absolute right-0 top-full mt-1 z-20 bg-navy-900 text-white text-[10px] rounded-lg shadow-lg p-3 min-w-[160px]">
+            <div class="space-y-1">
+              <div class="flex justify-between"><span>{{ $t('grantDetail.effort.phases.research') }}</span><span>{{ getGrantEffortPhases(grant).research }}h</span></div>
+              <div class="flex justify-between"><span>{{ $t('grantDetail.effort.phases.writing') }}</span><span>{{ getGrantEffortPhases(grant).writing }}h</span></div>
+              <div class="flex justify-between"><span>{{ $t('grantDetail.effort.phases.budgeting') }}</span><span>{{ getGrantEffortPhases(grant).budgeting }}h</span></div>
+              <div class="flex justify-between"><span>{{ $t('grantDetail.effort.phases.compliance') }}</span><span>{{ getGrantEffortPhases(grant).compliance }}h</span></div>
+              <div class="flex justify-between"><span>{{ $t('grantDetail.effort.phases.review') }}</span><span>{{ getGrantEffortPhases(grant).review }}h</span></div>
+              <div class="flex justify-between border-t border-white/20 pt-1 mt-1 font-bold"><span>Total</span><span>{{ getGrantEffortHours(grant) }}h</span></div>
+            </div>
+          </div>
         </div>
 
         <!-- Tags -->
@@ -839,31 +915,100 @@ function getHandoffNoteCount(grantId: string | number): { count: number; hasUrge
   }
 }
 
-function getReadinessScore(grantId: string): number {
-  let score = 0
-  const status = getGrantStatus(grantId)
-  // Status progress score
-  const statusScores: Record<string, number> = { interested: 0, researching: 20, applying: 50, submitted: 80, outcome: 100 }
-  score += statusScores[status] || 0
-  // Prep checklist progress
+// Annotation counts for grant cards
+function getAnnotationCounts(grantId: string | number): { total: number; yellow: number; green: number; red: number; blue: number } {
   try {
-    const items = JSON.parse(localStorage.getItem(`grantPrep_${grantId}`) || '[]')
-    if (items.length > 0) {
-      const checked = items.filter((i: any) => i.checked).length
-      score += Math.round((checked / items.length) * 30)
+    const stored = localStorage.getItem(`grantAnnotations_${grantId}`)
+    if (!stored) return { total: 0, yellow: 0, green: 0, red: 0, blue: 0 }
+    const anns = JSON.parse(stored) as { color: string }[]
+    return {
+      total: anns.length,
+      yellow: anns.filter(a => a.color === 'yellow').length,
+      green: anns.filter(a => a.color === 'green').length,
+      red: anns.filter(a => a.color === 'red').length,
+      blue: anns.filter(a => a.color === 'blue').length,
+    }
+  } catch { return { total: 0, yellow: 0, green: 0, red: 0, blue: 0 } }
+}
+
+function getReadinessScore(grantId: string): number {
+  // Multi-dimensional readiness: document, budget, narrative, timeline, compliance
+  const dims: number[] = []
+
+  // Document readiness
+  try {
+    const stored = JSON.parse(localStorage.getItem(`grantReadiness_${grantId}`) || '{}')
+    if (stored.documents && Array.isArray(stored.documents) && stored.documents.length > 0) {
+      const checked = stored.documents.filter((d: any) => d.checked).length
+      dims.push(Math.round((checked / stored.documents.length) * 100))
+    } else {
+      dims.push(0)
+    }
+  } catch { dims.push(0) }
+
+  // Budget readiness
+  try {
+    const data = JSON.parse(localStorage.getItem(`grantBudget_${grantId}`) || '{}')
+    if (data.requested && data.requested > 0 && data.fundingRate && data.fundingRate > 0) dims.push(100)
+    else if (data.requested && data.requested > 0) dims.push(60)
+    else dims.push(0)
+  } catch { dims.push(0) }
+
+  // Narrative readiness
+  let narrativeScore = 0
+  try {
+    // Check proposals from localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith('proposal_')) {
+        const raw = localStorage.getItem(key)
+        if (raw) {
+          const proposal = JSON.parse(raw)
+          if (String(proposal.grant_id) === String(grantId)) {
+            if (proposal.status === 'submitted') narrativeScore = 100
+            else if (proposal.status === 'in_review') narrativeScore = 80
+            else narrativeScore = 50
+            break
+          }
+        }
+      }
     }
   } catch { /* ignore */ }
-  // Has notes
-  try {
-    const notes = localStorage.getItem(`grantNotes_${grantId}`)
-    if (notes && notes.length > 2) score += 10
-  } catch { /* ignore */ }
-  // Has budget plan
-  try {
-    const budget = localStorage.getItem(`grantBudget_${grantId}`)
-    if (budget) score += 10
-  } catch { /* ignore */ }
-  return score
+  if (narrativeScore === 0) {
+    try {
+      const snippets = JSON.parse(localStorage.getItem('proposalSnippets') || '[]')
+      if (snippets.length > 3) narrativeScore = 30
+      else if (snippets.length > 0) narrativeScore = 15
+    } catch { /* ignore */ }
+  }
+  dims.push(narrativeScore)
+
+  // Timeline readiness
+  const grant = allGrants.value.find((g: any) => String(g.id) === String(grantId))
+  if (grant && grant.deadline) {
+    const days = Math.ceil((new Date(grant.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    if (days < 0) dims.push(0)
+    else if (days <= 3) dims.push(10)
+    else if (days <= 7) dims.push(30)
+    else if (days <= 14) dims.push(50)
+    else if (days <= 30) dims.push(70)
+    else dims.push(90)
+  } else {
+    dims.push(50)
+  }
+
+  // Compliance readiness - check prep items and status
+  const status = getGrantStatus(grantId)
+  const statusScores: Record<string, number> = { interested: 10, researching: 30, applying: 60, submitted: 90, outcome: 100 }
+  dims.push(statusScores[status] || 0)
+
+  return dims.length > 0 ? Math.round(dims.reduce((a, b) => a + b, 0) / dims.length) : 0
+}
+
+function getReadinessRingColor(score: number): string {
+  if (score >= 70) return '#22c55e'
+  if (score >= 40) return '#f59e0b'
+  return '#ef4444'
 }
 
 const filteredGrants = computed(() => {
@@ -1140,6 +1285,89 @@ function shareGrantList() {
     toast.success(t('savedGrants.shareCopied'))
   })
 }
+
+// Effort Estimation
+interface EffortPhases {
+  research: number
+  writing: number
+  budgeting: number
+  compliance: number
+  review: number
+}
+
+function calculateGrantEffort(g: any): { total: number; phases: EffortPhases } {
+  if (!g) return { total: 0, phases: { research: 0, writing: 0, budgeting: 0, compliance: 0, review: 0 } }
+
+  const maxAmount = g.amount_max || g.amount_min || 0
+  let baseHours = 20
+  if (maxAmount > 1000000) baseHours = 80
+  else if (maxAmount > 500000) baseHours = 60
+  else if (maxAmount > 200000) baseHours = 45
+  else if (maxAmount > 50000) baseHours = 30
+
+  const category = (g.category || '').toLowerCase()
+  let funderMultiplier = 1.0
+  if (category.includes('eu') || category.includes('european')) funderMultiplier = 1.4
+  else if (category.includes('government') || category.includes('bilateral')) funderMultiplier = 1.2
+  else if (category.includes('foundation') || category.includes('private')) funderMultiplier = 0.85
+
+  const fundingRate = g.funding_rate || 100
+  const coFinancingMultiplier = fundingRate < 80 ? 1.15 : 1.0
+
+  const descLength = (g.description || '').length
+  let complexityMultiplier = 1.0
+  if (descLength > 3000) complexityMultiplier = 1.2
+  else if (descLength > 1500) complexityMultiplier = 1.1
+
+  const total = Math.round(baseHours * funderMultiplier * coFinancingMultiplier * complexityMultiplier)
+
+  const phases: EffortPhases = {
+    research: Math.round(total * 0.15),
+    writing: Math.round(total * 0.35),
+    budgeting: Math.round(total * 0.20),
+    compliance: Math.round(total * 0.18),
+    review: Math.round(total * 0.12),
+  }
+  const phasesSum = phases.research + phases.writing + phases.budgeting + phases.compliance + phases.review
+  if (phasesSum !== total) phases.writing += (total - phasesSum)
+
+  return { total, phases }
+}
+
+function getGrantEffortHours(grant: any): number {
+  try {
+    const allEstimates = JSON.parse(localStorage.getItem('grantEffortEstimates') || '{}')
+    const stored = allEstimates[String(grant.id)]
+    if (stored?.override) return stored.override
+    if (stored?.total) return stored.total
+  } catch { /* ignore */ }
+  return calculateGrantEffort(grant).total
+}
+
+function getGrantEffortPhases(grant: any): EffortPhases {
+  try {
+    const allEstimates = JSON.parse(localStorage.getItem('grantEffortEstimates') || '{}')
+    const stored = allEstimates[String(grant.id)]
+    if (stored?.phases) return stored.phases
+  } catch { /* ignore */ }
+  return calculateGrantEffort(grant).phases
+}
+
+const effortCapacity = computed(() => {
+  const weeklyHours = parseInt(localStorage.getItem('teamCapacityHours') || '40', 10)
+  const monthlyAvailable = weeklyHours * 4
+  let totalCommitted = 0
+  allGrants.value.forEach((g: any) => {
+    totalCommitted += getGrantEffortHours(g)
+  })
+  const pct = monthlyAvailable > 0 ? Math.round((totalCommitted / monthlyAvailable) * 100) : 0
+  return {
+    committed: totalCommitted,
+    available: monthlyAvailable,
+    pct,
+    overloaded: totalCommitted > monthlyAvailable,
+  }
+})
 
 async function loadSavedGrants() {
   loading.value = true

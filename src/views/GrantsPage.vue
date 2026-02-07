@@ -1406,8 +1406,14 @@ async function searchGrants() {
     if (filters.value.amountMax) params.append('amount_max', filters.value.amountMax.toString())
 
     const response = await api.get(`/api/grants?${params.toString()}`)
-    grants.value = response.data.grants || []
-    totalGrants.value = response.data.count || grants.value.length
+    // Filter out non-Ukraine procurement tenders (UK/Ireland tenders with no description or amount)
+    const rawGrants = response.data.grants || []
+    grants.value = rawGrants.filter((g: any) => {
+      const title = g.title || ''
+      const isProcurement = /^(United Kingdom|Ireland)-[A-Z]/.test(title) && !g.amount_min && !g.description
+      return !isProcurement
+    })
+    totalGrants.value = response.data.count ? response.data.count - (rawGrants.length - grants.value.length) : grants.value.length
   } catch (error) {
     console.error('Error fetching grants:', error)
     toast.error(t('errors.network'))

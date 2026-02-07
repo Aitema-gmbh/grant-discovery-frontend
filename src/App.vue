@@ -2,7 +2,7 @@
   <div id="app" class="min-h-screen">
     <router-view v-slot="{ Component }">
       <Transition name="page" mode="out-in">
-        <component :is="Component" />
+        <component :is="Component" :key="$route.path" />
       </Transition>
     </router-view>
     <OnboardingTour ref="tourRef" />

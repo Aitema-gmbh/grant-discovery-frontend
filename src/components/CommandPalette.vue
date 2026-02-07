@@ -362,6 +362,28 @@ function buildCommandIndex(): CommandItem[] {
     }
   })
 
+  items.push({
+    id: 'action-least-ready',
+    type: 'action',
+    title: t('commandPalette.actionLeastReady'),
+    action: () => {
+      router.push({ path: '/saved', query: { sort: 'readiness', order: 'asc' } })
+    }
+  })
+
+  items.push({
+    id: 'action-at-risk',
+    type: 'action',
+    title: t('commandPalette.actionAtRisk'),
+    action: () => {
+      router.push('/dashboard')
+      setTimeout(() => {
+        const el = document.querySelector('[data-at-risk]')
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 300)
+    }
+  })
+
   return items
 }
 

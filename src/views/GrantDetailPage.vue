@@ -26,9 +26,20 @@
       <div class="mb-8">
         <div class="flex items-start justify-between mb-4">
           <div class="flex-1">
-            <h1 class="text-4xl font-bold text-gray-900 mb-2">
-              {{ grant.title }}
-            </h1>
+            <div class="flex items-center gap-3 mb-2">
+              <h1 class="text-4xl font-bold text-gray-900">
+                {{ grant.title }}
+              </h1>
+              <!-- Readiness Score Badge -->
+              <div
+                v-if="isSaved"
+                class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-sm"
+                :class="overallReadiness >= 70 ? 'bg-green-500' : overallReadiness >= 40 ? 'bg-amber-500' : 'bg-red-500'"
+                :title="$t('grantDetail.readiness.overallScore')"
+              >
+                {{ overallReadiness }}%
+              </div>
+            </div>
             <p class="text-lg text-gray-600">
               {{ grant.program_name || $t('grantDetail.grantProgram') }}
             </p>
@@ -83,6 +94,21 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
               {{ linkCopied ? $t('grantDetail.linkCopied') : $t('grantDetail.share') }}
+            </button>
+
+            <!-- Annotations Toggle -->
+            <button
+              @click="showAnnotationsSidebar = !showAnnotationsSidebar"
+              class="relative flex items-center gap-2 px-4 py-2 border rounded-lg hover:shadow transition-all"
+              :class="showAnnotationsSidebar ? 'bg-amber-50 text-amber-600 border-amber-300' : 'bg-white text-navy-700 border-gray-300'"
+              :aria-label="$t('grantDetail.annotations.toggle')"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+              </svg>
+              <span v-if="annotations.length > 0" class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-amber-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                {{ annotations.length }}
+              </span>
             </button>
           </div>
         </div>
@@ -202,7 +228,7 @@
       <!-- Main Content Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Left Column: Grant Details -->
-        <div class="lg:col-span-2 space-y-6">
+        <div class="lg:col-span-2 space-y-6" ref="annotatableContentEl" @mouseup="handleTextSelection">
           <!-- Description -->
           <div class="card">
             <div class="flex items-center justify-between mb-4">
@@ -488,6 +514,119 @@
             </dl>
           </div>
 
+          <!-- Application Readiness Score -->
+          <div v-if="isSaved" class="card">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-900">{{ $t('grantDetail.readiness.title') }}</h3>
+              <div
+                class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                :class="overallReadiness >= 70 ? 'bg-green-500' : overallReadiness >= 40 ? 'bg-amber-500' : 'bg-red-500'"
+              >
+                {{ overallReadiness }}%
+              </div>
+            </div>
+
+            <!-- Pentagon Radar Chart (CSS-only SVG) -->
+            <div class="flex justify-center mb-4">
+              <svg viewBox="0 0 200 200" class="w-48 h-48">
+                <!-- Background pentagon grid -->
+                <polygon :points="pentagonPoints(100)" fill="none" stroke="#e5e7eb" stroke-width="1" />
+                <polygon :points="pentagonPoints(80)" fill="none" stroke="#e5e7eb" stroke-width="0.5" />
+                <polygon :points="pentagonPoints(60)" fill="none" stroke="#e5e7eb" stroke-width="0.5" />
+                <polygon :points="pentagonPoints(40)" fill="none" stroke="#e5e7eb" stroke-width="0.5" />
+                <polygon :points="pentagonPoints(20)" fill="none" stroke="#e5e7eb" stroke-width="0.5" />
+                <!-- Axis lines -->
+                <line v-for="i in 5" :key="'axis-'+i"
+                  x1="100" y1="100"
+                  :x2="100 + 90 * Math.sin(2 * Math.PI * (i - 1) / 5)"
+                  :y2="100 - 90 * Math.cos(2 * Math.PI * (i - 1) / 5)"
+                  stroke="#d1d5db" stroke-width="0.5" />
+                <!-- Data polygon -->
+                <polygon
+                  :points="radarDataPoints"
+                  :fill="overallReadiness >= 70 ? 'rgba(34,197,94,0.2)' : overallReadiness >= 40 ? 'rgba(245,158,11,0.2)' : 'rgba(239,68,68,0.2)'"
+                  :stroke="overallReadiness >= 70 ? '#22c55e' : overallReadiness >= 40 ? '#f59e0b' : '#ef4444'"
+                  stroke-width="2"
+                />
+                <!-- Data points -->
+                <circle v-for="(pt, i) in radarDataPointsArray" :key="'pt-'+i"
+                  :cx="pt.x" :cy="pt.y" r="3"
+                  :fill="overallReadiness >= 70 ? '#22c55e' : overallReadiness >= 40 ? '#f59e0b' : '#ef4444'"
+                />
+                <!-- Labels -->
+                <text v-for="(dim, i) in readinessDimensionLabels" :key="'lbl-'+i"
+                  :x="100 + 98 * Math.sin(2 * Math.PI * i / 5)"
+                  :y="100 - 98 * Math.cos(2 * Math.PI * i / 5)"
+                  text-anchor="middle" dominant-baseline="central"
+                  class="text-[9px] fill-gray-500 font-medium">
+                  {{ dim }}
+                </text>
+              </svg>
+            </div>
+
+            <!-- Dimension Bars -->
+            <div class="space-y-2 mb-4">
+              <div v-for="(dim, key) in readinessDimensions" :key="key" class="flex items-center gap-2">
+                <span class="text-xs text-navy-600 w-20 truncate">{{ $t('grantDetail.readiness.dimensions.' + key) }}</span>
+                <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    class="h-full rounded-full transition-all duration-500"
+                    :class="dim >= 70 ? 'bg-green-500' : dim >= 40 ? 'bg-amber-400' : 'bg-red-400'"
+                    :style="{ width: dim + '%' }"
+                  ></div>
+                </div>
+                <span class="text-xs font-semibold w-8 text-right" :class="dim >= 70 ? 'text-green-600' : dim >= 40 ? 'text-amber-600' : 'text-red-600'">{{ dim }}%</span>
+              </div>
+            </div>
+
+            <!-- Document Checklist -->
+            <div class="border-t border-gray-100 pt-3 mb-3">
+              <button @click="showDocChecklist = !showDocChecklist" class="flex items-center justify-between w-full text-sm font-semibold text-navy-800">
+                <span>{{ $t('grantDetail.readiness.documents.title') }}</span>
+                <svg class="w-4 h-4 text-navy-400 transition-transform" :class="showDocChecklist ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              <div v-if="showDocChecklist" class="mt-2 space-y-1.5">
+                <label v-for="(doc, idx) in readinessDocuments" :key="idx" class="flex items-center gap-2 text-xs cursor-pointer hover:bg-gray-50 rounded p-1 -mx-1">
+                  <input type="checkbox" :checked="doc.checked" @change="toggleReadinessDoc(idx)"
+                    class="w-3.5 h-3.5 rounded border-gray-300 text-green-600 focus:ring-green-500" />
+                  <span :class="doc.checked ? 'text-gray-400 line-through' : 'text-navy-700'">{{ doc.label }}</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Gap Remediation Roadmap -->
+            <div v-if="readinessGaps.length > 0" class="border-t border-gray-100 pt-3">
+              <button @click="showGapRoadmap = !showGapRoadmap" class="flex items-center justify-between w-full text-sm font-semibold text-navy-800 mb-2">
+                <span>{{ $t('grantDetail.readiness.roadmap.title') }}</span>
+                <svg class="w-4 h-4 text-navy-400 transition-transform" :class="showGapRoadmap ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              <div v-if="showGapRoadmap" class="space-y-2">
+                <div v-for="gap in readinessGaps" :key="gap.dimension"
+                  class="p-2.5 rounded-lg border text-xs"
+                  :class="gap.score < 40 ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="font-semibold" :class="gap.score < 40 ? 'text-red-700' : 'text-amber-700'">
+                      {{ $t('grantDetail.readiness.dimensions.' + gap.dimension) }} — {{ gap.score }}%
+                    </span>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-medium"
+                      :class="gap.score < 40 ? 'bg-red-200 text-red-800' : 'bg-amber-200 text-amber-800'">
+                      {{ $t('grantDetail.readiness.roadmap.actionNeeded') }}
+                    </span>
+                  </div>
+                  <p class="text-gray-600 mb-1.5">{{ gap.message }}</p>
+                  <button @click="gap.action()" class="text-xs font-medium transition-colors"
+                    :class="gap.score < 40 ? 'text-red-600 hover:text-red-700' : 'text-amber-600 hover:text-amber-700'">
+                    {{ gap.actionLabel }} &rarr;
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Actions -->
           <div class="card">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ $t('grantDetail.actions') }}</h3>
@@ -594,6 +733,77 @@
                 <div class="flex justify-between text-[10px] text-navy-400">
                   <span>{{ $t('grantDetail.budgetPlanner.grant') }} {{ budgetFundingRate }}%</span>
                   <span>{{ $t('grantDetail.budgetPlanner.own') }} {{ 100 - budgetFundingRate }}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Effort Estimator -->
+          <div class="card">
+            <button @click="showEffortEstimator = !showEffortEstimator" class="w-full flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-navy-900 flex items-center gap-2">
+                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                {{ $t('grantDetail.effort.title') }}
+              </h3>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 bg-stone-100 text-stone-700 text-xs font-semibold rounded-full">
+                  {{ $t('grantDetail.effort.badge', { hours: effortDisplayTotal }) }}
+                </span>
+                <svg class="w-4 h-4 text-navy-400 transition-transform" :class="showEffortEstimator ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </div>
+            </button>
+            <div v-if="showEffortEstimator" class="mt-4 space-y-4">
+              <!-- Phase Breakdown Stacked Bar -->
+              <div>
+                <p class="text-xs font-medium text-navy-500 mb-2">{{ $t('grantDetail.effort.phaseBreakdown') }}</p>
+                <div class="flex rounded-full h-3 overflow-hidden bg-stone-100">
+                  <div class="bg-blue-400 transition-all" :style="`width: ${effortAutoEstimate.total > 0 ? (effortAutoEstimate.phases.research / effortAutoEstimate.total * 100) : 0}%`" :title="$t('grantDetail.effort.phases.research') + ': ' + effortAutoEstimate.phases.research + 'h'"></div>
+                  <div class="bg-amber-400 transition-all" :style="`width: ${effortAutoEstimate.total > 0 ? (effortAutoEstimate.phases.writing / effortAutoEstimate.total * 100) : 0}%`" :title="$t('grantDetail.effort.phases.writing') + ': ' + effortAutoEstimate.phases.writing + 'h'"></div>
+                  <div class="bg-green-400 transition-all" :style="`width: ${effortAutoEstimate.total > 0 ? (effortAutoEstimate.phases.budgeting / effortAutoEstimate.total * 100) : 0}%`" :title="$t('grantDetail.effort.phases.budgeting') + ': ' + effortAutoEstimate.phases.budgeting + 'h'"></div>
+                  <div class="bg-red-400 transition-all" :style="`width: ${effortAutoEstimate.total > 0 ? (effortAutoEstimate.phases.compliance / effortAutoEstimate.total * 100) : 0}%`" :title="$t('grantDetail.effort.phases.compliance') + ': ' + effortAutoEstimate.phases.compliance + 'h'"></div>
+                  <div class="bg-purple-400 transition-all" :style="`width: ${effortAutoEstimate.total > 0 ? (effortAutoEstimate.phases.review / effortAutoEstimate.total * 100) : 0}%`" :title="$t('grantDetail.effort.phases.review') + ': ' + effortAutoEstimate.phases.review + 'h'"></div>
+                </div>
+                <div class="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+                  <div class="flex items-center gap-1 text-[10px] text-stone-600">
+                    <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                    {{ $t('grantDetail.effort.phases.research') }} {{ effortAutoEstimate.phases.research }}h
+                  </div>
+                  <div class="flex items-center gap-1 text-[10px] text-stone-600">
+                    <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                    {{ $t('grantDetail.effort.phases.writing') }} {{ effortAutoEstimate.phases.writing }}h
+                  </div>
+                  <div class="flex items-center gap-1 text-[10px] text-stone-600">
+                    <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                    {{ $t('grantDetail.effort.phases.budgeting') }} {{ effortAutoEstimate.phases.budgeting }}h
+                  </div>
+                  <div class="flex items-center gap-1 text-[10px] text-stone-600">
+                    <span class="w-2 h-2 rounded-full bg-red-400"></span>
+                    {{ $t('grantDetail.effort.phases.compliance') }} {{ effortAutoEstimate.phases.compliance }}h
+                  </div>
+                  <div class="flex items-center gap-1 text-[10px] text-stone-600">
+                    <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                    {{ $t('grantDetail.effort.phases.review') }} {{ effortAutoEstimate.phases.review }}h
+                  </div>
+                </div>
+              </div>
+              <!-- Total -->
+              <div class="p-3 bg-stone-50 rounded-lg">
+                <div class="flex justify-between text-xs">
+                  <span class="text-navy-500">{{ $t('grantDetail.effort.totalHours') }}</span>
+                  <span class="font-bold text-navy-900">{{ effortDisplayTotal }}h</span>
+                </div>
+              </div>
+              <!-- Override -->
+              <div>
+                <label class="text-xs font-medium text-navy-500">{{ $t('grantDetail.effort.override') }}</label>
+                <p class="text-[10px] text-stone-400 mb-1">{{ $t('grantDetail.effort.overrideHint') }}</p>
+                <div class="flex items-center gap-2">
+                  <input v-model.number="effortOverride" type="number" min="1" class="input text-sm py-1.5 w-full" :placeholder="String(effortAutoEstimate.total)" @input="saveEffortEstimate" />
+                  <button v-if="effortOverride" @click="effortOverride = 0; saveEffortEstimate()" class="text-xs text-amber-600 hover:text-amber-700 whitespace-nowrap">{{ $t('grantDetail.effort.reset') }}</button>
                 </div>
               </div>
             </div>
@@ -1001,11 +1211,179 @@
       </div>
     </div>
     <ScrollToTop />
+
+    <!-- Floating Annotation Toolbar -->
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition duration-150 ease-out"
+        enter-from-class="opacity-0 scale-95"
+        enter-to-class="opacity-100 scale-100"
+        leave-active-class="transition duration-100 ease-in"
+        leave-from-class="opacity-100 scale-100"
+        leave-to-class="opacity-0 scale-95"
+      >
+        <div
+          v-if="showAnnotationToolbar && selectedText"
+          ref="annotationToolbarEl"
+          class="fixed z-[100] bg-navy-900 text-white rounded-lg shadow-2xl px-2 py-1.5 flex items-center gap-1"
+          :style="{ top: annotationToolbarPos.y + 'px', left: annotationToolbarPos.x + 'px' }"
+        >
+          <button
+            v-for="color in annotationColors"
+            :key="color.id"
+            @mousedown.prevent="createAnnotation(color.id)"
+            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md hover:bg-white/10 transition-colors text-xs font-medium whitespace-nowrap"
+            :title="$t(`grantDetail.annotations.colors.${color.i18nKey}`)"
+          >
+            <span class="w-3 h-3 rounded-full flex-shrink-0" :class="color.dotClass"></span>
+            <span class="hidden sm:inline">{{ $t(`grantDetail.annotations.colors.${color.i18nKey}`) }}</span>
+          </button>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Annotations Sidebar -->
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="translate-x-full"
+        enter-to-class="translate-x-0"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="translate-x-0"
+        leave-to-class="translate-x-full"
+      >
+        <div
+          v-if="showAnnotationsSidebar"
+          class="fixed top-0 right-0 h-full w-80 bg-white shadow-xl z-50 flex flex-col border-l border-stone-200"
+        >
+          <!-- Sidebar Header -->
+          <div class="flex items-center justify-between px-5 py-4 border-b border-stone-200">
+            <h3 class="text-base font-display font-semibold text-navy-900">
+              {{ $t('grantDetail.annotations.sidebar.title') }}
+              <span v-if="annotations.length > 0" class="ml-2 text-xs font-medium text-stone-500">
+                ({{ annotations.length }})
+              </span>
+            </h3>
+            <button @click="showAnnotationsSidebar = false" class="p-1.5 rounded-lg hover:bg-stone-100 text-stone-400 hover:text-stone-600 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Sidebar Content -->
+          <div class="flex-1 overflow-y-auto px-5 py-4">
+            <!-- Empty state -->
+            <div v-if="annotations.length === 0" class="text-center py-10">
+              <svg class="w-12 h-12 mx-auto mb-3 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+              </svg>
+              <p class="text-sm text-stone-400">{{ $t('grantDetail.annotations.sidebar.empty') }}</p>
+            </div>
+
+            <!-- Grouped annotations -->
+            <div v-else class="space-y-6">
+              <div v-for="group in annotationGroups" :key="group.color">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="w-3 h-3 rounded-full flex-shrink-0" :class="getAnnotationColorDot(group.color)"></span>
+                  <h4 class="text-xs font-bold uppercase tracking-wide text-stone-500">
+                    {{ getAnnotationGroupLabel(group.color) }}
+                  </h4>
+                  <span class="text-[10px] text-stone-400">({{ group.items.length }})</span>
+                </div>
+                <div class="space-y-2">
+                  <div
+                    v-for="annotation in group.items"
+                    :key="annotation.id"
+                    :id="`annotation-card-${annotation.id}`"
+                    class="rounded-lg border p-3 group hover:shadow-sm transition-shadow cursor-pointer"
+                    :class="getAnnotationCardClass(annotation.color)"
+                    @click="scrollToAnnotation(annotation.id)"
+                  >
+                    <!-- Text preview -->
+                    <p class="text-xs text-navy-800 font-medium line-clamp-2 mb-2">
+                      "{{ annotation.selectedText }}"
+                    </p>
+
+                    <!-- Note -->
+                    <div v-if="editingAnnotationId === annotation.id" class="mb-2">
+                      <textarea
+                        v-model="editingAnnotationNote"
+                        @blur="updateAnnotationNote(annotation.id, editingAnnotationNote)"
+                        @keydown.enter.ctrl="updateAnnotationNote(annotation.id, editingAnnotationNote)"
+                        :placeholder="$t('grantDetail.annotations.sidebar.notePlaceholder')"
+                        class="w-full text-xs border border-stone-200 rounded-md px-2 py-1.5 resize-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                        rows="2"
+                        @click.stop
+                      ></textarea>
+                    </div>
+                    <p v-else-if="annotation.note" class="text-[11px] text-stone-600 mb-2 italic">
+                      {{ annotation.note }}
+                    </p>
+
+                    <!-- Actions -->
+                    <div class="flex items-center justify-between">
+                      <span class="text-[10px] text-stone-400">{{ timeAgo(annotation.createdAt) }}</span>
+                      <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          @click.stop="startEditAnnotationNote(annotation)"
+                          class="p-1 rounded hover:bg-stone-200 text-stone-400 hover:text-stone-600"
+                          :title="$t('grantDetail.annotations.toolbar.addNote')"
+                        >
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                          </svg>
+                        </button>
+                        <button
+                          @click.stop="createTaskFromAnnotation(annotation)"
+                          class="p-1 rounded hover:bg-stone-200 text-stone-400 hover:text-stone-600"
+                          :title="$t('grantDetail.annotations.toolbar.createTask')"
+                        >
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                          </svg>
+                        </button>
+                        <button
+                          @click.stop="deleteAnnotation(annotation.id)"
+                          class="p-1 rounded hover:bg-red-100 text-stone-400 hover:text-red-500"
+                          :title="$t('grantDetail.annotations.toolbar.remove')"
+                        >
+                          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+
+      <!-- Sidebar backdrop -->
+      <Transition
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="showAnnotationsSidebar"
+          class="fixed inset-0 bg-black/20 z-40"
+          @click="showAnnotationsSidebar = false"
+        ></div>
+      </Transition>
+    </Teleport>
+
   </AppLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
@@ -1023,11 +1401,11 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const toast = useToast()
 
-const pageTitle = computed(() => grant.value?.title || t('nav.grants'))
-usePageTitle(pageTitle)
-
 const loading = ref(true)
 const grant = ref<any>(null)
+
+const pageTitle = computed(() => grant.value?.title || t('nav.grants'))
+usePageTitle(pageTitle)
 const similarGrants = ref<any[]>([])
 const similarLoading = ref(false)
 const aiSummary = ref('')
@@ -1130,6 +1508,221 @@ function viewAllFunderGrants() {
   router.push({ path: '/grants', query: { q: funderIntel.value.name } })
 }
 
+// === Application Readiness Score System ===
+const showDocChecklist = ref(false)
+const showGapRoadmap = ref(true)
+
+interface ReadinessDoc {
+  label: string
+  checked: boolean
+}
+
+const readinessDocuments = ref<ReadinessDoc[]>([])
+
+function loadReadiness() {
+  const grantId = route.params.id as string
+  const stored = localStorage.getItem(`grantReadiness_${grantId}`)
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored)
+      if (parsed.documents) readinessDocuments.value = parsed.documents
+      else initDocuments()
+    } catch { initDocuments() }
+  } else {
+    initDocuments()
+  }
+}
+
+function initDocuments() {
+  const docKeys = [
+    'registrationCert', 'auditReport', 'annualReport', 'projectProposal',
+    'budgetBreakdown', 'teamCVs', 'logicalFramework', 'partnerAgreements',
+    'bankDetails', 'legalEntityForm'
+  ]
+  readinessDocuments.value = docKeys.map(key => ({
+    label: t(`grantDetail.readiness.documents.${key}`),
+    checked: false
+  }))
+}
+
+function toggleReadinessDoc(idx: number) {
+  if (readinessDocuments.value[idx]) {
+    readinessDocuments.value[idx]!.checked = !readinessDocuments.value[idx]!.checked
+    saveReadiness()
+  }
+}
+
+function saveReadiness() {
+  const grantId = route.params.id as string
+  try {
+    localStorage.setItem(`grantReadiness_${grantId}`, JSON.stringify({
+      documents: readinessDocuments.value
+    }))
+  } catch { /* storage full */ }
+}
+
+// Readiness dimension computations
+const readinessDimensions = computed(() => {
+  const doc = computeDocumentReadiness()
+  const budget = computeBudgetReadiness()
+  const narrative = computeNarrativeReadiness()
+  const timeline = computeTimelineReadiness()
+  const compliance = computeComplianceReadiness()
+  return { document: doc, budget, narrative, timeline, compliance }
+})
+
+function computeDocumentReadiness(): number {
+  if (readinessDocuments.value.length === 0) return 0
+  const checked = readinessDocuments.value.filter(d => d.checked).length
+  return Math.round((checked / readinessDocuments.value.length) * 100)
+}
+
+function computeBudgetReadiness(): number {
+  const grantId = route.params.id as string
+  try {
+    const data = JSON.parse(localStorage.getItem(`grantBudget_${grantId}`) || '{}')
+    if (data.requested && data.requested > 0 && data.fundingRate && data.fundingRate > 0) return 100
+    if (data.requested && data.requested > 0) return 60
+  } catch { /* */ }
+  return 0
+}
+
+function computeNarrativeReadiness(): number {
+  // Check if proposal exists and has sections
+  if (grantProposal.value) {
+    const status = grantProposal.value.status
+    if (status === 'submitted') return 100
+    if (status === 'in_review') return 80
+    return 50 // draft
+  }
+  // Check content library snippets
+  try {
+    const snippets = JSON.parse(localStorage.getItem('proposalSnippets') || '[]')
+    if (snippets.length > 3) return 30
+    if (snippets.length > 0) return 15
+  } catch { /* */ }
+  return 0
+}
+
+function computeTimelineReadiness(): number {
+  if (!grant.value?.deadline) return 50 // No deadline = moderate
+  const days = daysUntilDeadline.value
+  if (days < 0) return 0 // Past deadline
+  if (days <= 3) return 10
+  if (days <= 7) return 30
+  if (days <= 14) return 50
+  if (days <= 30) return 70
+  return 90 // More than 30 days
+}
+
+function computeComplianceReadiness(): number {
+  if (eligibilityResult.value) {
+    const score = eligibilityResult.value.score
+    return Math.round(score * 100)
+  }
+  return 0
+}
+
+const overallReadiness = computed(() => {
+  const dims = readinessDimensions.value
+  const values = Object.values(dims)
+  if (values.length === 0) return 0
+  return Math.round(values.reduce((sum, v) => sum + v, 0) / values.length)
+})
+
+const readinessDimensionLabels = computed(() => [
+  t('grantDetail.readiness.dimensions.document'),
+  t('grantDetail.readiness.dimensions.budget'),
+  t('grantDetail.readiness.dimensions.narrative'),
+  t('grantDetail.readiness.dimensions.timeline'),
+  t('grantDetail.readiness.dimensions.compliance'),
+])
+
+// Pentagon chart helpers
+function pentagonPoints(radius: number): string {
+  const pts: string[] = []
+  for (let i = 0; i < 5; i++) {
+    const angle = (2 * Math.PI * i) / 5 - Math.PI / 2
+    pts.push(`${100 + radius * Math.cos(angle)},${100 + radius * Math.sin(angle)}`)
+  }
+  return pts.join(' ')
+}
+
+const radarDataPointsArray = computed(() => {
+  const dims = readinessDimensions.value
+  const values = [dims.document, dims.budget, dims.narrative, dims.timeline, dims.compliance]
+  return values.map((val, i) => {
+    const angle = (2 * Math.PI * i) / 5 - Math.PI / 2
+    const r = (val / 100) * 90
+    return { x: 100 + r * Math.cos(angle), y: 100 + r * Math.sin(angle) }
+  })
+})
+
+const radarDataPoints = computed(() => {
+  return radarDataPointsArray.value.map(pt => `${pt.x},${pt.y}`).join(' ')
+})
+
+// Gap Remediation Roadmap
+interface ReadinessGap {
+  dimension: string
+  score: number
+  message: string
+  actionLabel: string
+  action: () => void
+}
+
+const readinessGaps = computed((): ReadinessGap[] => {
+  const dims = readinessDimensions.value
+  const gaps: ReadinessGap[] = []
+
+  if (dims.document < 80) {
+    gaps.push({
+      dimension: 'document',
+      score: dims.document,
+      message: dims.document === 0 ? t('grantDetail.readiness.gaps.documentMissing') : t('grantDetail.readiness.gaps.documentPartial'),
+      actionLabel: t('grantDetail.readiness.actions.uploadDocs'),
+      action: () => { showDocChecklist.value = true }
+    })
+  }
+  if (dims.budget < 80) {
+    gaps.push({
+      dimension: 'budget',
+      score: dims.budget,
+      message: dims.budget === 0 ? t('grantDetail.readiness.gaps.budgetNotStarted') : t('grantDetail.readiness.gaps.budgetPartial'),
+      actionLabel: t('grantDetail.readiness.actions.startBudget'),
+      action: () => { showBudgetPlanner.value = true }
+    })
+  }
+  if (dims.narrative < 80) {
+    gaps.push({
+      dimension: 'narrative',
+      score: dims.narrative,
+      message: dims.narrative === 0 ? t('grantDetail.readiness.gaps.narrativeNotStarted') : t('grantDetail.readiness.gaps.narrativePartial'),
+      actionLabel: t('grantDetail.readiness.actions.writeNarrative'),
+      action: () => { startApplication() }
+    })
+  }
+  if (dims.timeline < 80) {
+    gaps.push({
+      dimension: 'timeline',
+      score: dims.timeline,
+      message: dims.timeline <= 30 ? t('grantDetail.readiness.gaps.timelineTight') : t('grantDetail.readiness.gaps.timelineOk'),
+      actionLabel: t('grantDetail.readiness.actions.planTimeline'),
+      action: () => { toggleReminder() }
+    })
+  }
+  if (dims.compliance < 80) {
+    gaps.push({
+      dimension: 'compliance',
+      score: dims.compliance,
+      message: dims.compliance === 0 ? t('grantDetail.readiness.gaps.complianceNotChecked') : t('grantDetail.readiness.gaps.compliancePartial'),
+      actionLabel: t('grantDetail.readiness.actions.checkCompliance'),
+      action: () => { runEligibilityCheck() }
+    })
+  }
+
+  return gaps.sort((a, b) => a.score - b.score)
+})
 
 // Handoff Notes System
 interface HandoffNote {
@@ -1349,6 +1942,105 @@ function loadBudgetPlan() {
 function saveBudgetPlan() {
   try {
     localStorage.setItem(BUDGET_KEY.value, JSON.stringify({ requested: budgetRequested.value, fundingRate: budgetFundingRate.value }))
+  } catch { /* storage full */ }
+}
+
+// Effort Estimator
+const showEffortEstimator = ref(false)
+const effortOverride = ref(0)
+
+interface EffortPhases {
+  research: number
+  writing: number
+  budgeting: number
+  compliance: number
+  review: number
+}
+
+interface EffortEstimate {
+  total: number
+  phases: EffortPhases
+}
+
+function calculateEffortEstimate(g: any): EffortEstimate {
+  if (!g) return { total: 0, phases: { research: 0, writing: 0, budgeting: 0, compliance: 0, review: 0 } }
+
+  // Base hours by budget size
+  const maxAmount = g.amount_max || g.amount_min || 0
+  let baseHours = 20
+  if (maxAmount > 1000000) baseHours = 80
+  else if (maxAmount > 500000) baseHours = 60
+  else if (maxAmount > 200000) baseHours = 45
+  else if (maxAmount > 50000) baseHours = 30
+
+  // Modifier for funder type complexity
+  const category = (g.category || '').toLowerCase()
+  let funderMultiplier = 1.0
+  if (category.includes('eu') || category.includes('european')) funderMultiplier = 1.4
+  else if (category.includes('government') || category.includes('bilateral')) funderMultiplier = 1.2
+  else if (category.includes('foundation') || category.includes('private')) funderMultiplier = 0.85
+
+  // Modifier for co-financing
+  const fundingRate = g.funding_rate || 100
+  const coFinancingMultiplier = fundingRate < 80 ? 1.15 : 1.0
+
+  // Modifier for requirements complexity (heuristic from description length)
+  const descLength = (g.description || '').length
+  let complexityMultiplier = 1.0
+  if (descLength > 3000) complexityMultiplier = 1.2
+  else if (descLength > 1500) complexityMultiplier = 1.1
+
+  const total = Math.round(baseHours * funderMultiplier * coFinancingMultiplier * complexityMultiplier)
+
+  // Phase distribution
+  const phases: EffortPhases = {
+    research: Math.round(total * 0.15),
+    writing: Math.round(total * 0.35),
+    budgeting: Math.round(total * 0.20),
+    compliance: Math.round(total * 0.18),
+    review: Math.round(total * 0.12),
+  }
+
+  // Adjust rounding to match total
+  const phasesSum = phases.research + phases.writing + phases.budgeting + phases.compliance + phases.review
+  if (phasesSum !== total) {
+    phases.writing += (total - phasesSum)
+  }
+
+  return { total, phases }
+}
+
+const effortAutoEstimate = computed((): EffortEstimate => {
+  return calculateEffortEstimate(grant.value)
+})
+
+const effortDisplayTotal = computed((): number => {
+  return effortOverride.value > 0 ? effortOverride.value : effortAutoEstimate.value.total
+})
+
+function loadEffortEstimate() {
+  try {
+    const allEstimates = JSON.parse(localStorage.getItem('grantEffortEstimates') || '{}')
+    const grantId = route.params.id as string
+    if (allEstimates[grantId]?.override) {
+      effortOverride.value = allEstimates[grantId].override
+    }
+  } catch { /* ignore */ }
+}
+
+function saveEffortEstimate() {
+  try {
+    const allEstimates = JSON.parse(localStorage.getItem('grantEffortEstimates') || '{}')
+    const grantId = route.params.id as string
+    allEstimates[grantId] = {
+      total: effortDisplayTotal.value,
+      phases: effortAutoEstimate.value.phases,
+      override: effortOverride.value || null,
+      grantTitle: grant.value?.title || '',
+      updatedAt: new Date().toISOString(),
+    }
+    localStorage.setItem('grantEffortEstimates', JSON.stringify(allEstimates))
+    toast.success(t('grantDetail.effort.saved'))
   } catch { /* storage full */ }
 }
 
@@ -1888,12 +2580,14 @@ async function fetchGrantDetails() {
     const reminders = JSON.parse(localStorage.getItem('grantReminders') || '[]')
     isReminderSet.value = reminders.some((r: any) => r.grantId === grantId)
 
-    // Load handoff notes, prep checklist, budget plan, requirements, and dependencies
+    // Load handoff notes, prep checklist, budget plan, requirements, dependencies, and readiness
     loadHandoffNotes()
     loadPrepItems()
     loadBudgetPlan()
+    loadEffortEstimate()
     loadRequirements()
     loadAllDependencies()
+    loadReadiness()
     // Pre-fill budget from grant data
     if (!budgetRequested.value && grant.value) {
       budgetRequested.value = grant.value.amount_max || grant.value.amount_min || 0
@@ -1922,7 +2616,270 @@ async function fetchGrantDetails() {
   }
 }
 
+// ===== Contextual Grant Annotation Layer =====
+interface GrantAnnotation {
+  id: string; grantId: string; selectedText: string; color: 'yellow' | 'green' | 'red' | 'blue'
+  note: string; textOffset: number; textLength: number; sectionId: string; createdAt: string; anchorHash: string
+}
+const annotations = ref<GrantAnnotation[]>([])
+const showAnnotationsSidebar = ref(false)
+const showAnnotationToolbar = ref(false)
+const selectedText = ref('')
+const selectionRange = ref<Range | null>(null)
+const annotationToolbarPos = ref({ x: 0, y: 0 })
+const annotationToolbarEl = ref<HTMLElement | null>(null)
+const annotatableContentEl = ref<HTMLElement | null>(null)
+const editingAnnotationId = ref<string | null>(null)
+const editingAnnotationNote = ref('')
+const annotationColors = [
+  { id: 'yellow' as const, i18nKey: 'keyRequirement', dotClass: 'bg-yellow-400' },
+  { id: 'green' as const, i18nKey: 'weMeetThis', dotClass: 'bg-green-400' },
+  { id: 'red' as const, i18nKey: 'gapRisk', dotClass: 'bg-red-400' },
+  { id: 'blue' as const, i18nKey: 'question', dotClass: 'bg-blue-400' },
+]
+const ANNOTATION_STORAGE_KEY = computed(() => `grantAnnotations_${route.params.id}`)
+
+function loadAnnotations() {
+  try { annotations.value = JSON.parse(localStorage.getItem(ANNOTATION_STORAGE_KEY.value) || '[]') }
+  catch { annotations.value = [] }
+}
+
+function saveAnnotations() {
+  try { localStorage.setItem(ANNOTATION_STORAGE_KEY.value, JSON.stringify(annotations.value)) }
+  catch { /* storage full */ }
+}
+
+function handleTextSelection() {
+  const selection = window.getSelection()
+  if (!selection || selection.isCollapsed || !selection.toString().trim()) {
+    setTimeout(() => {
+      if (!annotationToolbarEl.value?.matches(':hover')) {
+        showAnnotationToolbar.value = false
+        selectedText.value = ''
+        selectionRange.value = null
+      }
+    }, 200)
+    return
+  }
+  const text = selection.toString().trim()
+  if (text.length < 3) return
+  const range = selection.getRangeAt(0)
+  if (!annotatableContentEl.value?.contains(range.commonAncestorContainer)) return
+  selectedText.value = text
+  selectionRange.value = range.cloneRange()
+  const rect = range.getBoundingClientRect()
+  const tw = 400
+  let x = rect.left + (rect.width / 2) - (tw / 2)
+  x = Math.max(10, Math.min(x, window.innerWidth - tw - 10))
+  annotationToolbarPos.value = { x, y: rect.top - 50 }
+  showAnnotationToolbar.value = true
+}
+
+function createAnnotation(color: GrantAnnotation['color']) {
+  if (!selectedText.value || !selectionRange.value) return
+  const grantId = route.params.id as string
+  const id = Date.now().toString() + Math.random().toString(36).slice(2, 6)
+  const fullText = annotatableContentEl.value?.textContent || ''
+  const textOffset = fullText.indexOf(selectedText.value)
+  const annotation: GrantAnnotation = {
+    id, grantId, selectedText: selectedText.value, color, note: '',
+    textOffset: textOffset >= 0 ? textOffset : 0, textLength: selectedText.value.length,
+    sectionId: 'content', createdAt: new Date().toISOString(), anchorHash: `ann-${id}`
+  }
+  annotations.value.push(annotation)
+  saveAnnotations()
+  applyHighlight(annotation, selectionRange.value)
+  window.getSelection()?.removeAllRanges()
+  showAnnotationToolbar.value = false
+  selectedText.value = ''
+  selectionRange.value = null
+}
+
+function applyHighlight(annotation: GrantAnnotation, range: Range) {
+  const makeClick = () => () => {
+    showAnnotationsSidebar.value = true
+    nextTick(() => {
+      document.getElementById(`annotation-card-${annotation.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+  }
+  try {
+    const mark = document.createElement('mark')
+    mark.id = `ann-mark-${annotation.id}`
+    mark.dataset.annotationId = annotation.id
+    mark.dataset.annotationColor = annotation.color
+    mark.className = getHighlightClass(annotation.color)
+    mark.style.cursor = 'pointer'
+    mark.title = annotation.note || t(`grantDetail.annotations.colors.${annotationColors.find(c => c.id === annotation.color)?.i18nKey || 'keyRequirement'}`)
+    mark.addEventListener('click', makeClick())
+    range.surroundContents(mark)
+  } catch {
+    try {
+      const f = range.extractContents()
+      const mark = document.createElement('mark')
+      mark.id = `ann-mark-${annotation.id}`
+      mark.dataset.annotationId = annotation.id
+      mark.className = getHighlightClass(annotation.color)
+      mark.style.cursor = 'pointer'
+      mark.appendChild(f)
+      mark.addEventListener('click', makeClick())
+      range.insertNode(mark)
+    } catch { /* stored even if DOM fails */ }
+  }
+}
+
+function getHighlightClass(color: string): string {
+  const m: Record<string, string> = {
+    yellow: 'bg-yellow-200/50 rounded px-0.5 transition-colors hover:bg-yellow-200/80',
+    green: 'bg-green-200/50 rounded px-0.5 transition-colors hover:bg-green-200/80',
+    red: 'bg-red-200/50 rounded px-0.5 transition-colors hover:bg-red-200/80',
+    blue: 'bg-blue-200/50 rounded px-0.5 transition-colors hover:bg-blue-200/80'
+  }
+  return m[color] || m['yellow']!
+}
+
+function restoreHighlights() {
+  if (!annotatableContentEl.value) return
+  for (const ann of annotations.value) {
+    const walker = document.createTreeWalker(annotatableContentEl.value, NodeFilter.SHOW_TEXT, null)
+    let node: Text | null
+    while (node = walker.nextNode() as Text | null) {
+      const idx = node.textContent?.indexOf(ann.selectedText) ?? -1
+      if (idx >= 0) {
+        try {
+          const r = document.createRange()
+          r.setStart(node, idx)
+          r.setEnd(node, idx + ann.selectedText.length)
+          applyHighlight(ann, r)
+        } catch { /* skip */ }
+        break
+      }
+    }
+  }
+}
+
+function deleteAnnotation(id: string) {
+  const mark = document.getElementById(`ann-mark-${id}`)
+  if (mark) {
+    const p = mark.parentNode
+    while (mark.firstChild) { p?.insertBefore(mark.firstChild, mark) }
+    p?.removeChild(mark)
+    p?.normalize()
+  }
+  annotations.value = annotations.value.filter(a => a.id !== id)
+  saveAnnotations()
+}
+
+function startEditAnnotationNote(annotation: GrantAnnotation) {
+  editingAnnotationId.value = annotation.id
+  editingAnnotationNote.value = annotation.note
+}
+
+function updateAnnotationNote(id: string, note: string) {
+  const ann = annotations.value.find(a => a.id === id)
+  if (ann) {
+    ann.note = note.trim()
+    saveAnnotations()
+    const mark = document.getElementById(`ann-mark-${id}`)
+    if (mark) mark.title = note.trim() || t(`grantDetail.annotations.colors.${annotationColors.find(c => c.id === ann.color)?.i18nKey || 'keyRequirement'}`)
+  }
+  editingAnnotationId.value = null
+  editingAnnotationNote.value = ''
+}
+
+function createTaskFromAnnotation(annotation: GrantAnnotation) {
+  const grantId = route.params.id as string
+  const grantTitle = grant.value?.title || 'Grant'
+  try {
+    const cards: any[] = JSON.parse(localStorage.getItem('workspaceCards') || '[]')
+    const labels: Record<string, string> = {
+      yellow: t('grantDetail.annotations.colors.keyRequirement'),
+      green: t('grantDetail.annotations.colors.weMeetThis'),
+      red: t('grantDetail.annotations.colors.gapRisk'),
+      blue: t('grantDetail.annotations.colors.question')
+    }
+    cards.push({
+      id: Date.now().toString() + Math.random().toString(36).slice(2, 6),
+      text: `[${labels[annotation.color]}] "${annotation.selectedText.substring(0, 100)}${annotation.selectedText.length > 100 ? '...' : ''}"${annotation.note ? ` — ${annotation.note}` : ''}`,
+      grantId, grantTitle, column: 'todo',
+      urgency: annotation.color === 'red' ? 'high' : 'medium',
+      assignee: '', dueDate: null, createdAt: new Date().toISOString(), resolved: false
+    })
+    localStorage.setItem('workspaceCards', JSON.stringify(cards))
+    toast.success(t('grantDetail.annotations.sidebar.createdTask'))
+  } catch { toast.error(t('errors.generic')) }
+}
+
+function scrollToAnnotation(id: string) {
+  const mark = document.getElementById(`ann-mark-${id}`)
+  if (mark) {
+    mark.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    mark.style.transition = 'outline 0.3s ease'
+    mark.style.outline = '2px solid #f59e0b'
+    mark.style.outlineOffset = '2px'
+    setTimeout(() => { mark.style.outline = 'none' }, 1500)
+  }
+}
+
+function getAnnotationColorDot(color: string): string {
+  return annotationColors.find(c => c.id === color)?.dotClass || 'bg-yellow-400'
+}
+
+function getAnnotationGroupLabel(color: string): string {
+  const labels: Record<string, string> = {
+    yellow: t('grantDetail.annotations.sidebar.groupYellow'),
+    green: t('grantDetail.annotations.sidebar.groupGreen'),
+    red: t('grantDetail.annotations.sidebar.groupRed'),
+    blue: t('grantDetail.annotations.sidebar.groupBlue')
+  }
+  return labels[color] || color
+}
+
+function getAnnotationCardClass(color: string): string {
+  const m: Record<string, string> = {
+    yellow: 'border-l-4 border-l-yellow-400 border-yellow-200 bg-yellow-50/30',
+    green: 'border-l-4 border-l-green-400 border-green-200 bg-green-50/30',
+    red: 'border-l-4 border-l-red-400 border-red-200 bg-red-50/30',
+    blue: 'border-l-4 border-l-blue-400 border-blue-200 bg-blue-50/30'
+  }
+  return m[color] || 'border-l-4 border-l-yellow-400 border-stone-200'
+}
+
+const annotationGroups = computed(() => {
+  const order: GrantAnnotation['color'][] = ['yellow', 'green', 'red', 'blue']
+  return order.map(color => ({ color, items: annotations.value.filter(a => a.color === color) })).filter(g => g.items.length > 0)
+})
+
+function checkDeepLinkAnchor() {
+  const hash = window.location.hash
+  if (hash?.startsWith('#ann-')) {
+    const id = hash.replace('#ann-', '')
+    nextTick(() => { setTimeout(() => { scrollToAnnotation(id); showAnnotationsSidebar.value = true }, 500) })
+  }
+}
+
+function handleDocumentClick(e: MouseEvent) {
+  if (annotationToolbarEl.value && !annotationToolbarEl.value.contains(e.target as Node)) {
+    showAnnotationToolbar.value = false
+  }
+}
+
+onBeforeUnmount(() => { document.removeEventListener('mousedown', handleDocumentClick) })
+
+
 onMounted(() => {
   fetchGrantDetails()
+  document.addEventListener('mousedown', handleDocumentClick)
+})
+
+watch(loading, (newVal) => {
+  if (!newVal && grant.value) {
+    nextTick(() => {
+      loadAnnotations()
+      nextTick(() => {
+        restoreHighlights()
+        checkDeepLinkAnchor()
+      })
+    })
+  }
 })
 </script>
